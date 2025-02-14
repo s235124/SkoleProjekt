@@ -3,10 +3,10 @@ const mysql = require('mysql2');
 
 const db = mysql.createPool({
     connectionLimit: 10,
-    host: 'localhost',
-    user: 'root',
-    password: 'enter password',
-    database: 'skole'
+    host: 'ip_address',
+    user: 'your_user',
+    password: 'your_password',
+    database: 'skole' // HAS TO EXIST IN YOUR MYSQL SERVER
 });
 
 module.exports = db;
