@@ -40,17 +40,17 @@ module.exports = function(passport) {
     }))
     
     passport.serializeUser((user, done) => {
-        done(null, user.id);
+        done(null, user.user_id);
     });
 
     passport.deserializeUser((id, done) => {
-        const query = 'SELECT * FROM skole.user WHERE id = ?';
+        const query = 'SELECT * FROM skole.user WHERE user_id = ?';
         db.query(query, [id], (err, result) => {
             if(err) {
                 throw err;
             }
             const userinfo = {
-                id: result[0].id,
+                id: result[0].user_id,
                 email: result[0].email,
                 role: result[0].role
             }

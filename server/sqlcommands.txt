@@ -1,0 +1,49 @@
+-- CREATE A SCHEMA CALLED SKOLE FIRST
+
+use skole;
+
+-- Schools Table
+CREATE TABLE schools (
+    school_id INT AUTO_INCREMENT PRIMARY KEY,
+    school_name VARCHAR(255) NOT NULL
+);
+
+-- Users Table (students, instructors, owners, etc.)
+CREATE TABLE user (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    school_id INT,
+    password VARCHAR(120) NOT NULL,
+    email VARCHAR(45),
+    phone_number VARCHAR(15),
+    first_name VARCHAR(255),
+    last_name VARCHAR(255),
+    role INT, -- Role for user
+    FOREIGN KEY (school_id) REFERENCES schools(school_id) ON DELETE CASCADE
+);
+
+-- Modules/Courses Table
+CREATE TABLE modules (
+    module_id INT AUTO_INCREMENT PRIMARY KEY,
+    module_name VARCHAR(255) NOT NULL,
+    module_date DATE NOT NULL
+);
+
+-- Enrollments Table (Junction Table for Many-to-Many Relationship between users and modules)
+CREATE TABLE enrollments (
+    enrollment_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    module_id INT,
+    FOREIGN KEY (user_id) REFERENCES user(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (module_id) REFERENCES modules(module_id) ON DELETE CASCADE,
+    UNIQUE (user_id, module_id) -- Prevent duplicate enrollments
+);
+
+-- Attendance Table (Records attendance for users per module)
+CREATE TABLE attendance (
+    attendance_id INT AUTO_INCREMENT PRIMARY KEY,
+    enrollment_id INT,
+    session_date DATE NOT NULL,
+    present BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (enrollment_id) REFERENCES enrollments(enrollment_id) ON DELETE CASCADE,
+    UNIQUE (enrollment_id, session_date) -- Prevent duplicate attendance records
+);

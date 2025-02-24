@@ -19,6 +19,7 @@ const cookieparser = require('cookie-parser');
 const bcrypt = require('bcrypt');
 
 const db = require('./db');
+const { error } = require('console');
 
 const app = express();
 
@@ -99,6 +100,20 @@ app.listen(3001, () => {
 });
 
 
+app.get('/getAllUsers', (req, res) => {
+    const email = req.body.email;
+    const password = req.body.password;
 
+    const role = 1;
+    const query2 = 'SELECT email,role FROM user';
+
+    db.query(query2, (err, result) => {
+        if (err) {
+            throw err;
+        }
+        console.log(result)
+        res.send(result);
+    });
+});
 
 

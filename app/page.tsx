@@ -49,8 +49,8 @@ const router = useRouter()
         console.log('v', users[i].email, users[i].password);
         console.log('Logged in');
         switch(users[i].role) {
-          case 'owner':
-            router.push('/dashboards/owner')
+          case '1':
+            router.push('/dashboards/admin')
             return;
           case 'instructor':
             router.push('/dashboards/instructor')
@@ -78,7 +78,9 @@ const router = useRouter()
         timeout: 8000,
         }).then((response) => {
             console.log(response);
-            router.push('/dashboards/owner');
+            if (response.data != 'No user exists') {
+              router.push('/dashboards/owner');
+            }
         }).catch((error) => {
             console.log(error);
         });
