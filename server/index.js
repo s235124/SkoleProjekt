@@ -70,26 +70,36 @@ app.post('/signup', (req, res) => {
         }
     });
 });
+const jwt = require('jsonwebtoken');
 
-app.post('/login', (req, res,next) => {
-    passport.authenticate('local', (err, user,info) => {
-        if(err) {
-            throw err;
-        }
-        if(!user) {
-            res.send('No user exists');
-        }
-        else {
-            req.logIn(user, (err) => {
-                if(err) {
-                    throw err;
-                }
-                res.send('Successfully authenticated');
-                console.log(req.user);
-            });
-        } 
-    })(req, res, next);
+app.post('/login', (req, res, next) => {
+  passport.authenticate('local', (err, user, info) => {
+    try {
+      if (err) {
+        return res.status(500).json({ error: 'Internal server error' });
+      }
+      if (!user) {
+        return res.status(401).json({ error: 'Invalid credentials' });
+      }
+
+      // Generate JWT (no need for req.logIn)
+      const token = jwt.sign(
+        { userId: user.user_id },
+        process.env.JWT_SECRET,
+        { expiresIn: '1h' }
+      );
+
+      // Send token to client
+      res.json({ token });
+      
+    } catch (error) {
+      next(error); // Forward errors to Express error handler
+    }
+  })(req, res, next);
 });
+
+
+
 
 app.get('/getUser', (req, res) => {
     res.send(req.user);

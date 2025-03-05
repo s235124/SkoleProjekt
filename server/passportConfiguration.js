@@ -38,7 +38,28 @@ module.exports = function(passport) {
             });
         });
     }))
+
+    //deepseek
+    const jwtOptions = {
+        jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+        secretOrKey: process.env.JWT_SECRET, // Use environment variable
+      };
     
+      passport.use(
+        new JwtStrategy(jwtOptions, (jwtPayload, done) => {
+          const query = 'SELECT * FROM skole.user WHERE user_id = ?';
+          db.query(query, [jwtPayload.userId], (err, result) => {
+            if (err) return done(err);
+            if (result.length === 0) return done(null, false);
+            return done(null, result[0]);
+          });
+        })
+      );
+
+
+
+    // we use JSON Web Tokens to keep track of the user's session so serialize and deserialize are not needed
+    /*
     passport.serializeUser((user, done) => {
         done(null, user.user_id);
     });
@@ -57,4 +78,6 @@ module.exports = function(passport) {
             done(null, userinfo);
         });
     });
+*/
+
     ;}
