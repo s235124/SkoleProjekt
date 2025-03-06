@@ -5,8 +5,15 @@ const express = require('express');
 const db = require('./db');
 const bcrypt = require('bcrypt');
 const localStrategy = require('passport-local').Strategy;
+const JwtStrategy = require('passport-jwt').Strategy; // Add this
+const ExtractJwt = require('passport-jwt').ExtractJwt; // Add this
 
+
+require('dotenv').config();
 module.exports = function(passport) {
+    if (!process.env.JWT_SECRET) {
+        throw new Error('JWT_SECRET is not defined in .env file');
+      }
     passport.use(new localStrategy({ usernameField: 'email' },(email, password, done) => {
         const query = 'SELECT * FROM skole.user WHERE email = ?';
         db.query(query, [email], (err, result) => {
@@ -41,6 +48,7 @@ module.exports = function(passport) {
 
     //deepseek
     const jwtOptions = {
+        
         jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
         secretOrKey: process.env.JWT_SECRET, // Use environment variable
       };

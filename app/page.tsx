@@ -7,27 +7,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import axios from 'axios';
-class User {
-  id: string;
-  user_metadata: { first_name: string; last_name: string };
-  email: string;
-  password: string;
-  role: string;
+import jsonwebtoken from "jsonwebtoken";
+import { accessSync } from "node:fs";
 
-  constructor(id: string, first_name: string, last_name: string, email: string, password: string, role: string) {
-    this.id = id;
-    this.user_metadata = { first_name, last_name };
-    this.email = email;
-    this.password = password;
-    this.role = role;
-  }
-}
-
-const users = [
-  new User('1', 'John', 'Doe', 'v@gmail.com', 'password', 'owner'),
-  new User('2', 'Jane', 'Doe', 'v1@gmail.com', 'password', 'instructor'),
-  new User('3', 'John', 'Smith', 'v2@gmail.com', 'password', 'student'),
-];
 
 
 export default function Home() {
@@ -42,48 +24,43 @@ const router = useRouter()
     setPassword("")
   }, [])
 
-  async function login(e: React.FormEvent) {
-    for(let i = 0; i < users.length; i++) {
-      console.log('v', users[i].email, users[i].password);
-      if(users[i].email === email && users[i].password === password) {
-        console.log('v', users[i].email, users[i].password);
-        console.log('Logged in');
-        switch(users[i].role) {
-          case '1':
-            router.push('/dashboards/admin')
-            return;
-          case 'instructor':
-            router.push('/dashboards/instructor')
-            return;
-            case 'student':
-              router.push('/dashboards/student')
-              return;
-        }
-      }
-    }
-    console.log(email, password);
-  }
 
-  const login2 = (e: React.FormEvent) => {
+  const login3 = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(email, password);
-    axios({
-        method: 'post',
-        data: {
-            email: email,
-            password: password
-        },
-        withCredentials: true,
-        url: 'http://localhost:3001/login',
-        timeout: 8000,
-        }).then((response) => {
-            console.log(response);
-            if (response.data != 'No user exists') {
-              router.push('/dashboards/owner');
-            }
-        }).catch((error) => {
-            console.log(error);
-        });
+    try {
+    const res = await axios.post('http://localhost:3001/login', {
+      email: email,
+      password: password
+    });
+
+    const {token} = res.data
+    const decodedToken = jsonwebtoken.decode(token);
+    
+    const role = decodedToken.role;
+    document.cookie = `token=${token}; path=/; max-age=3600`;
+
+    
+    switch(role){
+      case 1:
+        router.push('/dashboards/student');
+        break;
+      case 2:
+        router.push('/dashboards/instructor');
+        break;
+      case 3:
+        router.push('/dashboards/owner');
+        break;
+      case 4:
+        router.push('/dashboards/admin');
+        break;
+      default:
+        console.log('No role found');
+    } 
+    }catch (err){
+      console.log(err);
+    }
+
+
   }
 
 
@@ -97,7 +74,7 @@ const router = useRouter()
           <h3 className='text-white text-sm mb-4'>EN DIGITAL LØSNING TIL DIN SKOLE</h3>
           <h2 className="text-3xl font-bold mb-6 text-left text-white">Log ind i din konto<span className='text-blue-500'>.</span></h2>
           <h3 className='text-white text-sm my-4'>Mangler du en konto? <Link href="/signup" className='text-blue-500'>Lav en her</Link></h3>
-          <form className="space-y-6" onSubmit={login2}>
+          <form className="space-y-6" onSubmit={login3}>
             <FloatingLabelInput value={email} onChange={(e: any) => setEmail(e.target.value)} label="Email" id="email"/>
             <FloatingLabelInput value={password} onChange={(e: any) => setPassword(e.target.value)} label="Password" id="password"/>
             <Button type="submit" className="w-full h-12 rounded-full bg-blue-500 hover:bg-blue-600 text-white">
