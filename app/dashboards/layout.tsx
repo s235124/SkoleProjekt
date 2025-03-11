@@ -1,6 +1,6 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/owner-sidebar"
- 
+ import LogoutButton from "@/components/logout-button"
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     < >
@@ -12,6 +12,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             {children}
           </main>
       </SidebarProvider>
+      <LogoutButton></LogoutButton>
     </div>
 
     </>
