@@ -26,10 +26,31 @@ export default function TeacherPage() {
   if (!teacher) return <div>Loading...</div>
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold">Teacher Profile</h1>
-      <p>Email: {teacher.email}</p>
-      {/* Add more teacher details here */}
-    </div>
+
+      <>
+          <div className=' flex w-full h-full bg-slate-50'>
+              <div className='flex flex-auto w-4/6 h-full bg-fuchsia-500'>
+                  <div className='font-bold text-4xl' >
+                      {teacher.email}'s profile
+                  </div>
+              </div>
+              <div className='flex-auto w-2/6'>
+                  <div className='w-full h-2/5 bg-slate-500'>
+                      <div className='rounded-full bg-red-800 w-56 h-56 m-auto'></div>
+                      <div className=''>
+                          <div className='w-full text-center text-slate-900 text-2xl'>
+                              First name, Last Name
+                          </div>
+                          <div className='w-full text-center'>Phone: 22222222</div>
+                          <div className='w-full text-center'>Role: 2</div>
+                      </div>
+
+                  </div>
+                  <div className='w.full text-center text-4xl font-bold'>
+                      Activity
+                  </div>
+              </div>
+          </div>
+      </>
   )
 }
