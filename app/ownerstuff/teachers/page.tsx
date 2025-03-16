@@ -6,9 +6,10 @@ import { useState } from 'react';
 import { useEffect } from 'react';
 import { ScrollArea } from "@/components/ui/scroll-area"
 import FloatingLabelInput from '@/components/FloatingLabelInput';
+import { useRouter } from "next/navigation";
 
 export default function Teachers () {
-
+  const router = useRouter();
   const [users, setUsers] = useState<User[]>([]);
 
  useEffect(() => {
@@ -23,11 +24,12 @@ export default function Teachers () {
 }, [])
 
 const listItems1 = users.filter(user => user.role === 1)
-
+listItems1.map((user) => console.log(user.id))
 const listItems = listItems1.map((user) => (
-    <div key={user.id}>
-      <div className='w-5/5 m-auto bg-white h-16 flex flex-row border-black border-b-[1px]'>
-        <div className="basis-64 bg-white">01</div>
+  
+    <div key={user.id} className=' bg-white hover:bg-slate-400 transition-all' onClick={() => router.push(`/ownerstuff/teachers/specificteacher/${user.id}`)}>
+      <div className='w-5/5 m-auto h-16 flex flex-row border-black border-b-[1px]'>
+        <div className="basis-64"><div className='rounded-3xl bg-violet-400 h-full w-1/3'></div></div>
         <div className="basis-128">{user.email}</div>
       </div>
       <div className='w-5/5 flex flex-row'></div>
@@ -43,9 +45,9 @@ const listItems = listItems1.map((user) => (
 
       <div className='h-full w-11/12 bg-white m-auto rounded-xl'>
 
-        <div className='w-fuill m-auto h-16 flex flex-row border-black border-b-[1px] justify-center items-center'>
-          <div className="basis-1/6 bg-white font-bold px-1">All Teachers Info</div>
-          <div className="basis-2/3"></div>
+        <div className='w-full m-auto h-48 flex flex-row border-black border-b-[1px] justify-center items-center'>
+          <div className="basis-3/6 bg-white font-bold text-4xl px-1">All Teachers Info</div>
+          <div className="basis-1/3"></div>
           <div className="basis-1/6 right-5 px-1">
             <div className="w-full max-w-sm min-w-[200px]">
               <div className="relative">
@@ -57,7 +59,7 @@ const listItems = listItems1.map((user) => (
                   className="absolute top-1 right-1 flex items-center rounded bg-slate-800 py-1 px-2.5 border border-transparent text-center text-sm text-white transition-all shadow-sm hover:shadow focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
                   type="button"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 mr-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 mr-2">
                     <path fill-rule="evenodd" d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z" clip-rule="evenodd" />
                   </svg>
 
@@ -69,12 +71,12 @@ const listItems = listItems1.map((user) => (
           
         </div>
 
-      <div className='w-4/5 m-auto bg-purple-500 h-8 flex flex-row border-black border-b-[1px]'>
+      <div className='w-4/5 m-auto bg-white h-8 flex flex-row border-black border-b-[1px]'>
         <div className="basis-64 bg-white font-bold">Info</div>
-        <div className="basis-48">Email</div>
-        <div className="basis-48">Name</div>
-        <div className="basis-48">v</div>
-        <div className="basis-48">V</div>
+        <div className="basis-48 text-slate-800 font-bold">Email</div>
+        <div className="basis-48 text-slate-800 font-bold">First Name</div>
+        <div className="basis-48 text-slate-800 font-bold">Last Name</div>
+        <div className="basis-48 text-slate-800 font-bold">Phone</div>
       </div>
       <ScrollArea className="m-auto w-4/5 h-3/5 flex flex-row border-black border-b-[2px]">
 
