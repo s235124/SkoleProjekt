@@ -46,7 +46,7 @@ export default function TeacherPage() {
                       </div>
 
                   </div>
-                  <div className='w.full text-center text-4xl font-bold'>
+                  <div className='w.full text-center text-4xl font-bold underline-offset-8 underline text-slate-900'>
                       Activity
                   </div>
               </div>
