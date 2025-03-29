@@ -23,11 +23,11 @@ export default function Teachers () {
     })
 }, [])
 
-const listItems1 = users.filter(user => user.role === 1)
-listItems1.map((user) => console.log(user.id))
+const listItems1 = users.filter(user => user.role === 2)
+listItems1.map((user) => console.log(user.user_id))
 const listItems = listItems1.map((user) => (
   
-    <div key={user.id} className=' bg-white hover:bg-slate-400 transition-all' onClick={() => router.push(`/ownerstuff/teachers/specificteacher/${user.id}`)}>
+    <div key={user.id} className=' bg-white hover:bg-slate-400 transition-all' onClick={() => router.push(`/ownerstuff/teachers/specificteacher/${user.user_id}`)}>
       <div className='w-5/5 m-auto h-16 flex flex-row border-black border-b-[1px]'>
         <div className="basis-64"><div className='rounded-3xl bg-violet-400 h-full w-1/3'></div></div>
         <div className="basis-128">{user.email}</div>

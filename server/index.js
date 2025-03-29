@@ -115,7 +115,7 @@ app.get('/getAllUsers', (req, res) => {
     const password = req.body.password;
 
     const role = 1;
-    const query2 = 'SELECT email,role,id FROM user';
+    const query2 = 'SELECT email,role,user_id FROM user';
 
     db.query(query2, (err, result) => {
         if (err) {
@@ -128,7 +128,7 @@ app.get('/getAllUsers', (req, res) => {
 //deepseek made this
 app.get('/teacher/:id', (req, res) => {
   const teacherId = req.params.id;
-  const query = 'SELECT * FROM skole.user WHERE id = ?';
+  const query = 'SELECT * FROM skole.user WHERE user_id = ?';
   
   db.query(query, [teacherId], (err, result) => {
     if (err) return res.status(500).json({ error: 'Database error' });

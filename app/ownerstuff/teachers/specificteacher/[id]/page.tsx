@@ -1,6 +1,8 @@
 // app/teacher/[id]/page.tsx
 "use client"
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import axios from 'axios';
+import { Users } from 'lucide-react';
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
@@ -29,9 +31,30 @@ export default function TeacherPage() {
 
       <>
           <div className=' flex w-full h-full bg-slate-50'>
-              <div className='flex flex-auto w-4/6 h-full bg-fuchsia-500'>
-                  <div className='font-bold text-4xl' >
+              <div className='flex flex-col w-4/6 h-full bg-fuchsia-500'>
+                  <div className='font-bold text-4xl h-2/5 w-full' >
                       {teacher.email}'s profile
+                  </div>
+                  <div className='h-3/5 bg-red-800 w-full flex flex-row'>
+                      <div className='text-4xl absolute'> Courses </div>
+                      <Card className='w-1/3 mx-2 mt-10 h-20 my-10'>
+                          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                              <CardTitle className="text-sm font-medium">Course name</CardTitle>
+                              <Users className="h-4 w-4 text-blue-500" />
+                          </CardHeader>
+                          <CardContent>
+                              <div className="text-2xl font-bold"></div>
+                          </CardContent>
+                      </Card>
+                      <Card className='w-1/3 mx-2 mt-10 h-20'>
+                          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                              <CardTitle className="text-sm font-medium">Course name</CardTitle>
+                              <Users className="h-4 w-4 text-blue-500" />
+                          </CardHeader>
+                          <CardContent>
+                              <div className="text-2xl font-bold"></div>
+                          </CardContent>
+                      </Card>
                   </div>
               </div>
               <div className='flex-auto w-2/6'>
