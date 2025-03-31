@@ -98,8 +98,29 @@ app.post('/login', (req, res, next) => {
   })(req, res, next);
 });
 
+app.get('/timeslots', (req, res) => {
+  const startTimeQuery = 'SELECT module_start_time FROM modules WHERE module_date = ?';
+  const endTimeQuery = 'SELECT module_end_time FROM modules WHERE module_date = ?';
 
+  const date = req.query.date;
 
+  console.log(date + " " + req.body)
+
+  db.query(startTimeQuery, [date], (err, result) => {
+  if(err) {
+    throw err;
+  }
+  res.send(result);
+})
+
+db.query(endTimeQuery, [date], (err, result) => {
+  if(err) {
+    throw err;
+  }
+  res.send(result);
+  console.log(result);
+  })
+})
 
 app.get('/getUser', (req, res) => {
     res.send(req.user);

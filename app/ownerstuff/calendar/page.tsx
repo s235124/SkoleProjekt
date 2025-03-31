@@ -1,6 +1,8 @@
 "use client"
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { responseCookiesToRequestCookies } from 'next/dist/server/web/spec-extension/adapters/request-cookies';
+import { threadId } from 'worker_threads';
 
 export default function CreateModulePage() {
   const [formData, setFormData] = useState({
@@ -9,6 +11,29 @@ export default function CreateModulePage() {
     class: '',
     content: ''
   });
+
+  let hours = [
+    "00:00:00", "01:00:00", "02:00:00", "03:00:00", "04:00:00", "05:00:00",
+    "06:00:00", "07:00:00", "08:00:00", "09:00:00", "10:00:00", "11:00:00",
+    "12:00:00", "13:00:00", "14:00:00", "15:00:00", "16:00:00", "17:00:00",
+    "18:00:00", "19:00:00", "20:00:00", "21:00:00", "22:00:00", "23:00:00"
+  ];
+
+  let filteredHours;
+
+  const updateHours = () => {
+    axios({
+      method: 'get',
+      withCredentials: true,
+      url: `http://localhost:3001/timeslots?date=${encodeURIComponent(formData.date)}`,
+      timeout: 8000,
+    }).then((response) => {
+      filteredHours = hours.filter(item => item !== response.data);
+      console.log(filteredHours);
+    }).catch((error) => {
+      console.log(error);
+    });
+  }
 
   const [timeslots, setTimeslots] = useState([]);
   const [classes, setClasses] = useState([]);
@@ -67,20 +92,43 @@ export default function CreateModulePage() {
             value={formData.date}
             min={minDate}
             max={maxDate}
-            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+            onChange={(e) => {
+              setFormData({ ...formData, date: e.target.value });
+              
+              updateHours();
+            }
+          }
             className="border dark:border-gray-600 p-2 w-full mb-4 dark:bg-gray-700 dark:text-gray-100"
             required
           />
+          <div className='flex'>
+            <div className='col-64 w-1/2'>Start time</div>
+            <div className='col-64 w-1/2'>End time</div>
+          </div>
+          <div className='flex'>
 
-          <label className="block mb-2 text-gray-700 dark:text-gray-200">
-            Tidspunkt:
-          </label>
           <select
             value={formData.timeslot}
             onChange={(e) => setFormData({ ...formData, timeslot: e.target.value })}
-            className="border dark:border-gray-600 p-2 w-full mb-4 dark:bg-gray-700 dark:text-gray-100"
+            className="border dark:border-gray-600 p-2 w-5/6 mb-4 dark:bg-gray-700 dark:text-gray-100"
             required
           >
+          
+            <option value="">Vælg tidspunkt</option>
+            {hours.map((hour) => (
+              <option key={hour.id} value={hour.time}>
+                {hour}
+              </option>
+            ))}
+          </select>
+            <div className='mx-2 font-bold text-2xl'> -</div>
+          <select
+            value={formData.timeslot}
+            onChange={(e) => setFormData({ ...formData, timeslot: e.target.value })}
+            className="border dark:border-gray-600 p-2 w-5/6 mb-4 dark:bg-gray-700 dark:text-gray-100"
+            required
+          >
+          
             <option value="">Vælg tidspunkt</option>
             {timeslots.map((slot) => (
               <option key={slot.id} value={slot.time}>
@@ -88,7 +136,7 @@ export default function CreateModulePage() {
               </option>
             ))}
           </select>
-
+          </div>
           <label className="block mb-2 text-gray-700 dark:text-gray-200">
             Hold:
           </label>
