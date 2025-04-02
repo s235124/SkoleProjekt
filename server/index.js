@@ -100,47 +100,30 @@ app.post('/login', (req, res, next) => {
 });
 
 app.get('/timeslots', (req, res) => {
-  const startTimeQuery = 'SELECT module_start_time FROM modules WHERE module_date = ?';
-  const endTimeQuery = 'SELECT module_end_time FROM modules WHERE module_date = ?';
+  const query = 'SELECT module_start_time, module_end_time FROM modules WHERE module_date = ?';
 
   const date = req.query.date;
   if (!date) {
     return res.status(400).json({ error: 'Date is required' });
   }
 
-  let startTimes = [];
-  let endTimes = [];
-  let times = []
   console.log(date + " " + req.body)
 
-  db.query(startTimeQuery, [date], (err, startTime) => {
-  if(err) {
-    throw err;
-  }
-  for(let i = 0; i < startTime.length; i++) {
-    startTimes[i] = startTime[i].module_start_time;
-    console.log("start time "+ i +" ", startTime[i].module_start_time)
-  }
-  db.query(endTimeQuery, [date], (err, endTime) => {
-  if(err) {
-    throw err;
-  }
-  for(let i = 0; i < endTime.length; i++) {
-    endTimes[i] = endTime[i].module_end_time;
-    console.log("end time "+ i +" ", endTime[i].module_end_time)
-  }
+  db.query(query, [date], (err, results) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
 
-  times.push([startTimes, endTimes])
-  console.log("first start time "+times[0][0][0])
-  console.log("first end time "+times[0][1][0])
+    const times = results.map(row => ({
+      start: row.module_start_time,
+      end: row.module_end_time
+    }));
   console.log("all of times "+times);
   res.send(times);
   
   })
-})
-
-
-})
+});
 
 app.get('/getUser', (req, res) => {
     res.send(req.user);

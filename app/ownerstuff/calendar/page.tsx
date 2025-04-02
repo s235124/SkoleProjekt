@@ -19,7 +19,71 @@ export default function CreateModulePage() {
     "18:00:00", "19:00:00", "20:00:00", "21:00:00", "22:00:00", "23:00:00"
   ];
 ;
+
+function timeslotInMinutes(timeslotStr) {
+  const [hours, minutes,seconds] = timeslotStr.split(':').map(Number);
+  return hours * 60 + minutes+seconds/60;
+}
+
+function minuteToTimeslot(minutes) {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  //creates a time slot in the format of 00:00:00
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:00`;
+}
+
+
+function createIntervals(intervals) {
+  if(intervals.length === 0) return [];
+  intervals.sort((a,b) => a.start - b.start);
+  const mergedIntervals = [intervals[0]];
+  for(let i = 1; i < intervals.length; i++) {
+    const current = intervals[i];
+    const lastMerged = mergedIntervals[mergedIntervals.length - 1];
+    if (current.start <= lastMerged.end) {
+      lastMerged.end = Math.max(lastMerged.end, current.end);
+    } else {
+      mergedIntervals.push(current);
+    }
+  }
+  return mergedIntervals;
+}
+
+  function findFreeIntervals(mergedIntervals) {
+    //initialize the arr of free intervals
+    const freeIntervals = [];
+    let previousEnd = 0;
+    // loop through the merged intervals and find the free intervals
+    for (let i = 0; i < mergedIntervals.length; i++) {
+      const interval = mergedIntervals[i];
+      //check if the start of the current interval is greater than the end of the previous interval if so, we know that there is at least one hour free between them
+      // for example current interval start is 14:00:00 and previous interval end is 12:00:00 then we know that there is two hours free between them
+      // so we push the interval between the previous end and the current start to the free intervals arr for example 12:00:00 - 14:00:00
+      if (interval.start > previousEnd) {
+        freeIntervals.push({
+          start: previousEnd,
+          end: interval.start
+        });
+
+      }
+      //update the previous end to be the max of the current end and the previous end
+      // this is to make sure that if there are overlapping intervals, we only take the max end time of them
+      previousEnd = Math.max(previousEnd, interval.end)
+    }
+    //1440 is the number of minutes in 24 hours so we, if previous end is lower than 1440, we know that there is an interval between previous end and 1440(24:00:00)
+    // so we push the interval between previous end and 1440 to the free intervals arr for example 14:00:00 - 24:00:00
+    if (previousEnd < 1440) {
+      freeIntervals.push({ start: previousEnd, end: 1440 });
+    }
+    return freeIntervals;
+  }
+
  const [filteredHours, setFilteredHours] = useState(hours);
+ const [freeTimeslots, setFreeTimeslots] = useState<{ start: number; end: number }[]>([]);
+  const [existingTimeslots, setExistingTimeslots] = useState<{ start: number; end: number }[]>([]);
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
+
   const updateHours = (date) => {
     if (!date) {
       console.error("Date is required");
@@ -34,19 +98,36 @@ export default function CreateModulePage() {
       timeout: 8000,
     }).then((response) => {
       console.log(response.data);
-      let startTimes = response.data[0][0];
-      console.log(startTimes);
-      setFilteredHours(hours.filter(item => !startTimes.includes(item)));
+      const intervals = response.data.map(({ start, end }) => ({
+        start: timeslotInMinutes(start),
+        end: timeslotInMinutes(end)
+      }));
+      const mergedIntervals = createIntervals(intervals);
+      const freeIntervals = findFreeIntervals(mergedIntervals);
+      setExistingTimeslots(mergedIntervals);
+      setFreeTimeslots(freeIntervals);
       console.log(filteredHours);
     }).catch((error) => {
       console.log(error);
     });
   }
   
-  const [timeslots, setTimeslots] = useState([]);
-  const [classes, setClasses] = useState([]);
+
   const [minDate, setMinDate] = useState('');
   const [maxDate, setMaxDate] = useState('');
+const [timeslots, setTimeslots] = useState([]);
+const [classes, setClasses] = useState([]);
+  const availableStartTimes = hours.filter(hour => {
+    const h = timeslotInMinutes(hour);
+    return freeTimeslots.some(free => h >= free.start && h < free.end);
+  });
+
+  const availableEndTimes = startTime ? hours.filter(hour => {
+    const hStart = timeslotInMinutes(startTime);
+    const hEnd = timeslotInMinutes(hour);
+    const free = freeTimeslots.find(f => hStart >= f.start && hStart < f.end);
+    return free && hEnd > hStart && hEnd <= free.end;
+  }) : [];
 
   useEffect(() => {
     // Set date constraints
@@ -124,8 +205,8 @@ export default function CreateModulePage() {
           >
           
             <option value="">Vælg tidspunkt</option>
-            {filteredHours.map((hour) => (
-              <option key={hour.id} value={hour}>
+            {availableStartTimes.map((hour) => (
+              <option key={hour} value={hour}>
                 {hour}
               </option>
             ))}
@@ -139,9 +220,9 @@ export default function CreateModulePage() {
           >
           
             <option value="">Vælg tidspunkt</option>
-            {timeslots.map((slot) => (
-              <option key={slot.id} value={slot.time}>
-                {slot.label}
+            {availableEndTimes.map((hour) => (
+              <option key={hour} value={hour}>
+                {hour}
               </option>
             ))}
           </select>
