@@ -123,6 +123,7 @@ const [classes, setClasses] = useState([]);
   });
 
   const availableEndTimes = startTime ? hours.filter(hour => {
+    //end time has to be later than start time and within the free timeslots
     const hStart = timeslotInMinutes(startTime);
     const hEnd = timeslotInMinutes(hour);
     const free = freeTimeslots.find(f => hStart >= f.start && hStart < f.end);
