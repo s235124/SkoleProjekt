@@ -198,8 +198,11 @@ const [classes, setClasses] = useState([]);
           <div className='flex'>
 
           <select
-            value={formData.timeslot}
-            onChange={(e) => setFormData({ ...formData, timeslot: e.target.value })}
+            value={startTime}
+            onChange={(e) => {
+              setStartTime(e.target.value);
+              setFormData({ ...formData, timeslot: e.target.value });
+            }}
             className="border dark:border-gray-600 p-2 w-5/6 mb-4 dark:bg-gray-700 dark:text-gray-100"
             required
           >
@@ -213,8 +216,11 @@ const [classes, setClasses] = useState([]);
           </select>
             <div className='mx-2 font-bold text-2xl'> -</div>
           <select
-            value={formData.timeslot}
-            onChange={(e) => setFormData({ ...formData, timeslot: e.target.value })}
+            value={endTime}
+            onChange={(e) => {
+              setEndTime(e.target.value);
+              setFormData({ ...formData, timeslot: e.target.value });
+            }}
             className="border dark:border-gray-600 p-2 w-5/6 mb-4 dark:bg-gray-700 dark:text-gray-100"
             required
           >
