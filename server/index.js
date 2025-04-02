@@ -71,6 +71,7 @@ app.post('/signup', (req, res) => {
     });
 });
 const jwt = require('jsonwebtoken');
+const { start } = require('repl');
 
 app.post('/login', (req, res, next) => {
   passport.authenticate('local', (err, user, info) => {
@@ -103,23 +104,42 @@ app.get('/timeslots', (req, res) => {
   const endTimeQuery = 'SELECT module_end_time FROM modules WHERE module_date = ?';
 
   const date = req.query.date;
+  if (!date) {
+    return res.status(400).json({ error: 'Date is required' });
+  }
 
+  let startTimes = [];
+  let endTimes = [];
+  let times = []
   console.log(date + " " + req.body)
 
-  db.query(startTimeQuery, [date], (err, result) => {
+  db.query(startTimeQuery, [date], (err, startTime) => {
   if(err) {
     throw err;
   }
-  res.send(result);
+  for(let i = 0; i < startTime.length; i++) {
+    startTimes[i] = startTime[i].module_start_time;
+    console.log("start time "+ i +" ", startTime[i].module_start_time)
+  }
+  db.query(endTimeQuery, [date], (err, endTime) => {
+  if(err) {
+    throw err;
+  }
+  for(let i = 0; i < endTime.length; i++) {
+    endTimes[i] = endTime[i].module_end_time;
+    console.log("end time "+ i +" ", endTime[i].module_end_time)
+  }
+
+  times.push([startTimes, endTimes])
+  console.log("first start time "+times[0][0][0])
+  console.log("first end time "+times[0][1][0])
+  console.log("all of times "+times);
+  res.send(times);
+  
+  })
 })
 
-db.query(endTimeQuery, [date], (err, result) => {
-  if(err) {
-    throw err;
-  }
-  res.send(result);
-  console.log(result);
-  })
+
 })
 
 app.get('/getUser', (req, res) => {

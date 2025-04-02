@@ -11,30 +11,38 @@ export default function CreateModulePage() {
     class: '',
     content: ''
   });
-
+ 
   let hours = [
     "00:00:00", "01:00:00", "02:00:00", "03:00:00", "04:00:00", "05:00:00",
     "06:00:00", "07:00:00", "08:00:00", "09:00:00", "10:00:00", "11:00:00",
     "12:00:00", "13:00:00", "14:00:00", "15:00:00", "16:00:00", "17:00:00",
     "18:00:00", "19:00:00", "20:00:00", "21:00:00", "22:00:00", "23:00:00"
   ];
-
-  let filteredHours;
-
-  const updateHours = () => {
+;
+ const [filteredHours, setFilteredHours] = useState(hours);
+  const updateHours = (date) => {
+    if (!date) {
+      console.error("Date is required");
+      return;
+    }
+    const url = `http://localhost:3001/timeslots?date=${encodeURIComponent(date)}`;
+    console.log("Request URL:", url);
     axios({
       method: 'get',
       withCredentials: true,
-      url: `http://localhost:3001/timeslots?date=${encodeURIComponent(formData.date)}`,
+      url: `http://localhost:3001/timeslots?date=${encodeURIComponent(date)}`,
       timeout: 8000,
     }).then((response) => {
-      filteredHours = hours.filter(item => item !== response.data);
+      console.log(response.data);
+      let startTimes = response.data[0][0];
+      console.log(startTimes);
+      setFilteredHours(hours.filter(item => !startTimes.includes(item)));
       console.log(filteredHours);
     }).catch((error) => {
       console.log(error);
     });
   }
-
+  
   const [timeslots, setTimeslots] = useState([]);
   const [classes, setClasses] = useState([]);
   const [minDate, setMinDate] = useState('');
@@ -93,9 +101,10 @@ export default function CreateModulePage() {
             min={minDate}
             max={maxDate}
             onChange={(e) => {
+              const newDate = e.target.value;
               setFormData({ ...formData, date: e.target.value });
               
-              updateHours();
+              updateHours(newDate);
             }
           }
             className="border dark:border-gray-600 p-2 w-full mb-4 dark:bg-gray-700 dark:text-gray-100"
@@ -115,8 +124,8 @@ export default function CreateModulePage() {
           >
           
             <option value="">Vælg tidspunkt</option>
-            {hours.map((hour) => (
-              <option key={hour.id} value={hour.time}>
+            {filteredHours.map((hour) => (
+              <option key={hour.id} value={hour}>
                 {hour}
               </option>
             ))}
