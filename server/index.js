@@ -125,6 +125,51 @@ app.get('/timeslots', (req, res) => {
   })
 });
 
+
+app.get('/getCourses', (req, res) => {
+  const query = 'SELECT * FROM courses';
+
+  db.query(query, (err, result) => {
+      if (err) {
+        console.log(err +" error in getCourses");
+      }
+      console.log(result)
+      res.send(result);
+  });
+});
+
+
+
+app.post('/createModule', (req, res) => {
+  const course_id = req.body.course_id;
+  const module_start_time = req.body.module_start_time;
+  const module_end_time = req.body.module_end_time;
+  const module_date = req.body.module_date;
+  const query = `INSERT INTO modules (
+    module_date,
+    course_id,
+    module_start_time,
+    module_end_time
+  ) VALUES (?, ?, ?, ?)`;
+  
+  db.query(query, [module_date, course_id, module_start_time, module_end_time], (err, result) => {
+      if(err) {
+          throw err;
+      }
+      console.log(result)
+      res.status(201).json({
+        success: true,
+        message: 'Module created successfully',
+        moduleId: result.insertId  // Return auto-generated ID
+      });
+  });
+});
+
+
+
+
+
+
 app.get('/getUser', (req, res) => {
     res.send(req.user);
 });

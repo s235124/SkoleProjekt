@@ -8,8 +8,9 @@ export default function CreateModulePage() {
   const [formData, setFormData] = useState({
     date: '',
     timeslot: '',
-    class: '',
-    content: ''
+    course: '',
+    content: '',
+    course_id: "",
   });
  
   let hours = [
@@ -83,6 +84,25 @@ function createIntervals(intervals) {
   const [existingTimeslots, setExistingTimeslots] = useState<{ start: number; end: number }[]>([]);
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
+  const [minDate, setMinDate] = useState('');
+  const [maxDate, setMaxDate] = useState('');
+  const [timeslots, setTimeslots] = useState([]);
+  const [courses, setCourses] = useState([]);
+  const [selectedClass, setSelectedClass] = useState('');
+
+  function getCourses() {
+    axios({
+      method: 'get',
+      withCredentials: true,
+      url: `http://localhost:3001/getCourses`,
+      timeout: 8000,
+    }).then((response) => {
+      console.log(response.data);
+      setCourses(response.data);
+    }).catch((error) => {
+      console.log(error);
+    });
+  }
 
   const updateHours = (date) => {
     if (!date) {
@@ -113,10 +133,7 @@ function createIntervals(intervals) {
   }
   
 
-  const [minDate, setMinDate] = useState('');
-  const [maxDate, setMaxDate] = useState('');
-const [timeslots, setTimeslots] = useState([]);
-const [classes, setClasses] = useState([]);
+
   const availableStartTimes = hours.filter(hour => {
     const h = timeslotInMinutes(hour);
     return freeTimeslots.some(free => h >= free.start && h < free.end);
@@ -137,23 +154,18 @@ const [classes, setClasses] = useState([]);
     setMaxDate(new Date(today.setFullYear(today.getFullYear() + 1)).toISOString().split('T')[0]);
 
     // Fetch available timeslots and classes
-    axios.get('/api/timeslots')
-      .then(response => setTimeslots(response.data))
-      .catch(error => console.error('Error fetching timeslots:', error));
-
-    axios.get('/api/classes')
-      .then(response => setClasses(response.data))
-      .catch(error => console.error('Error fetching classes:', error));
+    getCourses();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     try {
-      const response = await axios.post('/api/modules', {
-        module_date: `${formData.date} ${formData.timeslot}`,
-        module_name: formData.content,
-        class_id: formData.class
+      const response = await axios.post('http://localhost:3001/createModule', {
+        module_date: `${formData.date}`,
+        module_start_time: startTime,
+        module_end_time: endTime,
+        course_id: formData.course_id
       });
 
       if (response.data.success) {
@@ -238,15 +250,15 @@ const [classes, setClasses] = useState([]);
             Hold:
           </label>
           <select
-            value={formData.class}
-            onChange={(e) => setFormData({ ...formData, class: e.target.value })}
+            value={formData.course_id}
+            onChange={(e) => setFormData({ ...formData, course_id: e.target.value, })}
             className="border dark:border-gray-600 p-2 w-full mb-4 dark:bg-gray-700 dark:text-gray-100"
             required
           >
             <option value="">Vælg hold</option>
-            {classes.map((cls) => (
-              <option key={cls.class_id} value={cls.class_id}>
-                {cls.class_name}
+            {courses.map((course) => (
+              <option key={course.course_id} value={course.course_id}>
+                {course.course_name}
               </option>
             ))}
           </select>
