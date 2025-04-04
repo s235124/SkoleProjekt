@@ -1,6 +1,7 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/owner-sidebar"
- import LogoutButton from "@/components/logout-button"
+import { AppSidebarStudent } from "@/components/student-sidebar"
+import LogoutButton from "@/components/logout-button"
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     < >
