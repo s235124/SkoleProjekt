@@ -20,7 +20,7 @@ const items = [
   },
   {
     title: "Calendar",
-    url: "/ownerstuff/calendar", // Should be students calendar page route
+    url: "/studentstuff/calendar",
     icon: Calendar,
   },
   {
