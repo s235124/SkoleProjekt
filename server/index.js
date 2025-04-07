@@ -162,3 +162,38 @@ app.get('/teacher/:id', (req, res) => {
   });
 });
 
+app.get('/studenttimeslots', (req, res) => {
+  const query = 'SELECT m.module_date, m.module_start_time, m.module_end_time FROM modules m JOIN courses c ON m.course_id = c.course_id JOIN enrollments e ON c.course_id = e.course_id WHERE e.user_id = ? ORDER BY m.module_date, m.module_start_time;';
+
+  const date = req.query.date;
+  if (!date) {
+    return res.status(400).json({ error: 'Date is required' });
+  }
+
+  console.log(date + " " + req.body)
+
+  db.query(query, [date], (err, results) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+
+    const times = results.map(row => ({
+      start: row.module_start_time,
+      end: row.module_end_time
+    }));
+  console.log("all of times "+times);
+  res.send(times);
+  })
+});
+
+/* SQL query for finding the date and start and end time of a module with user id
+SELECT m.module_date,
+  m.module_start_time,
+  m.module_end_time
+FROM modules m
+JOIN courses c ON m.course_id = c.course_id
+JOIN enrollments e ON c.course_id = e.course_id
+WHERE e.user_id = ?
+ORDER BY m.module_date, m.module_start_time;
+*/
