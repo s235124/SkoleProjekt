@@ -95,11 +95,7 @@ export default function Calendar({ refetchTrigger }: CalendarProps) {
         events={events}
         datesSet={handleDatesSet}
         timeZone="UTC"
-        themeSystem="standard"
-        slotDuration="02:00:00"       // 2-hour time slots
-        slotLabelInterval="02:00:00" // Labels every 2 hours
-        slotMinTime="00:00:00"       // Start at 8 AM
-        slotMaxTime="24:00:00"       // End at 8 PM
+        themeSystem="standard"     // 2-hour time slots// Labels every 2 hours    // End at 8 PM
         allDaySlot={false}           // Remove all-day row
         expandRows={false}           // Prevent vertical expansion
         contentHeight="auto"         // Compact height
