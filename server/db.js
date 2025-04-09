@@ -6,7 +6,8 @@ const db = mysql.createPool({
     host: '172.23.93.11',
     user: 'v',
     password: 'v',
-    database: 'skole' // HAS TO EXIST IN YOUR MYSQL SERVER
+    database: 'skole', // HAS TO EXIST IN YOUR MYSQL SERVER
+    timezone: 'Z'
 });
 
 module.exports = db;

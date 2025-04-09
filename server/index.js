@@ -175,7 +175,6 @@ app.get('/modules', (req, res) => {
   });
 });
 
-
 app.post('/createModule', (req, res) => {
   const { course_id, module_start_time, module_end_time, module_date } = req.body;
 

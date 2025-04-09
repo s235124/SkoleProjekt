@@ -288,7 +288,7 @@ function createIntervals(intervals) {
       
     </div>
     <div className='h-full'>
-    <Calendar></Calendar>
+    <Calendar refetchTrigger={formData.date}></Calendar>
     </div>
     </>
   );
