@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { responseCookiesToRequestCookies } from 'next/dist/server/web/spec-extension/adapters/request-cookies';
 import { threadId } from 'worker_threads';
-
+import Calendar from '@/components/calendar';
 export default function CreateModulePage() {
   const [formData, setFormData] = useState({
     date: '',
@@ -179,6 +179,7 @@ function createIntervals(intervals) {
   };
 
   return (
+  <>
     <div className="flex flex-grow items-center justify-center">
       <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-96 text-center">
         <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">
@@ -284,6 +285,11 @@ function createIntervals(intervals) {
           </button>
         </form>
       </div>
+      
     </div>
+    <div className='h-full'>
+    <Calendar></Calendar>
+    </div>
+    </>
   );
 }

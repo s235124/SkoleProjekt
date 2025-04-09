@@ -138,7 +138,42 @@ app.get('/getCourses', (req, res) => {
   });
 });
 
+// Backend API Endpoint (server.js)
+app.get('/modules', (req, res) => {
+  const query = `
+    SELECT 
+      m.module_id,
+      m.module_name,
+      m.module_date,
+      m.module_start_time,
+      m.module_end_time,
+      m.course_id,
+      m.teacher_id,
+      c.course_name
+    FROM modules m
+    LEFT JOIN courses c ON m.course_id = c.course_id
+  `;
 
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error('Database error:', err);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to fetch modules'
+      });
+    }
+
+    // Format dates and times to ISO strings
+    const formattedModules = results.map(module => ({
+      ...module,
+      module_date: new Date(module.module_date).toISOString().split('T')[0],
+      module_start_time: module.module_start_time.toString().slice(0, 8),
+      module_end_time: module.module_end_time.toString().slice(0, 8)
+    }));
+
+    res.json(formattedModules);
+  });
+});
 
 app.post('/createModule', (req, res) => {
   const course_id = req.body.course_id;
