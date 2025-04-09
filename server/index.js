@@ -175,31 +175,54 @@ app.get('/modules', (req, res) => {
   });
 });
 
+
 app.post('/createModule', (req, res) => {
-  const course_id = req.body.course_id;
-  const module_start_time = req.body.module_start_time;
-  const module_end_time = req.body.module_end_time;
-  const module_date = req.body.module_date;
-  const query = `INSERT INTO modules (
-    module_date,
-    course_id,
-    module_start_time,
-    module_end_time
-  ) VALUES (?, ?, ?, ?)`;
+  const { course_id, module_start_time, module_end_time, module_date } = req.body;
+
+  // First get the course name
+  const getCourseQuery = 'SELECT course_name FROM courses WHERE course_id = ?';
   
-  db.query(query, [module_date, course_id, module_start_time, module_end_time], (err, result) => {
-      if(err) {
-          throw err;
+  db.query(getCourseQuery, [course_id], (err, courseResult) => {
+    if (err) {
+      console.error('Database error:', err);
+      return res.status(500).json({ success: false, message: 'Database error' });
+    }
+
+    if (courseResult.length === 0) {
+      return res.status(404).json({ success: false, message: 'Course not found' });
+    }
+
+    const course_name = courseResult[0].course_name;
+
+    // Now insert with course name
+    const insertModuleQuery = `
+      INSERT INTO modules (
+        module_name,
+        module_date,
+        course_id,
+        module_start_time,
+        module_end_time
+      ) VALUES (?, ?, ?, ?, ?)
+    `;
+
+    db.query(insertModuleQuery, 
+      [course_name, module_date, course_id, module_start_time, module_end_time],
+      (err, moduleResult) => {
+        if (err) {
+          console.error('Database error:', err);
+          return res.status(500).json({ success: false, message: 'Failed to create module' });
+        }
+
+        res.status(201).json({
+          success: true,
+          message: 'Module created successfully',
+          moduleId: moduleResult.insertId,
+          moduleName: course_name
+        });
       }
-      console.log(result)
-      res.status(201).json({
-        success: true,
-        message: 'Module created successfully',
-        moduleId: result.insertId  // Return auto-generated ID
-      });
+    );
   });
 });
-
 
 
 
