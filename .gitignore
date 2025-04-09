@@ -41,5 +41,6 @@ yarn-error.log*
 next-env.d.ts
 
 # important
-/server/db.js vi burde commite den once hvor vi fjerne password og udskifter det med en laceholder
+/server/db.js 
+# vi burde commite den once hvor vi fjerne password og udskifter det med en laceholder
 server/db.js
