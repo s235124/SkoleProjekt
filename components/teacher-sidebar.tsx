@@ -20,13 +20,13 @@ const items = [
   },
   {
     title: "Students",
-    url: "../ownerstuff/students",
+    url: "../teacherstuff/students",
     icon: Calendar,
   },
   {
-    title: "Search",
-    url: "#",
-    icon: Search,
+    title: "Calendar",
+    url: "../teacherstuff/calendar",
+    icon: Calendar,
   },
   {
     title: "Settings",

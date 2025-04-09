@@ -34,20 +34,30 @@ export async function middleware(request: NextRequest) {
       );
 
       //key value pairs
-      const roleDashboardPaths = {
-        1: '/dashboards/student',
-        2: '/dashboards/teacher',
-        3: '/dashboards/owner',
-        4: '/dashboards/admin',
+      // Map roles to their root directories
+      const roleRootPaths = {
+        1: '/studentstuff',
+        2: '/teacherstuff',
+        3: '/ownerstuff',
+        4: '/adminstuff'
       };
+
+      const allowedRoot = roleRootPaths[payload.role as keyof typeof roleRootPaths];
       
-      
-      //we figure out which path is allowed for the user based on their token by using their role
-      const allowedPath = roleDashboardPaths[payload.role as keyof typeof roleDashboardPaths];
-    
-      //if the path that the user tried to access is a dashboard, but it isnt their allowedPath, we redirect them to their allowed path
-      if (path.startsWith('/dashboards') && !path.startsWith(allowedPath)) {
-        return NextResponse.redirect(new URL(allowedPath, request.url));
+      // Redirect if trying to access wrong directory
+      if (!path.startsWith(allowedRoot)) {
+        // Special case for dashboard root
+        if (path === '/dashboards') {
+          return NextResponse.redirect(new URL(allowedRoot, request.url));
+        }
+        
+        // Block access to other role directories
+        const isTryingToAccessOtherRoleDir = Object.values(roleRootPaths)
+          .some(dir => path.startsWith(dir) && dir !== allowedRoot);
+
+        if (isTryingToAccessOtherRoleDir) {
+          return NextResponse.redirect(new URL(allowedRoot, request.url));
+        }
       }
     }
   } catch (error) { //error catch meh
