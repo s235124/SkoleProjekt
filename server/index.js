@@ -22,16 +22,17 @@ const db = require('./db');
 const { error } = require('console');
 
 const app = express();
-
-app.use(bodyparser.json());
-app.use(bodyparser.urlencoded({ extended: true }));
-app.use(expressSession({ secret: 'secret', resave: false, saveUninitialized: false }));
 app.use(cors({
     origin: 'http://localhost:3000',
     credentials: true
 }));
+app.use(bodyparser.json());
+app.use(bodyparser.urlencoded({ extended: true }));
+app.use(expressSession({ secret: 'secret', resave: false, saveUninitialized: false }));
 
 app.use(cookieparser('secret'));
+
+
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -133,6 +134,8 @@ app.post('/login', (req, res, next) => {
       );
 
       // Send token to client
+      res.cookie('token', token, { httpOnly: true, secure: false }); // Set cookie with token
+      // Optionally, you can also send the user info back to the client
       res.json({ token });
       
     } catch (error) {
@@ -204,6 +207,70 @@ app.post('/createcourse', (req, res) => {
     );
   });
 });
+
+// Course Creation API for Teachers
+app.post('/createcourseasteacher', (req, res) => {
+  const { course_name, course_description } = req.body;
+  const teacher_id = req.user.id; // From authentication
+
+  // 1. Check for existing course in the teacher's school
+  const checkQuery = `
+      SELECT * FROM courses 
+      WHERE course_name = ? 
+  `;
+
+  db.query(checkQuery, [course_name, teacher_id], (err, results) => {
+      if (err) {
+          console.error('Check error:', err);
+          return res.status(500).json({ error: 'Database error' });
+      }
+
+      if (results.length > 0) {
+          return res.status(409).json({ error: 'Course already exists in your school' });
+      }
+
+      // 2. Create the course
+      const insertCourseQuery = `
+          INSERT INTO courses 
+          (course_name, course_description) 
+          VALUES (?, ?)
+      `;
+
+      db.query(insertCourseQuery, [course_name, course_description, teacher_id], 
+      (err, courseResult) => {
+          if (err) {
+              console.error('Course creation error:', err);
+              return res.status(500).json({ error: 'Course creation failed' });
+          }
+
+          const course_id = courseResult.insertId;
+
+          // 3. Link teacher to course
+          const insertTeachesQuery = `
+              INSERT INTO teaches (teacher_id, course_id) 
+              VALUES (?, ?)
+          `;
+
+          db.query(insertTeachesQuery, [teacher_id, course_id], 
+          (err, teachesResult) => {
+              if (err) {
+                  console.error('Teacher link error:', err);
+                  // Optional: Delete the course if linking fails
+                  return res.status(500).json({ error: 'Failed to link teacher to course' });
+              }
+
+              res.status(201).json({ 
+                  success: true,
+                  course_id: course_id,
+                  message: 'Course created and teacher linked successfully'
+              });
+          });
+      });
+  });
+});
+
+
+
 
 app.get('/getCourses', (req, res) => {
   const query = 'SELECT * FROM courses';
@@ -304,12 +371,18 @@ app.post('/createModule', (req, res) => {
 
 
 
+const authenticateUser = passport.authenticate('jwt', { session: false });
 
-
-app.get('/getUser', (req, res) => {
-    res.send(req.user);
+// Protected user endpoint
+app.get('/getUser', authenticateUser, (req, res) => {
+  // Return sanitized user data
+  res.json({
+    id: req.user.user_id,
+    email: req.user.email,
+    role: req.user.role,
+    school_id: req.user.school_id
+  });
 });
-
 app.listen(3001, () => {
   console.log('Server is running on port 3001');
 });
@@ -349,10 +422,9 @@ app.use((err, req, res, next) => {
 });
 
 // Get courses taught by teacher
-app.get('/teacher/courses', (req, res) => {
-  // the teacher id is in the request object, which is set by passport and is in the token json web token
-  const teacherId = req.user.id; //
-  
+app.get('/teacher/courses/:id', (req, res) => {
+  const teacherId = req.params.id;
+  console.log(teacherId + " teacher id in get courses taught by teacher");
   const query = `
       SELECT c.course_id, c.course_name 
       FROM teaches t

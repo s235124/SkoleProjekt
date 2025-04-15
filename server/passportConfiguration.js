@@ -48,21 +48,32 @@ module.exports = function(passport) {
 
     //deepseek
     const jwtOptions = {
-        
-        jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-        secretOrKey: process.env.JWT_SECRET, // Use environment variable
-      };
+        // Extract JWT from cookies instead of Authorization header
+        jwtFromRequest: (req) => {
+            return req?.cookies?.token || null;
+        },
+        secretOrKey: process.env.JWT_SECRET
+    };
     
-      passport.use(
+    passport.use(
         new JwtStrategy(jwtOptions, (jwtPayload, done) => {
-          const query = 'SELECT * FROM skole.user WHERE user_id = ?';
-          db.query(query, [jwtPayload.userId], (err, result) => {
-            if (err) return done(err);
-            if (result.length === 0) return done(null, false);
-            return done(null, result[0]);
-          });
+            const query = 'SELECT * FROM skole.user WHERE user_id = ?';
+            db.query(query, [jwtPayload.userId], (err, result) => {
+                if (err) return done(err);
+                if (result.length === 0) return done(null, false);
+                
+                // Structure the user object properly
+                const user = {
+                    user_id: result[0].user_id,
+                    email: result[0].email,
+                    role: result[0].role,
+                    school_id: result[0].school_id
+                };
+                
+                return done(null, user);
+            });
         })
-      );
+    );
 
 
 

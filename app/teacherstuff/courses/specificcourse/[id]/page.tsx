@@ -23,7 +23,6 @@ export default function CoursePage() {
     const [assignmentOpen, setAssignmentOpen] = useState(false);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     useEffect(() => {
-        // Fetch the current user
         axios.get(`http://localhost:3001/getUser`)
         .then((response) => {
             if (response.data.length > 0) {
@@ -131,16 +130,6 @@ export default function CoursePage() {
                         <div className='basis-1/6 font-bold text-5xl'></div>
                         <div className='basis-1/6 bg-violet-200"'>
 
-                            <button
-                                onClick={() => setAssignmentOpen(true)}
-                                className="top-1 flex items-center rounded bg-slate-800 py-1 px-2.5 border border-transparent text-center text-sm text-white transition-all shadow-sm hover:shadow focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-                                type="button"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 mr-2">
-                                    <path d="M6.25 6.375a4.125 4.125 0 118.25 0 4.125 4.125 0 01-8.25 0zM3.25 19.125a7.125 7.125 0 0114.25 0v.003l-.001.119a.75.75 0 01-.363.63 13.067 13.067 0 01-6.761 1.873c-2.472 0-4.786-.684-6.76-1.873a.75.75 0 01-.364-.63l-.001-.122zM19.75 7.5a.75.75 0 00-1.5 0v2.25H16a.75.75 0 000 1.5h2.25v2.25a.75.75 0 001.5 0v-2.25H22a.75.75 0 000-1.5h-2.25V7.5z" />
-                                </svg>
-                                Assign Teacher
-                            </button>
                         </div>
                         <div className='basis-1/6 bg-violet-200"'>
                             <button
@@ -205,6 +194,15 @@ export default function CoursePage() {
                                             <p className='text-sm text-gray-600'>{teacher.email}</p>
                                         </div>
                                     </div>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleRemoveTeacher(teacher.user_id);
+                                        }}
+                                        className="ml-4 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                                    >
+                                        Remove
+                                    </button>
                                 </div>
                             ))}
                             <div className="w-full flex items-center my-4">

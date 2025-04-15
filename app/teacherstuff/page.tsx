@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { CalendarDays, Users, GraduationCap, ClipboardCheck, Car, Star } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import axios from 'axios'
 
 // Mock data (replace with actual data fetching in a real application)
 const mockData = {
@@ -16,8 +17,47 @@ const mockData = {
 }
 
 export default function OwnerDashboard() {
+  const [users, setUsers] = useState([]);
 
-
+  const [user, setUser] = useState();
+  useEffect(() => {
+    getUser();
+    getAllUsers();
+  }, [])
+  
+  const getUser = async () => {
+    try {
+      const response = await axios.get('http://localhost:3001/getUser', {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      
+      setUser(response.data);
+      console.log('User data:', response.data);
+    } catch (error) {
+      console.error('Error fetching user:', error);
+      if (error.response?.status === 401) {
+        // Handle unauthorized access
+      }
+    }
+  };
+  
+  const getAllUsers = () => {
+    axios({
+      method: 'get',
+      withCredentials: true,
+      url: 'http://localhost:3001/getAllUsers',
+      timeout: 8000,
+      }).then((response) => {
+        setUsers(response.data);
+          console.log(response.data);
+      }).catch((error) => {
+          console.log(error);
+      });
+  }
 
   return (
     <div className="p-8 bg-background text-foreground">
