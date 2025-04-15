@@ -440,7 +440,55 @@ app.post('/courses/:courseId/assign-teacher', (req, res) => {
       }
   );
 });
+app.delete('/courses/delete/:courseId', (req, res) => {
+  const courseId = req.params.courseId;
+  
+  // First check if course exists
+  const checkQuery = 'SELECT * FROM courses WHERE course_id = ?';
+  const deleteQuery = 'DELETE FROM courses WHERE course_id = ?';
 
+  db.query(checkQuery, [courseId], (err, results) => {
+      if (err) {
+          console.error('Database error:', err);
+          return res.status(500).json({ error: 'Database error' });
+      }
+      
+      if (results.length === 0) {
+          return res.status(404).json({ error: 'Course not found' });
+      }
+
+      db.query(deleteQuery, [courseId], (err, result) => {
+          if (err) {
+              console.error('Delete error:', err);
+              return res.status(500).json({ error: 'Failed to delete course' });
+          }
+          
+          res.json({ success: true });
+      });
+  });
+});
+app.delete('/courses/:courseId/teachers/delete/:teacherId', (req, res) => {
+  const { courseId, teacherId } = req.params;
+  
+  const query = `
+    DELETE FROM teaches 
+    WHERE course_id = ? 
+    AND teacher_id = ?
+  `;
+
+  db.query(query, [courseId, teacherId], (err, result) => {
+    if (err) {
+      console.error('Database error:', err);
+      return res.status(500).json({ error: 'Database error' });
+    }
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Teacher not assigned to this course' });
+    }
+
+    res.json({ success: true });
+  });
+});
 
 
 

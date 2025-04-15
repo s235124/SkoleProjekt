@@ -54,7 +54,7 @@ export default function TeacherAssignmentModal({ courseId, open, onOpenChange })
                             <option value="">Select a teacher</option>
                             {teachers.map(teacher => (
                                 <option key={teacher.user_id} value={teacher.user_id}>
-                                    {teacher.first_name} {teacher.last_name}
+                                    {teacher.email} {teacher.last_name}
                                 </option>
                             ))}
                         </select>
