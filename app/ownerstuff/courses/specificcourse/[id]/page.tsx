@@ -11,11 +11,13 @@ import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import StudentEnrollmentModal from '@/components/studentAssign';
 export default function CoursePage() {
     const router = useRouter()
     const params = useParams()
     const [course, setCourse] = useState()
-    const [students, setStudents] = useState()
+    const [students, setStudents] = useState([])
     const [teachers, setTeachers] = useState([])
     const [assignmentOpen, setAssignmentOpen] = useState(false);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -60,6 +62,45 @@ export default function CoursePage() {
             alert('Failed to remove teacher');
         }
     };
+
+
+    //student stuff
+    const [enrollmentOpen, setEnrollmentOpen] = useState(false);
+
+    // Add useEffect for fetching students
+    useEffect(() => {
+        if (params?.id) {
+            axios.get(`http://localhost:3001/courses/${params.id}/students`)
+                .then(response => setStudents(response.data))
+                .catch(console.error);
+
+        }
+    }, [params?.id]);
+
+    // Add enrollment handlers
+    const handleEnrollStudent = async (studentId) => {
+        try {
+            await axios.post(`http://localhost:3001/courses/${params.id}/enroll`, { studentId });
+            const res = await axios.get(`http://localhost:3001/courses/${params.id}/students`);
+            setStudents(res.data);
+        } catch (error) {
+            console.error('Enrollment failed:', error);
+            alert(error.response?.data?.error || 'Enrollment failed');
+        }
+    };
+
+    const handleUnenrollStudent = async (studentId) => {
+        try {
+            await axios.delete(`http://localhost:3001/courses/${params.id}/students/delete/${studentId}`);
+            setStudents(students.filter(s => s.user_id !== studentId));
+        } catch (error) {
+            console.error('Unenrollment failed:', error);
+            alert('Failed to unenroll student');
+        }
+    };
+
+
+
     if (!course) return <div>Loading...</div>
 
     return (
@@ -89,19 +130,16 @@ export default function CoursePage() {
                             </button>
                         </div>
                         <div className='basis-1/6 bg-violet-200"'>
-
-                            <Link href="/ownerstuff/courses/createcourse">
-                                <button
-                                    className="top-1 flex items-center rounded bg-slate-800 py-1 px-2.5 border border-transparent text-center text-sm text-white transition-all shadow-sm hover:shadow focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-                                    type="button"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 mr-2">
-                                        <path fillRule="evenodd" d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z" clipRule="evenodd" />
-                                    </svg>
-                                    Assign Teacher
-                                </button>
-                            </Link>
-
+                            <button
+                                onClick={() => setEnrollmentOpen(true)}
+                                className="top-1 flex items-center rounded bg-slate-800 py-1 px-2.5 border border-transparent text-center text-sm text-white transition-all shadow-sm hover:shadow focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                                type="button"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 mr-2">
+                                    <path fillRule="evenodd" d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z" clipRule="evenodd" />
+                                </svg>
+                                Assign Student
+                            </button>
                         </div>
                         <div className='basis-1/6 bg-violet-200"'>
 
@@ -134,7 +172,11 @@ export default function CoursePage() {
                         </div>
                     </div>
                     <ScrollArea className="m-auto w-4/5 h-3/5 border-black border-b-[2px]">
-                        <div className="flex flex-col">
+                        <div className="flex flex-col">                            <div className="w-full flex items-center my-4">
+                            <div className="flex-1 border-t border-slate-300"></div>
+                            <span className="px-3 text-slate-600 text-sm font-medium uppercase tracking-wide">Teachers</span>
+                            <div className="flex-1 border-t border-slate-300"></div>
+                        </div>
                             {teachers.map((teacher) => (
                                 <div
                                     key={teacher.user_id}
@@ -161,6 +203,34 @@ export default function CoursePage() {
                                     </button>
                                 </div>
                             ))}
+                            <div className="w-full flex items-center my-4">
+                                <div className="flex-1 border-t border-slate-300"></div>
+                                <span className="px-3 text-slate-600 text-sm font-medium uppercase tracking-wide">Students</span>
+                                <div className="flex-1 border-t border-slate-300"></div>
+                            </div>
+                            {students.map((student) => (
+                                <div
+                                    key={student.user_id}
+                                    className='bg-white hover:bg-slate-100 transition-all cursor-pointer p-4 border-b flex justify-between items-center'
+                                >
+                                    <div className='flex-1 flex items-center gap-4'>
+                                        <div className='w-8 h-8 rounded-full bg-violet-400'></div>
+                                        <div>
+                                            <p className='font-medium'>{student.first_name} {student.last_name}</p>
+                                            <p className='text-sm text-gray-600'>{student.email}</p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleUnenrollStudent(student.user_id);
+                                        }}
+                                        className="ml-4 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                                    >
+                                        Remove
+                                    </button>
+                                </div>
+                            ))}
                         </div>
                     </ScrollArea>
                 </div>
@@ -174,6 +244,12 @@ export default function CoursePage() {
                 courseId={params.id}
                 open={assignmentOpen}
                 onOpenChange={setAssignmentOpen}
+            />
+            <StudentEnrollmentModal
+                courseId={params.id}
+                open={enrollmentOpen}
+                onOpenChange={setEnrollmentOpen}
+                onEnroll={handleEnrollStudent}
             />
         </>
     )

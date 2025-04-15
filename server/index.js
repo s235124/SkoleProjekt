@@ -491,7 +491,79 @@ app.delete('/courses/:courseId/teachers/delete/:teacherId', (req, res) => {
 });
 
 
+// Get enrolled students
+app.get('/courses/:courseId/students', async (req, res) => {
+      const query =`
+          SELECT u.user_id, u.first_name, u.last_name, u.email 
+          FROM courseEnrollments ce
+          JOIN user u ON ce.student_id = u.user_id
+          WHERE ce.course_id = ?
+      `;
+      const courseId = req.params.courseId;
+  db.query(query, [courseId, courseId], (err, results) => {
+    if (err) {
+        console.error('Database error:', err);
+        return res.status(500).json({ error: 'Database error' });
+    }
+    res.json(results);
+});
+});
 
+// Get available students for enrollment
+app.get('/courses/:courseId/available-students', async (req, res) => {
+
+      const query = `
+          SELECT u.user_id, u.first_name, u.last_name, u.email 
+          FROM user u
+          WHERE u.role = 1 
+          AND u.user_id NOT IN (
+              SELECT student_id FROM courseEnrollments WHERE course_id = ?
+          )`;
+      const courseId = req.params.courseId;
+      // remember to add school id to the query later
+          db.query(query, [courseId, courseId], (err, results) => {
+            if (err) {
+                console.error('Database error:', err);
+                return res.status(500).json({ error: 'Database error' });
+            }
+            res.json(results);
+        });
+    });
+
+/// Enroll student
+app.post('/courses/:courseId/enroll', (req, res) => {
+  const courseId = req.params.courseId;
+  const { studentId } = req.body;
+
+  const query = 'INSERT INTO courseEnrollments (student_id, course_id) VALUES (?, ?)';
+  
+  db.query(query, [studentId, courseId], (err, result) => {
+      if (err) {
+          console.error('Enrollment error:', err);
+          return res.status(500).json({ error: 'Failed to enroll student' });
+      }
+      res.status(201).json({ success: true });
+  });
+});
+
+// Unenroll student
+app.delete('/courses/:courseId/students/delete/:studentId', (req, res) => {
+  const { courseId, studentId } = req.params;
+  const query = 'DELETE FROM courseEnrollments WHERE course_id = ? AND student_id = ?';
+  
+  db.query(query, [courseId, studentId], (err, result) => {
+      if (err) {
+          console.error('Unenrollment error:', err);
+          return res.status(500).json({ error: 'Failed to unenroll student' });
+      }
+      
+      if (result.affectedRows === 0) {
+          return res.status(404).json({ error: 'Enrollment not found' });
+      }
+      
+      res.json({ success: true });
+  });
+});
 
 
 

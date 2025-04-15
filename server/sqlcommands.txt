@@ -125,6 +125,15 @@ CREATE TABLE attendance (
     FOREIGN KEY (enrollment_id) REFERENCES enrollments(enrollment_id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
+CREATE TABLE courseEnrollments (
+    enrollment_id INT AUTO_INCREMENT PRIMARY KEY,
+    student_id INT NOT NULL,
+    course_id INT NOT NULL,
+    enrollment_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY (student_id, course_id), -- Prevent duplicate enrollments
+    FOREIGN KEY (student_id) REFERENCES user(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (course_id) REFERENCES courses(course_id) ON DELETE CASCADE
+) ENGINE=InnoDB;
 -- Add indexes for better performance
 CREATE INDEX idx_teaches ON teaches(course_id, teacher_id);
 CREATE INDEX idx_modules ON modules(course_id, teacher_id);
