@@ -47,3 +47,85 @@ CREATE TABLE attendance (
     FOREIGN KEY (enrollment_id) REFERENCES enrollments(enrollment_id) ON DELETE CASCADE,
     UNIQUE (enrollment_id, session_date) -- Prevent duplicate attendance records
 );
+
+
+new creation 
+
+-- Create database
+CREATE DATABASE IF NOT EXISTS skole;
+USE skole;
+
+-- Schools Table
+CREATE TABLE schools (
+    school_id INT AUTO_INCREMENT PRIMARY KEY,
+    school_name VARCHAR(255) NOT NULL
+) ENGINE=InnoDB;
+
+-- Users Table
+CREATE TABLE user (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    school_id INT,
+    password VARCHAR(120) NOT NULL,
+    email VARCHAR(45),
+    phone_number VARCHAR(15),
+    first_name VARCHAR(255),
+    last_name VARCHAR(255),
+    role INT,
+    FOREIGN KEY (school_id) REFERENCES schools(school_id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Courses Table (updated with school_id)
+CREATE TABLE courses (
+    course_id INT AUTO_INCREMENT PRIMARY KEY,
+    course_name VARCHAR(255) NOT NULL,
+    course_description TEXT,
+    school_id INT NOT NULL,
+    FOREIGN KEY (school_id) REFERENCES schools(school_id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Teaches Junction Table
+CREATE TABLE teaches (
+    teacher_id INT NOT NULL,
+    course_id INT NOT NULL,
+    PRIMARY KEY (teacher_id, course_id),
+    FOREIGN KEY (teacher_id) REFERENCES user(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (course_id) REFERENCES courses(course_id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Modules Table
+CREATE TABLE modules (
+    module_id INT AUTO_INCREMENT PRIMARY KEY,
+    module_name VARCHAR(255),
+    module_date DATE NOT NULL,
+    teacher_id INT,
+    course_id INT,
+    module_start_time TIME NOT NULL,
+    module_end_time TIME NOT NULL,
+    FOREIGN KEY (teacher_id) REFERENCES user(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (course_id) REFERENCES courses(course_id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Enrollments Table
+CREATE TABLE enrollments (
+    enrollment_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    module_id INT,
+    UNIQUE KEY (user_id, module_id),
+    FOREIGN KEY (user_id) REFERENCES user(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (module_id) REFERENCES modules(module_id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Attendance Table
+CREATE TABLE attendance (
+    attendance_id INT AUTO_INCREMENT PRIMARY KEY,
+    enrollment_id INT,
+    session_date DATE NOT NULL,
+    present BOOLEAN NOT NULL DEFAULT 0,
+    UNIQUE KEY (enrollment_id, session_date),
+    FOREIGN KEY (enrollment_id) REFERENCES enrollments(enrollment_id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Add indexes for better performance
+CREATE INDEX idx_teaches ON teaches(course_id, teacher_id);
+CREATE INDEX idx_modules ON modules(course_id, teacher_id);
+CREATE INDEX idx_enrollments ON enrollments(module_id, user_id);

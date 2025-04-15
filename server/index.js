@@ -361,7 +361,94 @@ app.get('/course/:id', (req, res) => {
   });
 });
 
+// In your API endpoint
+app.get('/courses/:courseId/teachers', (req, res) => {
+  const courseId = req.params.courseId;
+  
+  const query = `
+      SELECT 
+          u.user_id, 
+          u.first_name, 
+          u.last_name, 
+          u.email 
+      FROM user u
+      WHERE u.user_id IN (
+          SELECT teacher_id 
+          FROM teaches 
+          WHERE course_id = ?
+      )
+  `;
+
+  db.query(query, [courseId], (err, results) => {
+      if (err) {
+          console.error('Database error:', err);
+          return res.status(500).json({ error: 'Database error' });
+      }
+      res.json(results);
+  });
+});
+
+// Get available teachers for a course
+app.get('/courses/:courseId/available-teachers', (req, res) => {
+  const courseId = req.params.courseId;
+  // remember to add school id to the query later
+  const query = `
+      SELECT u.user_id, u.first_name, u.last_name, u.email 
+      FROM user u
+      WHERE u.user_id NOT IN (
+          SELECT teacher_id FROM teaches WHERE course_id = ?
+      )
+  `;
+
+  db.query(query, [courseId, courseId], (err, results) => {
+      if (err) {
+          console.error('Database error:', err);
+          return res.status(500).json({ error: 'Database error' });
+      }
+      res.json(results);
+  });
+});
+
+// Assign teacher to course
+app.post('/courses/:courseId/assign-teacher', (req, res) => {
+  const courseId = req.params.courseId;
+  const { teacherId } = req.body;
+
+  const query = `
+      INSERT INTO teaches (teacher_id, course_id)
+      VALUES (?, ?)
+  `;
+
+  // First validate teacher exists and is a teacher
+  db.query(
+      'SELECT * FROM user WHERE user_id = ?',
+      [teacherId],
+      (err, results) => {
+          if (err || results.length === 0) {
+              return res.status(400).json({ error: 'Invalid teacher' });
+          }
+          
+          db.query(query, [teacherId, courseId], (err, result) => {
+              if (err) {
+                  if (err.code === 'ER_DUP_ENTRY') {
+                      return res.status(409).json({ error: 'Teacher already assigned' });
+                  }
+                  return res.status(500).json({ error: 'Assignment failed' });
+              }
+              res.json({ success: true });
+          });
+      }
+  );
+});
+
+
+
+
+
+
+
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: 'Internal server error' });
 });
+
