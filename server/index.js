@@ -70,6 +70,48 @@ app.post('/signup', (req, res) => {
         }
     });
 });
+
+
+
+app.post('/adduser', (req, res) => {
+  const { email, password, phone_number, first_name, last_name, role: roleStr } = req.body;
+  const school_id = 1; // Hardcoded school_id as per instruction
+  const role = parseInt(roleStr, 10); // Convert role to integer
+
+  const insertQuery = `
+    INSERT INTO user 
+      (password, email, phone_number, first_name, last_name, role) 
+    VALUES (?, ?, ?, ?, ?, ?)
+  `;
+  const checkUserQuery = 'SELECT * FROM user WHERE email = ?';
+
+  // Check if user already exists
+  db.query(checkUserQuery, [email], (err, result) => {
+    if (err) {
+      console.error('Database error:', err);
+      return res.status(500).json({ message: 'Database error' });
+    }
+    
+    if (result.length > 0) {
+      return res.status(409).json({ message: 'User already exists' });
+    }
+
+    // Hash password and create user
+    const hashedPassword = bcrypt.hashSync(password, 10);
+    db.query(
+      insertQuery,
+      [hashedPassword, email, phone_number, first_name, last_name, role],
+      (err, result) => {
+        if (err) {
+          console.error('Error creating user:', err);
+          return res.status(500).json({ message: 'Error creating user' });
+        }
+        res.status(201).json({ message: 'User created successfully' });
+      }
+    );
+  });
+});
+
 const jwt = require('jsonwebtoken');
 const { start } = require('repl');
 
@@ -125,6 +167,43 @@ app.get('/timeslots', (req, res) => {
   })
 });
 
+// Course Creation API
+app.post('/createcourse', (req, res) => {
+  const { course_name, course_description } = req.body;
+  
+  const checkCourseQuery = 'SELECT * FROM courses WHERE course_name = ?';
+  const insertCourseQuery = `
+    INSERT INTO courses 
+      (course_name, course_description) 
+    VALUES (?, ?)
+  `;
+
+  db.query(checkCourseQuery, [course_name], (err, result) => {
+    if (err) {
+      console.error('Database error:', err);
+      return res.status(500).json({ message: 'Database error' });
+    }
+    
+    if (result.length > 0) {
+      return res.status(409).json({ message: 'Course already exists' });
+    }
+
+    db.query(
+      insertCourseQuery,
+      [course_name, course_description],
+      (err, result) => {
+        if (err) {
+          console.error('Error creating course:', err);
+          return res.status(500).json({ message: 'Error creating course' });
+        }
+        res.status(201).json({ 
+          message: 'Course created successfully',
+          course_id: result.insertId
+        });
+      }
+    );
+  });
+});
 
 app.get('/getCourses', (req, res) => {
   const query = 'SELECT * FROM courses';
@@ -264,3 +343,7 @@ app.get('/teacher/:id', (req, res) => {
   });
 });
 
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: 'Internal server error' });
+});

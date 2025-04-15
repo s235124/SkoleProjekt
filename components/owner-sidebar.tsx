@@ -34,8 +34,8 @@ const items = [
     icon: Calendar,
   },
   {
-    title: "Settings",
-    url: "",
+    title: "Courses",
+    url: "/ownerstuff/courses",
     icon: Settings,
   },
 ]

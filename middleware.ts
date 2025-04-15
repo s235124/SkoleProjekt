@@ -47,7 +47,7 @@ export async function middleware(request: NextRequest) {
       // Redirect if trying to access wrong directory
       if (!path.startsWith(allowedRoot)) {
         // Special case for dashboard root, we use this route for login frontend, i am too lazy to tamper with it right now
-        if (path === '/dashboards') {
+        if (path === '/dashboards/owner' || path === '/dashboards/student' || path === '/dashboards/teacher') {
           return NextResponse.redirect(new URL(allowedRoot, request.url));
         }
         
