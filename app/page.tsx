@@ -42,13 +42,13 @@ const router = useRouter()
     
     switch(role){
       case 1:
-        router.push('/dashboards/student');
+        router.push('/studentstuff');
         break;
       case 2:
-        router.push('/dashboards/instructor');
+        router.push('/teacherstuff');
         break;
       case 3:
-        router.push('/dashboards/owner');
+        router.push('/ownerstuff');
         break;
       case 4:
         router.push('/dashboards/admin');

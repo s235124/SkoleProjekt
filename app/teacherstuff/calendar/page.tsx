@@ -94,7 +94,7 @@ function createIntervals(intervals) {
     axios({
       method: 'get',
       withCredentials: true,
-      url: `http://localhost:3001/getCourses`,
+      url: `http://localhost:3001/teacher/courses`,
       timeout: 8000,
     }).then((response) => {
       console.log(response.data);

@@ -348,6 +348,23 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal server error' });
 });
 
+// Get courses taught by teacher
+app.get('/teacher/courses', (req, res) => {
+  // the teacher id is in the request object, which is set by passport and is in the token json web token
+  const teacherId = req.user.id; //
+  
+  const query = `
+      SELECT c.course_id, c.course_name 
+      FROM teaches t
+      JOIN courses c ON t.course_id = c.course_id
+      WHERE t.teacher_id = ?
+  `;
+  
+  db.query(query, [teacherId], (err, results) => {
+      if (err) return res.status(500).json({ error: 'Database error' });
+      res.json(results);
+  });
+});
 
 app.get('/course/:id', (req, res) => {
   const courseId = req.params.id;
