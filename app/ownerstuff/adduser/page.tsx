@@ -54,11 +54,11 @@ export default function AddStudent() {
       <div className="flex flex-grow items-center justify-center">
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-96 text-center">
           <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">
-            Tilføj en bruger
+            Add New User
           </h2>
           <form onSubmit={handleSubmit}>
             <label className="block mb-2 text-gray-700 dark:text-gray-200">
-              Skole ID:
+              School id:
             </label>
             <input
               type="number"
@@ -72,7 +72,7 @@ export default function AddStudent() {
             />
 
             <label className="block mb-2 text-gray-700 dark:text-gray-200">
-              Adgangskode:
+              Password:
             </label>
             <input
               type="password"
@@ -100,7 +100,7 @@ export default function AddStudent() {
             />
 
             <label className="block mb-2 text-gray-700 dark:text-gray-200">
-              Telefonnummer:
+              Phone number:
             </label>
             <input
               type="text"
@@ -114,7 +114,7 @@ export default function AddStudent() {
             />
 
             <label className="block mb-2 text-gray-700 dark:text-gray-200">
-              Fornavn:
+              First Name:
             </label>
             <input
               type="text"
@@ -128,7 +128,7 @@ export default function AddStudent() {
             />
 
             <label className="block mb-2 text-gray-700 dark:text-gray-200">
-              Efternavn:
+              Last Name:
             </label>
             <input
               type="text"
@@ -142,7 +142,7 @@ export default function AddStudent() {
             />
 
             <label className="block mb-2 text-gray-700 dark:text-gray-200">
-              Rolle:
+              Role:
             </label>
             <select
               name="role"
@@ -153,17 +153,17 @@ export default function AddStudent() {
               className="border dark:border-gray-600 p-2 w-full mb-4 dark:bg-gray-700 dark:text-gray-100"
               required
             >
-              <option value="">Vælg en rolle</option>
-              <option value="3">Ejer</option>
-              <option value="2">Lærer</option>
-              <option value="1">Elev</option>
+              <option value="">Choose role</option>
+              <option value="3">Owner</option>
+              <option value="2">Teacher</option>
+              <option value="1">Student</option>
             </select>
 
             <button
               type="submit"
               className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded w-full dark:bg-blue-500 dark:hover:bg-blue-600"
             >
-              Tilføj Bruger
+              Add User
             </button>
           </form>
         </div>
