@@ -9,39 +9,14 @@ import router from 'next/router';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Book } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
-export default function CreateCourseForm() {
+export default function Coursesview() {
   const [formData, setFormData] = useState({
     course_name: '',
     course_description: '',
   });
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    console.log('Form data:', formData);
-    e.preventDefault();
-    try {
-      const response = await fetch('http://localhost:3001/createcourse', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to create course');
-      }
-      alert('Course created successfully!');
-      setFormData({
-        course_name: '',
-        course_description: '',
-      });
-    } catch (error) {
-      console.error('Error:', error);
-      alert(error.message || 'Error creating course');
-    }
-  };
+  const router = useRouter();
 
   const [courses, setCourses] = useState<Course[]>([]);
 
@@ -61,7 +36,7 @@ export default function CreateCourseForm() {
    <Card 
      key={course.course_id}
      className="hover:shadow-lg transition-all cursor-pointer"
-     onClick={() => router.push(`/ownerstuff/course/${course.course_id}`)}
+     onClick={() => router.push(`/ownerstuff/courses/specificcourse/${course.course_id}`)}
    >
      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
        <CardTitle className="text-sm font-medium">{course.course_name}</CardTitle>

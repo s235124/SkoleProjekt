@@ -347,3 +347,21 @@ app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: 'Internal server error' });
 });
+
+
+app.get('/course/:id', (req, res) => {
+  const courseId = req.params.id;
+  const query = 'SELECT * FROM skole.courses WHERE course_id = ?';
+  
+  db.query(query, [courseId], (err, result) => {
+    if (err) return res.status(500).json({ error: 'Database error' });
+    if (result.length === 0) return res.status(404).json({ error: 'Course not found' });
+    
+    res.json(result[0]);
+  });
+});
+
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: 'Internal server error' });
+});
