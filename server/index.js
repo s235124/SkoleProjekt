@@ -213,7 +213,7 @@ app.post('/createcourse', (req, res) => {
 // Course Creation API for Teachers
 app.post('/createcourseasteacher/:teacher_id', (req, res) => {
   const { course_name, course_description } = req.body;
-  const teacher_id = req.params.teacher_id;
+  const teacher_id = req.params.teacher_id;v
 
   // 1. Check for existing course in the teacher's school
   const checkQuery = `
@@ -272,7 +272,31 @@ app.post('/createcourseasteacher/:teacher_id', (req, res) => {
 });
 
 
-
+app.get('/teaches', (req, res) => {
+  const query = `
+    SELECT 
+      c.course_id, 
+      GROUP_CONCAT(t.teacher_id) as teachers 
+    FROM courses c
+    JOIN teaches t ON c.course_id = t.course_id
+    GROUP BY c.course_id
+  `;
+  
+  db.query(query, (err, result) => {
+    if (err) {
+      console.error("Error in /teaches:", err);
+      return res.status(500).json({ error: "Database error" });
+    }
+    
+    const formatted = result.map((row) => ({
+      course_id: Number(row.course_id), // Convert to number
+      teachers: row.teachers.split(',').map(Number)
+    }));
+    
+    res.json(formatted);
+  });
+});
+  
 
 app.get('/getCourses', (req, res) => {
   const query = 'SELECT * FROM courses';
@@ -285,6 +309,9 @@ app.get('/getCourses', (req, res) => {
       res.send(result);
   });
 });
+
+
+
 
 // Backend API Endpoint (server.js)
 app.get('/modules', (req, res) => {

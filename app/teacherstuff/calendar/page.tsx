@@ -307,8 +307,13 @@ export default function CreateModulePage() {
 
       </div>
       <div className='h-full'>
-        <Calendar refetchTrigger={formData.date}></Calendar>
-      </div>
+  {user && (
+    <Calendar 
+      refetchTrigger={formData.date} 
+      currentTeacherId={user.id}
+    />
+  )}
+</div>
     </>
   );
 }
