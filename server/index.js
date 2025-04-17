@@ -397,7 +397,36 @@ app.post('/createModule', (req, res) => {
     );
   });
 });
+app.delete('/deletemodule/:id', (req, res) => {
+  const moduleId = req.params.id;
+  const deleteQuery = `
+    DELETE FROM modules 
+    WHERE module_id = ?
+  `;
 
+  db.query(deleteQuery, [moduleId], (err, result) => {
+    if (err) {
+      console.error('Database error:', err);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to delete module'
+      });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Module not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Module deleted successfully',
+      deletedId: moduleId
+    });
+  });
+});
 
 const authenticateUser = passport.authenticate('jwt', { session: false });
 // Protected user endpoint
