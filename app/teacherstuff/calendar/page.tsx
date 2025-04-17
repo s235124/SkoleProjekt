@@ -90,48 +90,40 @@ export default function CreateModulePage() {
   const [timeslots, setTimeslots] = useState([]);
   const [courses, setCourses] = useState([]);
   const [selectedClass, setSelectedClass] = useState('');
-
-
-
   const [user, setUser] = useState();
   useEffect(() => {
     getUser();
-  }, [])
-
+  }, []);
+  
   const getUser = async () => {
-      const response = await axios.get('http://localhost:3001/getUser', {
-        withCredentials: true,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
+    const response = await axios.get('http://localhost:3001/getUser', {
+      withCredentials: true,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    });
 
-      setUser(response.data);
-      console.log('User data:', response.data);
-      
-    axios.get(`http://localhost:3001/teacher/courses/${response.data.user_id}`, {
-      withCredentials: true
-    })
-      .then(response => {
-        setCourses(response.data);
-      })
-      .catch(error => {
-        if (error.response) {
-          // Server responded with error status
-          console.error('Server error:', error.response.status);
-        } else {
-          console.error('Network error:', error.message);
-        }
-      });
-  };
-
-  function getCourses() {
-    
+    setUser(response.data);
+    console.log('User data:', user);
+    getCourses(response.data);
   }
-  useEffect(() => {
-    getCourses();
-  }, [])
+
+  const getCourses = (data) => {
+    if (!data) {
+      console.error('User not found');
+      return;
+    }
+    axios.get(`http://localhost:3001/teacher/courses/${data.id}`)
+    .then((response) => { if (response.data.length > 0) {
+        setCourses(response.data) }
+        else { console.log('No courses found') }
+        
+    }).catch((error) => {
+        console.log(error)
+    })
+
+  }
   const updateHours = (date) => {
     if (!date) {
       console.error("Date is required");
@@ -182,7 +174,6 @@ export default function CreateModulePage() {
     setMaxDate(new Date(today.setFullYear(today.getFullYear() + 1)).toISOString().split('T')[0]);
 
     // Fetch available timeslots and classes
-    getCourses();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {

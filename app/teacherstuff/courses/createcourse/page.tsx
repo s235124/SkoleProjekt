@@ -4,48 +4,62 @@ import Link from 'next/link';
 import React, { use, useEffect } from 'react'
 import { useState } from 'react';
 
-
 export default function CreateCourseForm() {
   const [formData, setFormData] = useState({
     course_name: '',
     course_description: '',
   });
   const [me, setMe] = useState();
-  useEffect(() => {
-    axios.get(`http://localhost:3001/getUser`)
-    .then((response) => {
-        if (response.data.length > 0) {
-            console.log(response.data)
-            setMe(response.data)
-        }
-        else { console.log('we cant find you') }
+  const [isLoading, setIsLoading] = useState(true); // Track loading state
+  const [error, setError] = useState(''); // Track errors
 
-    }).catch((error) => {
-        console.log("vvvv" + error)
-    })
-}, [])
-  const handleSubmit = async (e: React.FormEvent) => {
-    console.log('Form data:', formData);
-    e.preventDefault();
+  useEffect(() => {
+    getUser();
+  }, []);
+
+  const getUser = async () => {
     try {
-      const response = await fetch('http://localhost:3001/createcourseasteacher', {
-        method: 'POST',
+      const response = await axios.get('http://localhost:3001/getUser', {
+        withCredentials: true,
         headers: {
           'Content-Type': 'application/json',
-        },
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      setMe(response.data);
+    } catch (err) {
+      setError('Failed to load user data');
+      console.error('Error fetching user:', err);
+    } finally {
+      setIsLoading(false); // Always stop loading
+    }
+  };
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!me) return; // Final safeguard
+
+    try {
+      const response = await fetch(`http://localhost:3001/createcourseasteacher/${me.id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
 
       const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to create course');
+          if (!response.ok) {
+        // Handle 409 conflict specifically
+        if (response.status === 409) {
+          throw new Error(data.error || 'This course already exists in your school');
+        } else {
+          throw new Error(data.error || 'Failed to create course');
+        }
+        return;
       }
       alert('Course created successfully!');
       setFormData({
         course_name: '',
         course_description: '',
-      });
-    } catch (error) {
+      });}catch (error) {
       console.error('Error:', error);
       alert(error.message || 'Error creating course');
     }
@@ -72,7 +86,7 @@ export default function CreateCourseForm() {
             onChange={(e) =>
               setFormData({ ...formData, course_name: e.target.value })
             }
-            className="border dark:border-gray-600 p-2 w-full mb-4 dark:bg-gray-700 dark:text-gray-100"
+            className="border dark:border-gray-600 p-2 w-full mb-4 dark:bg-gray-700 dark:text-gray-100 "
             required
             maxLength={255}
           />
@@ -92,13 +106,16 @@ export default function CreateCourseForm() {
 
           <button
             type="submit"
-            className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded w-full dark:bg-green-600 dark:hover:bg-green-700"
+            disabled={!me} // Disable if no user
+                className={`bg-green-500 text-white px-4 py-2 rounded w-full ${
+                  !me ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-600'
+                }`}
           >
             Create Course
           </button>
         </form>
         <div className='h-10 w-1'></div>
-        <Link href="/ownerstuff/courses">
+        <Link href="/teacherstuff/courses">
               <button
                 className="top-1 w-full flex items-center rounded bg-slate-800 py-2 px-2.5 border border-transparent text-center text-sm text-white transition-all shadow-sm hover:shadow focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
                 type="button"

@@ -21,6 +21,8 @@ const bcrypt = require('bcrypt');
 const db = require('./db');
 const { error } = require('console');
 
+
+
 const app = express();
 app.use(cors({
     origin: 'http://localhost:3000',
@@ -209,9 +211,9 @@ app.post('/createcourse', (req, res) => {
 });
 
 // Course Creation API for Teachers
-app.post('/createcourseasteacher', (req, res) => {
+app.post('/createcourseasteacher/:teacher_id', (req, res) => {
   const { course_name, course_description } = req.body;
-  const teacher_id = req.user.id; // From authentication
+  const teacher_id = req.params.teacher_id;
 
   // 1. Check for existing course in the teacher's school
   const checkQuery = `
@@ -370,9 +372,7 @@ app.post('/createModule', (req, res) => {
 });
 
 
-
 const authenticateUser = passport.authenticate('jwt', { session: false });
-
 // Protected user endpoint
 app.get('/getUser', authenticateUser, (req, res) => {
   // Return sanitized user data

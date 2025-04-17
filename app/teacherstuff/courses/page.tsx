@@ -19,24 +19,47 @@ export default function Coursesview() {
   const router = useRouter();
 
   const [courses, setCourses] = useState<Course[]>([]);
-
+  const [user, setUser] = useState();
   useEffect(() => {
-     axios.get('http://localhost:3001/getUser')
-     .then((response) => { if (response.data.length > 0) {
-         setCourses(response.data) }
-         else { console.log('No users found') }
-         
-     }).catch((error) => {
-         console.log(error)
-     })
- }, [])
+    getUser();
+  }, []);
+  
+  const getUser = async () => {
+    const response = await axios.get('http://localhost:3001/getUser', {
+      withCredentials: true,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    });
+
+    setUser(response.data);
+    console.log('User data:', user);
+    getCourses(response.data);
+  }
+
+  const getCourses = (data) => {
+    if (!data) {
+      console.error('User not found');
+      return;
+    }
+    axios.get(`http://localhost:3001/teacher/courses/${data.id}`)
+    .then((response) => { if (response.data.length > 0) {
+        setCourses(response.data) }
+        else { console.log('No courses found') }
+        
+    }).catch((error) => {
+        console.log(error)
+    })
+
+  }
  
  const listItems = <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
  {courses.map((course) => (
    <Card 
      key={course.course_id}
      className="hover:shadow-lg transition-all cursor-pointer"
-     onClick={() => router.push(`/ownerstuff/courses/specificcourse/${course.course_id}`)}
+     onClick={() => router.push(`/teacherstuff/courses/specificcourse/${course.course_id}`)}
    >
      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
        <CardTitle className="text-sm font-medium">{course.course_name}</CardTitle>
@@ -83,14 +106,7 @@ export default function Coursesview() {
       <ScrollArea className="m-auto w-4/5 h-3/5 flex flex-row border-black border-b-[2px]">
 
       {listItems}
-      {listItems}
-      {listItems}
-      {listItems}
-      {listItems}
-      {listItems}
-      {listItems}
-      {listItems}
-      {listItems}
+      
       </ScrollArea>
       </div>  
     </div>
