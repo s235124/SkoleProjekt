@@ -34,23 +34,30 @@ export default function Calendar({ refetchTrigger, currentTeacherId }: CalendarP
   const [error, setError] = useState('');
   const [courses, setCourses] = useState([]);
   const [courseTeacherMap, setCourseTeacherMap] = useState<Record<number, number[]>>({});
+  const [fetched, setFetched] = useState(false); // User state
+// Add loading state
+const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchCourseTeachers = async () => {
-      try {
-        const response = await axios.get<CourseTeachers[]>('http://localhost:3001/teaches');
-        const map = response.data.reduce((acc, { course_id, teachers }) => {
-          acc[course_id] = teachers;
-          return acc;
-        }, {} as Record<number, number[]>);
-        setCourseTeacherMap(map);
-      } catch (err) {
-        console.error('Failed to load teacher associations:', err);
-      }
-    };
-    fetchCourseTeachers();
-  }, []);
-  
+// 1. Fetch teacher-course relationships with loading state
+useEffect(() => {
+ 
+}, []);
+   const fetchCourseTeachers = async () => {
+    try {
+      const response = await axios.get<CourseTeachers[]>('http://localhost:3001/teaches');
+      const map = response.data.reduce((acc, { course_id, teachers }) => {
+        acc[course_id] = teachers;
+        return acc;
+      }, {} as Record<number, number[]>);
+      setCourseTeacherMap(map);
+    } catch (err) {
+      console.error('Failed to load teacher associations:', err);
+    } finally {
+      setFetched(true); // Set fetched to true after loading
+      setIsLoading(false); // Update loading state when done
+    }
+  };
+  fetchCourseTeachers();
   
   const fetchModules = useCallback(async (start: string, end: string) => {
     try {
@@ -64,10 +71,13 @@ export default function Calendar({ refetchTrigger, currentTeacherId }: CalendarP
         }
       });
       const formattedEvents = response.data.map((module: any) => {
+        console.log("v"+currentTeacherId); // Debugging line
+
         const courseId = Number(module.course_id);
         const teachers = courseTeacherMap[courseId] || [];
         const isCurrentTeacher = teachers.includes(Number(currentTeacherId));
-      
+      console.log("what"+isCurrentTeacher); // Debugging line
+      console.log("what"+ teachers); // Debugging line
         return {
           id: module.module_id,
           title: module.module_name,
@@ -90,7 +100,7 @@ export default function Calendar({ refetchTrigger, currentTeacherId }: CalendarP
     } finally {
       setLoading(false);
     }
-  }, [currentTeacherId]);
+  }, [currentTeacherId, courseTeacherMap]);
 
   const handleDatesSet = (dateInfo: { start: Date; end: Date }) => {
     const startStr = dateInfo.start.toISOString();
@@ -105,17 +115,20 @@ export default function Calendar({ refetchTrigger, currentTeacherId }: CalendarP
 
   // Fixed useEffect with proper dependencies
   useEffect(() => {
-    if (currentStart && currentEnd) {
+    fetchCourseTeachers(); // Fetch course-teacher relationships on mount
+    if (currentStart && currentEnd && fetched) {
       fetchModules(currentStart, currentEnd);
     }
-  }, [refetchTrigger, currentStart, currentEnd, fetchModules]); // Add all used dependencies
+  }, [refetchTrigger, currentStart, currentEnd, fetchModules, fetched]); // Add all used dependencies
 
   return (
     <div className="p-4 dark:bg-gray-800 min-h-screen">
-      {loading && <div className="text-center py-4 text-gray-600 dark:text-gray-400">Loading...</div>}
-      {error && <div className="text-center py-4 text-red-500">{error}</div>}
-      
-      <FullCalendar
+      {isLoading ? (
+        <div className="flex justify-center items-center h-96">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        </div>
+      ) : (
+        <FullCalendar
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
         initialView="timeGridWeek"
         headerToolbar={{
@@ -163,6 +176,8 @@ export default function Calendar({ refetchTrigger, currentTeacherId }: CalendarP
           info.el.classList.add('dark:bg-gray-700', 'dark:border-gray-600');
         }}
       />
+      )}
+      {error && <div className="text-center py-4 text-red-500">{error}</div>}
     </div>
   );
 }
