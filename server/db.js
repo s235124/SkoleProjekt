@@ -3,7 +3,7 @@ const mysql = require('mysql2');
 
 const db = mysql.createPool({
     connectionLimit: 10,
-    host: '172.20.9.67',
+    host: '172.20.6.96',
     user: 'v',
     password: 'v',
     database: 'skole', // HAS TO EXIST IN YOUR MYSQL SERVER

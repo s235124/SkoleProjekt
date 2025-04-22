@@ -31,7 +31,7 @@ export default function Students() {
 
   const filteredTeachers = users
     .filter(user => 
-      user.role === 2 &&
+      user.role === 1 &&
       (user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
        `${user.firstName} ${user.lastName}`.toLowerCase().includes(searchQuery.toLowerCase()))
     );
@@ -42,7 +42,7 @@ export default function Students() {
         {/* Header */}
         <div className="p-6 border-b border-gray-200">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <h1 className="text-2xl font-bold text-gray-900">Teacher Directory</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Students</h1>
             <div className="w-full md:max-w-xs">
               <div className="relative">
                 <input

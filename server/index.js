@@ -213,7 +213,7 @@ app.post('/createcourse', (req, res) => {
 // Course Creation API for Teachers
 app.post('/createcourseasteacher/:teacher_id', (req, res) => {
   const { course_name, course_description } = req.body;
-  const teacher_id = req.params.teacher_id;v
+  const teacher_id = req.params.teacher_id;
 
   // 1. Check for existing course in the teacher's school
   const checkQuery = `
