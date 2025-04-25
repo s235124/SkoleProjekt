@@ -471,7 +471,17 @@ app.get('/teacher/:id', (req, res) => {
     res.json(result[0]);
   });
 });
-
+app.get('/student/:id', (req, res) => {
+  const teacherId = req.params.id;
+  const query = 'SELECT * FROM skole.user WHERE user_id = ?';
+  
+  db.query(query, [teacherId], (err, result) => {
+    if (err) return res.status(500).json({ error: 'Database error' });
+    if (result.length === 0) return res.status(404).json({ error: 'Teacher not found' });
+    
+    res.json(result[0]);
+  });
+});
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: 'Internal server error' });
@@ -635,7 +645,29 @@ app.delete('/courses/:courseId/teachers/delete/:teacherId', (req, res) => {
   });
 });
 
-
+// Get courses for a specific student
+app.get('/students/:studentId/courses', async (req, res) => {
+  const query = `
+    SELECT 
+      c.course_id,
+      c.course_name,
+      c.course_description,
+      ce.enrollment_date
+    FROM courseEnrollments ce
+    JOIN courses c ON ce.course_id = c.course_id
+    WHERE ce.student_id = ?
+  `;
+  
+  const studentId = req.params.studentId;
+  
+  db.query(query, [studentId], (err, results) => {
+    if (err) {
+      console.error('Database error:', err);
+      return res.status(500).json({ error: 'Database error' });
+    }
+    res.json(results);
+  });
+});
 // Get enrolled students
 app.get('/courses/:courseId/students', async (req, res) => {
       const query =`

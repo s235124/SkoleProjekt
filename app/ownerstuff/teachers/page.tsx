@@ -1,77 +1,50 @@
 "use client"
 
 import axios from 'axios';
-import React from 'react'
-import { useState } from 'react';
-import { useEffect } from 'react';
-import { ScrollArea } from "@/components/ui/scroll-area"
-import FloatingLabelInput from '@/components/FloatingLabelInput';
-import { useRouter } from "next/navigation";
+import React, { useState, useEffect } from 'react';
+import { ScrollArea } from "@/components/ui/scroll-area";
+import router from 'next/router';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
-export default function Teachers () {
-  const router = useRouter();
+interface User {
+  user_id: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: number;
+}
+
+export default function Students() {
   const [users, setUsers] = useState<User[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const router = useRouter();
+  useEffect(() => {
+    axios.get<User[]>('http://localhost:3001/getAllUsers')
+      .then((response) => {
+        if (response.data.length > 0) {
+          setUsers(response.data);
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching users:', error);
+      });
+  }, []);
 
- useEffect(() => {
-    axios.get('http://localhost:3001/getAllUsers')
-    .then((response) => { if (response.data.length > 0) {
-        setUsers(response.data) }
-        else { console.log('No users found') }
-        
-    }).catch((error) => {
-        console.log(error)
-    })
-}, [])
-
-const listItems1 = users.filter(user => user.role === 2)
-listItems1.map((user) => console.log(user.user_id))
-const listItems = listItems1.map((user) => (
-  
-    <div key={user.id} className=' bg-white hover:bg-slate-400 transition-all' onClick={() => router.push(`/ownerstuff/teachers/specificteacher/${user.user_id}`)}>
-      <div className='w-5/5 m-auto h-16 flex flex-row border-black border-b-[1px]'>
-        <div className="basis-64"><div className='rounded-3xl bg-violet-400 h-full w-1/3'></div></div>
-        <div className="basis-128">{user.email}</div>
-      </div>
-      <div className='w-5/5 flex flex-row'></div>
-    </div>
-  
-));
-
+  const filteredTeachers = users
+    .filter(user => 
+      user.role === 2 &&
+      (user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+       `${user.firstName} ${user.lastName}`.toLowerCase().includes(searchQuery.toLowerCase()))
+    );
 
   return (
-    <div className="w-full h-full justify-center bg-slate-600 overflow-hidden">
-            <div className='w-4/5  h-4 flex flex-row'>
-            </div>
-
-      <div className='h-full w-11/12 bg-white m-auto rounded-xl'>
-
-        <div className='w-full m-auto h-48 flex flex-row border-black border-b-[1px] justify-center items-center'>
-          <div className="basis-3/6 bg-white font-bold text-4xl px-1">All Teachers Info</div>
-          <div className="basis-1/3"></div>
-          <div className="basis-1/6 right-5 px-1">
-            <div className="w-full max-w-sm min-w-[200px]">
-              <div className="relative">
-                <input
-                  className="w-full bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md pl-3 pr-28 py-2 transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow"
-                  placeholder="Search"
-                />
-                <button
-                  className="absolute top-1 right-1 flex items-center rounded bg-slate-800 py-1 px-2.5 border border-transparent text-center text-sm text-white transition-all shadow-sm hover:shadow focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-                  type="button"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 mr-2">
-                    <path fill-rule="evenodd" d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z" clip-rule="evenodd" />
-                  </svg>
-
-                  Search
-                </button>
-              </div>
-            </div>
-          </div>
-          <div className='basis-1/6 bg-violet-200"'>
-
-            <Link href="/ownerstuff/adduser">
+    <div className="min-h-screen bg-gray-50 p-8">
+      <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-sm overflow-hidden">
+        {/* Header */}
+        <div className="p-6 border-b border-gray-200">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <Link href="/ownerstuff/adduser">
               <button
                 className="top-1 flex items-center rounded bg-slate-800 py-1 px-2.5 border border-transparent text-center text-sm text-white transition-all shadow-sm hover:shadow focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
                 type="button"
@@ -79,33 +52,76 @@ const listItems = listItems1.map((user) => (
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 mr-2">
                   <path fillRule="evenodd" d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z" clipRule="evenodd" />
                 </svg>
-                Add Teacher
+                Add teacher
               </button>
             </Link>
-
+            <h1 className="text-2xl font-bold text-gray-900">Teachers</h1>
+            <div className="w-full md:max-w-xs">
+              <div className="relative">
+                <input
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full px-4 py-2 pl-10 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="Search teachers..."
+                />
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg 
+                    className="h-5 w-5 text-gray-400" 
+                    fill="currentColor" 
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-      <div className='w-4/5 m-auto bg-white h-8 flex flex-row border-black border-b-[1px]'>
-        <div className="basis-64 bg-white font-bold">Info</div>
-        <div className="basis-48 text-slate-800 font-bold">Email</div>
-        <div className="basis-48 text-slate-800 font-bold">First Name</div>
-        <div className="basis-48 text-slate-800 font-bold">Last Name</div>
-        <div className="basis-48 text-slate-800 font-bold">Phone</div>
+        {/* Content */}
+        <ScrollArea className="h-[600px]">
+          <div className="divide-y divide-gray-200">
+            {filteredTeachers.length > 0 ? (
+              filteredTeachers.map((user) => (
+                <div 
+                  key={user.id} 
+                  className="group p-4 hover:bg-gray-50 transition-colors cursor-pointer"
+                  onClick={() => router.push(`/ownerstuff/teachers/specificteacher/${user.user_id}`)}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="flex-shrink-0">
+                      <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
+                        <span className="text-indigo-600 font-medium">
+                          {user.firstName?.[0]}{user.lastName?.[0]}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {user.firstName} {user.lastName}
+                      </p>
+                      <p className="text-sm text-gray-500 truncate">{user.email}</p>
+                    </div>
+                    <div className="hidden md:flex items-center gap-2 text-sm text-gray-500">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        Student
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="p-6 text-center text-gray-500">
+                {users.length === 0 ? 'Loading...' : 'No teachers found'}
+              </div>
+            )}
+          </div>
+        </ScrollArea>
       </div>
-      <ScrollArea className="m-auto w-4/5 h-3/5 flex flex-row border-black border-b-[2px]">
-
-      {listItems}
-      {listItems}
-      {listItems}
-      {listItems}
-      {listItems}
-      {listItems}
-      {listItems}
-      {listItems}
-      {listItems}
-      </ScrollArea>
-      </div>  
     </div>
-  )
+  );
 }
