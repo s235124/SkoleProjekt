@@ -142,15 +142,6 @@ export default function CoursePage() {
                                             <p className='text-sm text-gray-600'>{teacher.email}</p>
                                         </div>
                                     </div>
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleRemoveTeacher(teacher.user_id);
-                                        }}
-                                        className="ml-4 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
-                                    >
-                                        Remove
-                                    </button>
                                 </div>
                             ))}
                             <div className="w-full flex items-center my-4">

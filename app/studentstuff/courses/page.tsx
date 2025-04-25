@@ -43,7 +43,7 @@ export default function Coursesview() {
       console.error('User not found');
       return;
     }
-    axios.get(`http://localhost:3001/teacher/courses/${data.id}`)
+    axios.get(`http://localhost:3001/students/${data.id}/courses`)
     .then((response) => { if (response.data.length > 0) {
         setCourses(response.data) }
         else { console.log('No courses found') }
@@ -59,7 +59,7 @@ export default function Coursesview() {
    <Card 
      key={course.course_id}
      className="hover:shadow-lg transition-all cursor-pointer"
-     onClick={() => router.push(`/teacherstuff/courses/specificcourse/${course.course_id}`)}
+     onClick={() => router.push(`/studentstuff/courses/specificcourse/${course.course_id}`)}
    >
      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
        <CardTitle className="text-sm font-medium">{course.course_name}</CardTitle>

@@ -645,7 +645,7 @@ app.delete('/courses/:courseId/teachers/delete/:teacherId', (req, res) => {
   });
 });
 
-// Get courses for a specific student
+// Get courses for a specific student deepseek made this
 app.get('/students/:studentId/courses', async (req, res) => {
   const query = `
     SELECT 
