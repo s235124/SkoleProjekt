@@ -172,11 +172,6 @@ export default function CoursePage() {
                 onOpenChange={setDeleteDialogOpen}
                 onConfirm={handleUnenrollStudent}
             />
-            <TeacherAssignmentModal
-                courseId={params.id}
-                open={assignmentOpen}
-                onOpenChange={setAssignmentOpen}
-            />
         </>
     )
 }

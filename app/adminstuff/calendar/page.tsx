@@ -109,6 +109,9 @@ function createIntervals(intervals) {
       console.log(error);
     });
   }
+  if(selectedSchoolId == null) {
+    return <div>Please select a school.</div>;
+  }
 
   const updateHours = (date) => {
     if (!date) {
@@ -186,12 +189,7 @@ function createIntervals(intervals) {
       alert('Error creating module');
     }
   };
-  if (!selectedSchoolId) {
-    return <div>Please select a school.</div>;
-  }
-  if(selectedSchoolId == null) {
-    return <div>Please select a school.</div>;
-  }
+  
 
   return (
   <>

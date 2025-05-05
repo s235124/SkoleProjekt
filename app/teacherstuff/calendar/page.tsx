@@ -311,6 +311,7 @@ export default function CreateModulePage() {
     <Calendar 
       refetchTrigger={formData.date} 
       currentTeacherId={user.id}
+      schoolId={user.school_id}
     />
   )}
 </div>
