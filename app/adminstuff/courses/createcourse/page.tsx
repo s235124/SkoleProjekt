@@ -3,21 +3,26 @@ import axios from 'axios';
 import Link from 'next/link';
 import React from 'react'
 import { useState } from 'react';
-
+import { useSelectedSchool } from '../../selectedSchoolContext'  // ← two dots, one for createcourses → courses, second for courses → adminstuff
 
 export default function CreateCourseForm() {
+
+    const { selectedSchoolId } = useSelectedSchool();
   const [formData, setFormData] = useState({
     course_name: '',
     course_description: '',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
+    if (selectedSchoolId == null) return;
     console.log('Form data:', formData);
     e.preventDefault();
     try {
       const response = await fetch('http://localhost:3001/createcourse', {
+        credentials: 'include',
         method: 'POST',
         headers: {
+          'schoolid': selectedSchoolId.toString(),
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
@@ -84,21 +89,19 @@ export default function CreateCourseForm() {
             Create Course
           </button>
         </form>
-        <div className='h-10 w-1'></div>
-        <Link href="/ownerstuff/courses">
-              <button
-                className="top-1 w-full flex items-center rounded bg-slate-800 py-2 px-2.5 border border-transparent text-center text-sm text-white transition-all shadow-sm hover:shadow focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-                type="button"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 mr-2">
-                  <path fillRule="evenodd" d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z" clipRule="evenodd" />
-                </svg>
-                View courses
-              </button>
-            </Link>
+          <div className='h-10 w-1'></div>
+          <Link href="/adminstuff/courses">
+            <button
+              className="top-1 w-full flex items-center rounded bg-slate-800 py-2 px-2.5 border border-transparent text-center text-sm text-white transition-all shadow-sm hover:shadow focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+              type="button"
+            >
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" className="w-4 h-4 mr-2"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path stroke="#FFFFFF" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m5 12 6-6m-6 6 6 6m-6-6h14"></path></g></svg>
+              View courses
+            </button>
+          </Link>
+        </div>
+
       </div>
-          
-    </div>
 
     </>
   );

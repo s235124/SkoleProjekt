@@ -4,14 +4,18 @@ import { Button } from '@/components/ui/button';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 
-export default function TeacherAssignmentModal({ courseId, open, onOpenChange }) {
+export default function TeacherAssignmentModalAdmin({ courseId, open, onOpenChange,schoolId }) {
     const [teachers, setTeachers] = useState([]);
     const [selectedTeacher, setSelectedTeacher] = useState('');
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         if (open && courseId) {
-            axios.get(`http://localhost:3001/courses/${courseId}/available-teachers`)
+            axios.get(`http://localhost:3001/courses/${courseId}/available-teachers`, {
+                headers: {
+                  'schoolid': schoolId.toString(),
+                }
+              })
                 .then(response => setTeachers(response.data))
                 .catch(console.error);
         }

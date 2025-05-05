@@ -842,17 +842,40 @@ app.get('/courses/:courseId/teachers', (req, res) => {
 
 // Get available teachers for a course
 app.get('/courses/:courseId/available-teachers', (req, res) => {
+  const token = req.cookies.token;
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.clearCookie('token').status(401).json({ error: 'Invalid token' });
+    }
+    req.user = decoded;
+    console.log("decoded token in modules" + req.user.role + " " + req.user.school_id);
+  });
+  
+  let schoolId = req.get('schoolid');
+
+  // 2) If no header, try the logged‑in user
+  if (!schoolId && req.user) {
+    schoolId = String(req.user.school_id);
+  }
+
+  // 3) If still missing, error out
+  if (!schoolId) {
+    return res.status(400).json({ error: 'Missing schoolid header and no authenticated user' });
+  }
+  console.log(schoolId + " school id in get available teachers for a course");
   const courseId = req.params.courseId;
   // remember to add school id to the query later
   const query = `
-      SELECT u.user_id, u.first_name, u.last_name, u.email 
-      FROM user u
-      WHERE u.user_id NOT IN (
-          SELECT teacher_id FROM teaches WHERE course_id = ?
-      )
-  `;
+SELECT u.user_id, u.first_name, u.last_name, u.email
+FROM user u
+WHERE u.school_id = ?
+  AND u.role = 2
+  AND u.user_id NOT IN (
+      SELECT t.teacher_id FROM teaches t WHERE t.course_id = ?
+  );
 
-  db.query(query, [courseId, courseId], (err, results) => {
+`;
+  db.query(query, [schoolId, courseId], (err, results) => {
       if (err) {
           console.error('Database error:', err);
           return res.status(500).json({ error: 'Database error' });
@@ -1030,17 +1053,38 @@ app.get('/courses/:courseId/students', async (req, res) => {
 
 // Get available students for enrollment
 app.get('/courses/:courseId/available-students', async (req, res) => {
+  const token = req.cookies.token;
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.clearCookie('token').status(401).json({ error: 'Invalid token' });
+    }
+    req.user = decoded;
+    console.log("decoded token in modules" + req.user.role + " " + req.user.school_id);
+  });
+  
+  let schoolId = req.get('schoolid');
 
+  // 2) If no header, try the logged‑in user
+  if (!schoolId && req.user) {
+    schoolId = String(req.user.school_id);
+  }
+
+  // 3) If still missing, error out
+  if (!schoolId) {
+    return res.status(400).json({ error: 'Missing schoolid header and no authenticated user' });
+  }
+  console.log(schoolId + " school id in get available teachers for a course");
       const query = `
           SELECT u.user_id, u.first_name, u.last_name, u.email 
           FROM user u
-          WHERE u.role = 1 
+          WHERE u.school_id = ?
+          AND u.role = 1
           AND u.user_id NOT IN (
               SELECT student_id FROM courseEnrollments WHERE course_id = ?
           )`;
       const courseId = req.params.courseId;
       // remember to add school id to the query later
-          db.query(query, [courseId, courseId], (err, results) => {
+          db.query(query, [schoolId, courseId], (err, results) => {
             if (err) {
                 console.error('Database error:', err);
                 return res.status(500).json({ error: 'Database error' });

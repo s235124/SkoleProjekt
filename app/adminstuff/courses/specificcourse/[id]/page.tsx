@@ -13,6 +13,8 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import StudentEnrollmentModal from '@/components/studentAssign';
+import { useSelectedSchool } from '../../../selectedSchoolContext';
+import TeacherAssignmentModalAdmin from '@/components/teacherAssignAdmin';
 export default function CoursePage() {
     const router = useRouter()
     const params = useParams()
@@ -20,6 +22,7 @@ export default function CoursePage() {
     const [course, setCourse] = useState()
     const [students, setStudents] = useState([])
     const [teachers, setTeachers] = useState([])
+      const { selectedSchoolId } = useSelectedSchool();
     const [assignmentOpen, setAssignmentOpen] = useState(false);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     useEffect(() => {
@@ -244,10 +247,11 @@ export default function CoursePage() {
                 onOpenChange={setDeleteDialogOpen}
                 onConfirm={handleDeleteCourse}
             />
-            <TeacherAssignmentModal
+            <TeacherAssignmentModalAdmin
                 courseId={params.id}
                 open={assignmentOpen}
                 onOpenChange={setAssignmentOpen}
+                schoolId={selectedSchoolId}
             />
             <StudentEnrollmentModal
                 courseId={params.id}
