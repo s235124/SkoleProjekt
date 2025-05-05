@@ -1,6 +1,6 @@
 "use client"
 import SchoolSelector from '@/components/SchoolSelector';
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, use } from 'react'
 import { CalendarDays, Users, GraduationCap, ClipboardCheck, Car, Star } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation'
 import { createContext } from 'react';
 import { useSelectedSchool } from './selectedSchoolContext';
 import { SelectedSchoolContext } from './selectedSchoolContext';
+import { get } from 'http';
 // Mock data (replace with actual data fetching in a real application)
 const mockData = {
   totalInstructors: 10,
@@ -18,28 +19,37 @@ const mockData = {
   completedLessons: 30,
   averageRating: 4.5
 }
-
+interface School {
+  school_id: number;
+  school_name: string;
+}
 
 export default function AdminDashboard() {
   const { selectedSchoolId, setSelectedSchoolId } = useSelectedSchool();
+  const [schools, setSchools] = useState<School[]>([]);
+  const [email, setEmail] = useState('');
   //const [activeView, setActiveView] = useState<'calendar' | 'students' | 'courses'>('calendar');
   const router = useRouter();
-
-  // Mock data - replace with actual API call
-  const schools = [
-    { id: 1, name: 'Green Valley High' },
-    { id: 2, name: 'Sunrise Academy' },
-    { id: 3, name: 'Tech Prep Institute' }
-  ];
+  const getSchools = () => {
+    axios.get('http://localhost:3001/getSchools')
+     .then((response) => { if (response.data.length > 0) {
+         setSchools(response.data) }
+         else { console.log('No users found') }
+         
+     }).catch((error) => {
+         console.log(error)
+     })
+  }
   console.log('Selected School ID:', selectedSchoolId);
   const handleSchoolSelect = (schoolId: number) => {
     setSelectedSchoolId(Number(schoolId));
     console.log('Selected School ID:', selectedSchoolId);
     // Optionally fetch additional school details here
   };
-const [email, setEmail] = useState('');
+
 
 useEffect(() => {
+    getSchools();
   getUser();
 }, [])
 

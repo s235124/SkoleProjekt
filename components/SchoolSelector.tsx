@@ -3,15 +3,15 @@
 "use client";
 import { useState } from 'react';
 import { useSelectedSchool } from '@/app/adminstuff/selectedSchoolContext';
-interface School {
-  id: number;
-  name: string;
-}
+
 
 
 export default function SchoolSelector({ schools, onSelect, selectedSchoolId }) {
   const { setSelectedSchoolId } = useSelectedSchool();
-
+  interface School {
+    school_id: number;
+    school_name: string;
+  }
   const handleSelect = (schoolId: number) => {
     setSelectedSchoolId(schoolId);
     onSelect(schoolId);
@@ -20,19 +20,19 @@ export default function SchoolSelector({ schools, onSelect, selectedSchoolId }) 
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">Select School</h3>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {schools.map((school) => (
+        {schools.map((School) => (
           <button
-            key={school.id}
-            onClick={() => handleSelect(school.id)}
+            key={School.school_id}
+            onClick={() => handleSelect(School.school_id)}
             className={`p-4 rounded-lg border-2 transition-all ${
-              selectedSchoolId === school.id
+              selectedSchoolId === School.school_id
                 ? 'border-blue-500 bg-blue-50'
                 : 'border-gray-200 hover:border-blue-300'
             }`}
           >
             <div className="text-left">
-              <p className="font-medium">{school.name}</p>
-              <p className="text-sm text-gray-500">ID: {school.id}</p>
+              <p className="font-medium">{School.school_name}</p>
+              <p className="text-sm text-gray-500">ID: {School.school_id}</p>
             </div>
           </button>
         ))}

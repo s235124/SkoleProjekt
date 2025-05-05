@@ -507,6 +507,19 @@ app.get('/getCourses', (req, res) => {
 });
 
 
+app.get('/getSchools', (req, res) => {
+
+  const query = 'SELECT * FROM schools';
+
+  db.query(query,  (err, result) => {
+      if (err) {
+        console.log(err +" error in getSchools");
+      }
+      console.log(result)
+      res.send(result);
+  });
+});
+
 
 
 // Backend API Endpoint (server.js)
@@ -693,13 +706,29 @@ app.listen(3001, () => {
 
 
 app.get('/getAllUsers', (req, res) => {
-    const email = req.body.email;
-    const password = req.body.password;
+  const token = req.cookies.token;
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.clearCookie('token').status(401).json({ error: 'Invalid token' });
+    }
+    req.user = decoded;
+    console.log("decoded token in modules" + req.user.role + " " + req.user.school_id);
+  });
+  
+  let schoolId = req.get('schoolid');
 
-    const role = 1;
-    const query2 = 'SELECT email,role,user_id FROM user';
+  // 2) If no header, try the logged‑in user
+  if (!schoolId && req.user) {
+    schoolId = String(req.user.school_id);
+  }
 
-    db.query(query2, (err, result) => {
+  // 3) If still missing, error out
+  if (!schoolId) {
+    return res.status(400).json({ error: 'Missing schoolid header and no authenticated user' });
+  }
+    const query2 = 'SELECT email,role,user_id,school_id FROM user WHERE school_id = ?';
+
+    db.query(query2,[schoolId], (err, result) => {
         if (err) {
             throw err;
         }
