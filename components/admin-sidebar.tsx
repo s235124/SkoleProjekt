@@ -38,6 +38,11 @@ const items = [
     url: "/adminstuff/courses",
     icon: Settings,
   },
+  {
+    title: "School",
+    url: "/adminstuff/schools",
+    icon: Home,
+  },
 ]
 
 export function AppSidebar() {

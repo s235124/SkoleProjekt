@@ -130,6 +130,67 @@ app.post('/adduser', (req, res) => {
   }
 });
 
+
+
+
+app.post('/addschool', (req, res) => {
+  const token = req.cookies.token;
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.clearCookie('token').status(401).json({ error: 'Invalid token' });
+    }
+    req.user = decoded;
+    console.log("decoded token in adduser" + req.user.role + " " + req.user.name);
+  });
+  //if school owner or admin or teacher
+  if (req.user.role == 4) {
+
+    const {school_name} = req.body;
+
+    const insertQuery = `
+    INSERT INTO schools 
+      (school_name) 
+    VALUES (?)
+  `;
+    const checkSchoolQuery = 'SELECT * FROM schools WHERE school_name = ?';
+
+    // Check if user already exists
+    db.query(checkSchoolQuery, [school_name], (err, result) => {
+      if (err) {
+        console.error('Database error:', err);
+        return res.status(500).json({ message: 'Database error' });
+      }
+
+      if (result.length > 0) {
+        return res.status(409).json({ message: 'User already exists' });
+      }
+
+      db.query(
+        insertQuery,
+        [school_name],
+        (err, result) => {
+          if (err) {
+            console.error('Error creating school:', err);
+            return res.status(500).json({ message: 'Error creating user' });
+          }
+          res.status(201).json({ message: 'School created successfully' });
+        }
+      );
+    });
+  } else {
+    console.log("decoded token in adduser" + req.user.role + " " + req.user.name);
+    return res.status(403).json({ error: 'Forbidden you are not an admin' });
+  }
+});
+
+
+
+
+
+
+
+
+
 const jwt = require('jsonwebtoken');
 const { start } = require('repl');
 const { decode } = require('punycode');
@@ -532,6 +593,26 @@ app.get('/getAllUsers', (req, res) => {
         res.send(result);
     });
 });
+
+app.get('/getSchools', (req, res) => {
+
+  const query2 = 'SELECT * FROM schools';
+
+  db.query(query2, (err, result) => {
+      if (err) {
+          throw err;
+      }
+      console.log(result)
+      res.send(result);
+  });
+});
+
+
+
+
+
+
+
 //deepseek made this
 app.get('/teacher/:id', (req, res) => {
   const teacherId = req.params.id;
