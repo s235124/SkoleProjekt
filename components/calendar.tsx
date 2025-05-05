@@ -22,6 +22,7 @@ interface ModuleEvent {
 interface CalendarProps {
   refetchTrigger?: string;
   currentTeacherId?: number;  // Add this
+  schoolId?: number; // Add this
 }
 
 interface user {
@@ -31,7 +32,7 @@ interface CourseTeachers {
   course_id: number;
   teachers: number[];
 }
-export default function Calendar({ refetchTrigger, currentTeacherId }: CalendarProps) {
+export default function Calendar({ refetchTrigger, currentTeacherId,schoolId }: CalendarProps) {
   const [events, setEvents] = useState<ModuleEvent[]>([]);
   const [currentStart, setCurrentStart] = useState('');
   const [currentEnd, setCurrentEnd] = useState('');
@@ -85,10 +86,13 @@ const getUser = () => {
       setLoading(true);
       setError('');
 
-      const response = await axios.get('http://localhost:3001/modules', {
+      const response = await axios.get('http://localhost:3001/modules', { 
         params: {
           start: start.split('T')[0],
           end: end.split('T')[0]
+        },
+        headers: {
+          'schoolid': schoolId.toString(),
         }
       });
       const formattedEvents = response.data.map((module: any) => {

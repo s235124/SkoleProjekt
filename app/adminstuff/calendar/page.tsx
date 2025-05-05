@@ -4,7 +4,9 @@ import axios from 'axios';
 import { responseCookiesToRequestCookies } from 'next/dist/server/web/spec-extension/adapters/request-cookies';
 import { threadId } from 'worker_threads';
 import Calendar from '@/components/calendar';
+import { useSelectedSchool } from '../selectedSchoolContext';
 export default function CreateModulePage() {
+  const { selectedSchoolId } = useSelectedSchool();
   const [formData, setFormData] = useState({
     date: '',
     timeslot: '',
@@ -95,6 +97,10 @@ function createIntervals(intervals) {
       method: 'get',
       withCredentials: true,
       url: `http://localhost:3001/getCourses`,
+      
+      headers: {
+        'schoolid': selectedSchoolId.toString(),
+      },
       timeout: 8000,
     }).then((response) => {
       console.log(response.data);
@@ -115,6 +121,9 @@ function createIntervals(intervals) {
       method: 'get',
       withCredentials: true,
       url: `http://localhost:3001/timeslots?date=${encodeURIComponent(date)}`,
+      headers: {
+        'schoolid': selectedSchoolId.toString(),
+      },
       timeout: 8000,
     }).then((response) => {
       console.log(response.data);
@@ -177,6 +186,12 @@ function createIntervals(intervals) {
       alert('Error creating module');
     }
   };
+  if (!selectedSchoolId) {
+    return <div>Please select a school.</div>;
+  }
+  if(selectedSchoolId == null) {
+    return <div>Please select a school.</div>;
+  }
 
   return (
   <>
@@ -288,7 +303,9 @@ function createIntervals(intervals) {
       
     </div>
     <div className='h-full'>
-    <Calendar refetchTrigger={formData.date}></Calendar>
+    <Calendar 
+    refetchTrigger={formData.date} 
+    schoolId ={selectedSchoolId}/>
     </div>
     </>
   );

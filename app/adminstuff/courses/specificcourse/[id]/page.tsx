@@ -15,6 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import StudentEnrollmentModal from '@/components/studentAssign';
 import { useSelectedSchool } from '../../../selectedSchoolContext';
 import TeacherAssignmentModalAdmin from '@/components/teacherAssignAdmin';
+import StudentEnrollmentModalAdmin from '@/components/studentAssignAdmin';
 export default function CoursePage() {
     const router = useRouter()
     const params = useParams()
@@ -253,11 +254,12 @@ export default function CoursePage() {
                 onOpenChange={setAssignmentOpen}
                 schoolId={selectedSchoolId}
             />
-            <StudentEnrollmentModal
+            <StudentEnrollmentModalAdmin
                 courseId={params.id}
                 open={enrollmentOpen}
                 onOpenChange={setEnrollmentOpen}
                 onEnroll={handleEnrollStudent}
+                schoolId={selectedSchoolId}
             />
         </>
     )
