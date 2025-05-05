@@ -1,10 +1,9 @@
 "use client";
 
 import React, { useState } from 'react';
-
+import { useSelectedSchool } from '../selectedSchoolContext';
 export default function AddStudent() {
   const [formData, setFormData] = useState({
-    school_id: '',
     password: '',
     email: '',
     phone_number: '',
@@ -12,14 +11,18 @@ export default function AddStudent() {
     last_name: '',
     role: '',
   });
-
+  const { selectedSchoolId } = useSelectedSchool();
+  console.log('Selected School ID:', selectedSchoolId);
   const handleSubmit = async (e: React.FormEvent) => {
+    if (selectedSchoolId == null) return;
     console.log('Form data:', formData);
     e.preventDefault();
     try {
       const response = await fetch('http://localhost:3001/adduser', {
+        credentials: 'include',
         method: 'POST',
         headers: {
+          'schoolid': selectedSchoolId.toString(),
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -35,7 +38,6 @@ export default function AddStudent() {
       alert('User created successfully!');
       // Reset form or redirect as needed
       setFormData({
-        school_id: '',
         password: '',
         email: '',
         phone_number: '',
@@ -57,19 +59,6 @@ export default function AddStudent() {
             Add New User
           </h2>
           <form onSubmit={handleSubmit}>
-            <label className="block mb-2 text-gray-700 dark:text-gray-200">
-              School id:
-            </label>
-            <input
-              type="number"
-              name="school_id"
-              value={formData.school_id}
-              onChange={(e) =>
-                setFormData({ ...formData, school_id: e.target.value })
-              }
-              className="border dark:border-gray-600 p-2 w-full mb-4 dark:bg-gray-700 dark:text-gray-100"
-              required
-            />
 
             <label className="block mb-2 text-gray-700 dark:text-gray-200">
               Password:

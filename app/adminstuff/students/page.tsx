@@ -61,7 +61,7 @@ export default function Students() {
       {/* Header */}
       <div className="p-6 border-b border-gray-200">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <Link href="/ownerstuff/adduser">
+          <Link href="/adminstuff/adduser">
             <button
               className="flex items-center rounded bg-slate-800 py-1 px-2.5 text-sm text-white hover:bg-slate-700 transition"
             >
