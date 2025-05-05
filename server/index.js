@@ -77,46 +77,62 @@ app.post('/signup', (req, res) => {
 
 
 app.post('/adduser', (req, res) => {
-  const { email, password, phone_number, first_name, last_name, role: roleStr } = req.body;
-  const school_id = 1; // Hardcoded school_id as per instruction
-  const role = parseInt(roleStr, 10); // Convert role to integer
+  const token = req.cookies.token;
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.clearCookie('token').status(401).json({ error: 'Invalid token' });
+    }
+    req.user = decoded;
+    console.log("decoded token in adduser" + req.user.role + " " + req.user.name);
+  });
+  //if school owner or admin or teacher
+  if (req.user.role == 3 || req.user.role == 2 || req.user.role == 4) {
 
-  const insertQuery = `
+    const { email, password, phone_number, first_name, last_name, role: roleStr } = req.body;
+    const school_id = 1; // Hardcoded school_id as per instruction
+    const role = parseInt(roleStr, 10); // Convert role to integer
+
+    const insertQuery = `
     INSERT INTO user 
       (password, email, phone_number, first_name, last_name, role) 
     VALUES (?, ?, ?, ?, ?, ?)
   `;
-  const checkUserQuery = 'SELECT * FROM user WHERE email = ?';
+    const checkUserQuery = 'SELECT * FROM user WHERE email = ?';
 
-  // Check if user already exists
-  db.query(checkUserQuery, [email], (err, result) => {
-    if (err) {
-      console.error('Database error:', err);
-      return res.status(500).json({ message: 'Database error' });
-    }
-    
-    if (result.length > 0) {
-      return res.status(409).json({ message: 'User already exists' });
-    }
-
-    // Hash password and create user
-    const hashedPassword = bcrypt.hashSync(password, 10);
-    db.query(
-      insertQuery,
-      [hashedPassword, email, phone_number, first_name, last_name, role],
-      (err, result) => {
-        if (err) {
-          console.error('Error creating user:', err);
-          return res.status(500).json({ message: 'Error creating user' });
-        }
-        res.status(201).json({ message: 'User created successfully' });
+    // Check if user already exists
+    db.query(checkUserQuery, [email], (err, result) => {
+      if (err) {
+        console.error('Database error:', err);
+        return res.status(500).json({ message: 'Database error' });
       }
-    );
-  });
+
+      if (result.length > 0) {
+        return res.status(409).json({ message: 'User already exists' });
+      }
+
+      // Hash password and create user
+      const hashedPassword = bcrypt.hashSync(password, 10);
+      db.query(
+        insertQuery,
+        [hashedPassword, email, phone_number, first_name, last_name, role],
+        (err, result) => {
+          if (err) {
+            console.error('Error creating user:', err);
+            return res.status(500).json({ message: 'Error creating user' });
+          }
+          res.status(201).json({ message: 'User created successfully' });
+        }
+      );
+    });
+  } else {
+    console.log("decoded token in adduser" + req.user.role + " " + req.user.name);
+    return res.status(403).json({ error: 'Forbidden you are not an owner' });
+  }
 });
 
 const jwt = require('jsonwebtoken');
 const { start } = require('repl');
+const { decode } = require('punycode');
 
 app.post('/login', (req, res, next) => {
   passport.authenticate('local', (err, user, info) => {
@@ -174,6 +190,16 @@ app.get('/timeslots', (req, res) => {
 
 // Course Creation API
 app.post('/createcourse', (req, res) => {
+  const token = req.cookies.token;
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.clearCookie('token').status(401).json({ error: 'Invalid token' });
+    }
+    req.user = decoded;
+    console.log("decoded token in adduser" + req.user.role + " " + req.user.name);
+  });
+  //if school owner or admin or teacher
+  if (req.user.role == 3 || req.user.role == 2 || req.user.role == 4) {
   const { course_name, course_description } = req.body;
   
   const checkCourseQuery = 'SELECT * FROM courses WHERE course_name = ?';
@@ -207,11 +233,24 @@ app.post('/createcourse', (req, res) => {
         });
       }
     );
-  });
+  });} else {
+    console.log("decoded token in adduser" + req.user.role + " " + req.user.name);
+    return res.status(403).json({ error: 'Forbidden you are not an owner' });
+  }
 });
 
 // Course Creation API for Teachers
 app.post('/createcourseasteacher/:teacher_id', (req, res) => {
+  const token = req.cookies.token;
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.clearCookie('token').status(401).json({ error: 'Invalid token' });
+    }
+    req.user = decoded;
+    console.log("decoded token in adduser" + req.user.role + " " + req.user.name);
+  });
+  //if school owner or admin or teacher
+  if (req.user.role == 3 || req.user.role == 2 || req.user.role == 4) {
   const { course_name, course_description } = req.body;
   const teacher_id = req.params.teacher_id;
 
@@ -269,6 +308,11 @@ app.post('/createcourseasteacher/:teacher_id', (req, res) => {
           });
       });
   });
+  }
+  else {
+    console.log("decoded token in adduser" + req.user.role + " " + req.user.name);
+    return res.status(403).json({ error: 'Forbidden you are not an owner' });
+  }
 });
 
 
@@ -351,6 +395,16 @@ app.get('/modules', (req, res) => {
 });
 
 app.post('/createModule', (req, res) => {
+  const token = req.cookies.token;
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.clearCookie('token').status(401).json({ error: 'Invalid token' });
+    }
+    req.user = decoded;
+    console.log("decoded token in adduser" + req.user.role + " " + req.user.name);
+  });
+  //if school owner or admin or teacher
+  if (req.user.role == 3 || req.user.role == 2 || req.user.role == 4) {
   const { course_id, module_start_time, module_end_time, module_date } = req.body;
 
   // First get the course name
@@ -396,8 +450,22 @@ app.post('/createModule', (req, res) => {
       }
     );
   });
+  } else {
+    console.log("decoded token in adduser" + req.user.role + " " + req.user.name);
+    return res.status(403).json({ error: 'Forbidden you are not an owner' });
+  }
 });
 app.delete('/deletemodule/:id', (req, res) => {
+  const token = req.cookies.token;
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.clearCookie('token').status(401).json({ error: 'Invalid token' });
+    }
+    req.user = decoded;
+    console.log("decoded token in adduser" + req.user.role + " " + req.user.name);
+  });
+  //if school owner or admin or teacher
+  if (req.user.role == 3 || req.user.role == 2 || req.user.role == 4) {
   const moduleId = req.params.id;
   const deleteQuery = `
     DELETE FROM modules 
@@ -426,6 +494,11 @@ app.delete('/deletemodule/:id', (req, res) => {
       deletedId: moduleId
     });
   });
+  }
+  else {
+    console.log("decoded token in adduser" + req.user.role + " " + req.user.name);
+    return res.status(403).json({ error: 'Forbidden you are not an owner' });
+  }
 });
 
 const authenticateUser = passport.authenticate('jwt', { session: false });
@@ -566,6 +639,16 @@ app.get('/courses/:courseId/available-teachers', (req, res) => {
 
 // Assign teacher to course
 app.post('/courses/:courseId/assign-teacher', (req, res) => {
+  const token = req.cookies.token;
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.clearCookie('token').status(401).json({ error: 'Invalid token' });
+    }
+    req.user = decoded;
+    console.log("decoded token in adduser" + req.user.role + " " + req.user.name);
+  });
+  //if school owner or admin or teacher
+  if (req.user.role == 3 || req.user.role == 2 || req.user.role == 4) {
   const courseId = req.params.courseId;
   const { teacherId } = req.body;
 
@@ -594,8 +677,23 @@ app.post('/courses/:courseId/assign-teacher', (req, res) => {
           });
       }
   );
+  }
+  else {
+    console.log("decoded token in adduser" + req.user.role + " " + req.user.name);
+    return res.status(403).json({ error: 'Forbidden you are not an owner' });
+  }
 });
 app.delete('/courses/delete/:courseId', (req, res) => {
+  const token = req.cookies.token;
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.clearCookie('token').status(401).json({ error: 'Invalid token' });
+    }
+    req.user = decoded;
+    console.log("decoded token in adduser" + req.user.role + " " + req.user.name);
+  });
+  //if school owner or admin or teacher
+  if (req.user.role == 3 || req.user.role == 2 || req.user.role == 4) {
   const courseId = req.params.courseId;
   
   // First check if course exists
@@ -621,8 +719,23 @@ app.delete('/courses/delete/:courseId', (req, res) => {
           res.json({ success: true });
       });
   });
+  }
+  else {
+    console.log("decoded token in adduser" + req.user.role + " " + req.user.name);
+    return res.status(403).json({ error: 'Forbidden you are not an owner' });
+  }
 });
 app.delete('/courses/:courseId/teachers/delete/:teacherId', (req, res) => {
+  const token = req.cookies.token;
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.clearCookie('token').status(401).json({ error: 'Invalid token' });
+    }
+    req.user = decoded;
+    console.log("decoded token in adduser" + req.user.role + " " + req.user.name);
+  });
+  //if school owner or admin or teacher
+  if (req.user.role == 3 || req.user.role == 2 || req.user.role == 4) {
   const { courseId, teacherId } = req.params;
   
   const query = `
@@ -643,6 +756,11 @@ app.delete('/courses/:courseId/teachers/delete/:teacherId', (req, res) => {
 
     res.json({ success: true });
   });
+  }
+  else {
+    console.log("decoded token in adduser" + req.user.role + " " + req.user.name);
+    return res.status(403).json({ error: 'Forbidden you are not an owner' });
+  }
 });
 
 // Get courses for a specific student deepseek made this
@@ -709,6 +827,16 @@ app.get('/courses/:courseId/available-students', async (req, res) => {
 
 /// Enroll student
 app.post('/courses/:courseId/enroll', (req, res) => {
+  const token = req.cookies.token;
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.clearCookie('token').status(401).json({ error: 'Invalid token' });
+    }
+    req.user = decoded;
+    console.log("decoded token in adduser" + req.user.role + " " + req.user.name);
+  });
+  //if school owner or admin or teacher
+  if (req.user.role == 3 || req.user.role == 2 || req.user.role == 4 || req.user.role == 1) {
   const courseId = req.params.courseId;
   const { studentId } = req.body;
 
@@ -721,10 +849,17 @@ app.post('/courses/:courseId/enroll', (req, res) => {
       }
       res.status(201).json({ success: true });
   });
+  
+    }
+  else {
+    console.log("decoded token in adduser" + req.user.role + " " + req.user.first_name);
+    return res.status(403).json({ error: 'Forbidden you are not an owner' });
+  }
 });
 
 // Unenroll student
 app.delete('/courses/:courseId/students/delete/:studentId', (req, res) => {
+  
   const { courseId, studentId } = req.params;
   const query = 'DELETE FROM courseEnrollments WHERE course_id = ? AND student_id = ?';
   

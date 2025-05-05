@@ -6,7 +6,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import router from 'next/router';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useContext } from 'react';
 
+import { useSelectedSchool } from '../selectedSchoolContext'; // Fix import path
 interface User {
   user_id: number;
   firstName: string;
@@ -16,6 +18,8 @@ interface User {
 }
 
 export default function Students() {
+  const { selectedSchoolId } = useSelectedSchool();
+  console.log('Selected School ID:', selectedSchoolId);
   const [users, setUsers] = useState<User[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
@@ -33,7 +37,7 @@ export default function Students() {
 
   const filteredTeachers = users
     .filter(user => 
-      user.role === 2 &&
+      user.role === 1 &&
       (user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
        `${user.firstName} ${user.lastName}`.toLowerCase().includes(searchQuery.toLowerCase()))
     );
@@ -52,17 +56,17 @@ export default function Students() {
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 mr-2">
                   <path fillRule="evenodd" d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z" clipRule="evenodd" />
                 </svg>
-                Add teacher
+                Add student
               </button>
             </Link>
-            <h1 className="text-2xl font-bold text-gray-900">Teachers</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Students</h1>
             <div className="w-full md:max-w-xs">
               <div className="relative">
                 <input
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full px-4 py-2 pl-10 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="Search teachers..."
+                  placeholder="Search students..."
                 />
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <svg 
@@ -90,7 +94,7 @@ export default function Students() {
                 <div 
                   key={user.id} 
                   className="group p-4 hover:bg-gray-50 transition-colors cursor-pointer"
-                  onClick={() => router.push(`/ownerstuff/teachers/specificteacher/${user.user_id}`)}
+                  onClick={() => router.push(`/ownerstuff/students/specificstudent/${user.user_id}`)}
                 >
                   <div className="flex items-center gap-4">
                     <div className="flex-shrink-0">
@@ -108,7 +112,7 @@ export default function Students() {
                     </div>
                     <div className="hidden md:flex items-center gap-2 text-sm text-gray-500">
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        Teacher
+                        Student
                       </span>
                     </div>
                   </div>

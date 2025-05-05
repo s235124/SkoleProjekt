@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 import axios from 'axios';
 import jsonwebtoken from "jsonwebtoken";
 import { accessSync } from "node:fs";
-
+import { env } from '../env.mjs';
 
 
 export default function Home() {
@@ -17,7 +17,7 @@ export default function Home() {
   const [password, setPassword] = useState('');
 const [isMounted, setIsMounted] = useState(false)
 const router = useRouter()
-
+console.log("v"+env.NEXT_PUBLIC_API_BASE_URL)
   useEffect(() => {
     setIsMounted(true)
     setEmail("")
@@ -28,7 +28,8 @@ const router = useRouter()
   const login3 = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-    const res = await axios.post('http://localhost:3001/login', {
+    
+    const res = await axios.post(env.NEXT_PUBLIC_API_BASE_URL+'/login', {
       email: email,
       password: password
     });
