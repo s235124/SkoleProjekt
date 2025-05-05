@@ -10,18 +10,24 @@ import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Book } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-
+import { useSelectedSchool } from '../selectedSchoolContext';
 export default function Coursesview() {
   const [formData, setFormData] = useState({
     course_name: '',
     course_description: '',
   });
+  const { selectedSchoolId } = useSelectedSchool();
   const router = useRouter();
 
   const [courses, setCourses] = useState<Course[]>([]);
 
   useEffect(() => {
-     axios.get('http://localhost:3001/getCourses')
+    if (selectedSchoolId == null) return;
+     axios.get('http://localhost:3001/getCourses', {
+      headers: {
+        'schoolid': selectedSchoolId.toString(),
+      }
+    })
      .then((response) => { if (response.data.length > 0) {
          setCourses(response.data) }
          else { console.log('No users found') }
@@ -29,7 +35,7 @@ export default function Coursesview() {
      }).catch((error) => {
          console.log(error)
      })
- }, [])
+ }, [selectedSchoolId]);
  
  const listItems = <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
  {courses.map((course) => (

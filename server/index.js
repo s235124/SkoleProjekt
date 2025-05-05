@@ -404,9 +404,13 @@ app.get('/teaches', (req, res) => {
   
 
 app.get('/getCourses', (req, res) => {
-  const query = 'SELECT * FROM courses';
+  const schoolId = req.header('schoolid');
+  if (!schoolId) {
+    return res.status(400).json({ error: 'Missing schoolid header' });
+  }
+  const query = 'SELECT * FROM courses WHERE school_id = ?';
 
-  db.query(query, (err, result) => {
+  db.query(query, [schoolId],  (err, result) => {
       if (err) {
         console.log(err +" error in getCourses");
       }
