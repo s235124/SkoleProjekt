@@ -146,14 +146,11 @@ function createIntervals(intervals) {
     const free = freeTimeslots.find(f => hStart >= f.start && hStart < f.end);
     return free && hEnd > hStart && hEnd <= free.end;
   }) : [];
-
   useEffect(() => {
-    // Set date constraints
     const today = new Date();
     setMinDate(today.toISOString().split('T')[0]);
     setMaxDate(new Date(today.setFullYear(today.getFullYear() + 1)).toISOString().split('T')[0]);
-
-    // Fetch available timeslots and classes
+  
     getCourses();
   }, []);
 

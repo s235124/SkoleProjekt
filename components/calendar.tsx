@@ -6,6 +6,7 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
+import { number } from 'zod';
 
 interface ModuleEvent {
   id: number;
@@ -22,6 +23,10 @@ interface CalendarProps {
   refetchTrigger?: string;
   currentTeacherId?: number;  // Add this
 }
+
+interface user {
+role: number;
+}
 interface CourseTeachers {
   course_id: number;
   teachers: number[];
@@ -37,11 +42,28 @@ export default function Calendar({ refetchTrigger, currentTeacherId }: CalendarP
   const [fetched, setFetched] = useState(false); // User state
 // Add loading state
 const [isLoading, setIsLoading] = useState(true);
+const [user, setUser] = useState<user | null>(null);
+
+useEffect(() => {
+  getUser();
+}, [])
+
+const getUser = () => {
+
+    axios({
+        method: 'get',
+        withCredentials: true,
+        url: 'http://localhost:3001/getUser',
+        timeout: 8000,
+        }).then((response) => {
+          setUser(response.data.role);
+            console.log(response.data.role);
+        }).catch((error) => {
+            console.log(error);
+        });
+}
 
 // 1. Fetch teacher-course relationships with loading state
-useEffect(() => {
- 
-}, []);
    const fetchCourseTeachers = async () => {
     try {
       const response = await axios.get<CourseTeachers[]>('http://localhost:3001/teaches');
@@ -57,7 +79,6 @@ useEffect(() => {
       setIsLoading(false); // Update loading state when done
     }
   };
-  fetchCourseTeachers();
   
   const fetchModules = useCallback(async (start: string, end: string) => {
     try {
@@ -134,7 +155,7 @@ useEffect(() => {
     if (currentStart && currentEnd && fetched) {
       fetchModules(currentStart, currentEnd);
     }
-  }, [refetchTrigger, currentStart, currentEnd, fetchModules, fetched]); // Add all used dependencies
+  }, [refetchTrigger]); // Add all used dependencies
 
   return (
     <div className="p-4 dark:bg-gray-800 min-h-screen">
@@ -162,7 +183,7 @@ useEffect(() => {
         eventContent={(arg) => (
           <div className="flex justify-between items-center h-full p-1">
             <div className="flex-1 overflow-hidden">{arg.event.title}</div>
-            {arg.event.extendedProps.teacherId === currentTeacherId && (
+            {(arg.event.extendedProps.teacherId === currentTeacherId || user == 3|| user == 4) && (
             <button 
               className="ml-2 p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
               onClick={(e) => {

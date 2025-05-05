@@ -83,19 +83,31 @@ app.post('/adduser', (req, res) => {
       return res.clearCookie('token').status(401).json({ error: 'Invalid token' });
     }
     req.user = decoded;
-    console.log("decoded token in adduser" + req.user.role + " " + req.user.name);
+    console.log("decoded token in adduser" + req.user.role + " " + req.user.school_id);
   });
+  
+  let schoolId = req.get('schoolid');
+
+  // 2) If no header, try the logged‑in user
+  if (!schoolId && req.user) {
+    schoolId = String(req.user.school_id);
+  }
+
+  // 3) If still missing, error out
+  if (!schoolId) {
+    return res.status(400).json({ error: 'Missing schoolid header and no authenticated user' });
+  }
   //if school owner or admin or teacher
   if (req.user.role == 3 || req.user.role == 2 || req.user.role == 4) {
 
     const { email, password, phone_number, first_name, last_name, role: roleStr } = req.body;
-    const school_id = 1; // Hardcoded school_id as per instruction
+    const school_id = schoolId;
     const role = parseInt(roleStr, 10); // Convert role to integer
 
     const insertQuery = `
     INSERT INTO user 
-      (password, email, phone_number, first_name, last_name, role) 
-    VALUES (?, ?, ?, ?, ?, ?)
+      (password, email, phone_number, first_name, last_name, role,school_id) 
+    VALUES (?, ?, ?, ?, ?, ?, ?)
   `;
     const checkUserQuery = 'SELECT * FROM user WHERE email = ?';
 
@@ -114,7 +126,7 @@ app.post('/adduser', (req, res) => {
       const hashedPassword = bcrypt.hashSync(password, 10);
       db.query(
         insertQuery,
-        [hashedPassword, email, phone_number, first_name, last_name, role],
+        [hashedPassword, email, phone_number, first_name, last_name, role, school_id],
         (err, result) => {
           if (err) {
             console.error('Error creating user:', err);
@@ -207,7 +219,7 @@ app.post('/login', (req, res, next) => {
 
       // Generate JWT (no need for req.logIn)
       const token = jwt.sign(
-        { userId: user.user_id, role: user.role },
+        { userId: user.user_id, role: user.role, school_id: user.school_id },
         process.env.JWT_SECRET,
         { expiresIn: '1h' }
       );
@@ -222,9 +234,47 @@ app.post('/login', (req, res, next) => {
     }
   })(req, res, next);
 });
+app.post('/logout', (req, res) => {
+  // Clear the HTTP‐only cookie named “token”
+  // Note: you should match the same options you used when setting it
+  res.clearCookie('token', {
+    httpOnly: true,
+    secure: false,       // set to true if you’re on HTTPS
+    sameSite: 'lax',     // or 'strict' / 'none' per your original cookie policy
+    path: '/',           // must match the original path
+  });
 
+  // Optionally send a JSON response
+  res.status(200).json({ message: 'Logged out successfully' });
+});
 app.get('/timeslots', (req, res) => {
-  const query = 'SELECT module_start_time, module_end_time FROM modules WHERE module_date = ?';
+  const token = req.cookies.token;
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.clearCookie('token').status(401).json({ error: 'Invalid token' });
+    }
+    req.user = decoded;
+    console.log("decoded token in adduser" + req.user.role + " " + req.user.school_id);
+  });
+  
+  let schoolId = req.get('schoolid');
+
+  // 2) If no header, try the logged‑in user
+  if (!schoolId && req.user) {
+    schoolId = String(req.user.school_id);
+  }
+
+  // 3) If still missing, error out
+  if (!schoolId) {
+    return res.status(400).json({ error: 'Missing schoolid header and no authenticated user' });
+  }
+  const query = `
+  SELECT m.module_start_time, m.module_end_time
+  FROM modules m
+  JOIN courses c ON m.course_id = c.course_id
+  WHERE m.module_date = ? AND c.school_id = ?
+`;
+
 
   const date = req.query.date;
   if (!date) {
@@ -233,7 +283,7 @@ app.get('/timeslots', (req, res) => {
 
   console.log(date + " " + req.body)
 
-  db.query(query, [date], (err, results) => {
+  db.query(query, [date,schoolId], (err, results) => {
     if (err) {
       console.error(err);
       return res.status(500).json({ error: 'Internal server error' });
@@ -257,20 +307,32 @@ app.post('/createcourse', (req, res) => {
       return res.clearCookie('token').status(401).json({ error: 'Invalid token' });
     }
     req.user = decoded;
-    console.log("decoded token in adduser" + req.user.role + " " + req.user.name);
+    console.log("decoded token in adduser" + req.user.role + " " + req.user.school_id);
   });
+  
+  let schoolId = req.get('schoolid');
+
+  // 2) If no header, try the logged‑in user
+  if (!schoolId && req.user) {
+    schoolId = String(req.user.school_id);
+  }
+
+  // 3) If still missing, error out
+  if (!schoolId) {
+    return res.status(400).json({ error: 'Missing schoolid header and no authenticated user' });
+  }
   //if school owner or admin or teacher
   if (req.user.role == 3 || req.user.role == 2 || req.user.role == 4) {
   const { course_name, course_description } = req.body;
   
-  const checkCourseQuery = 'SELECT * FROM courses WHERE course_name = ?';
+  const checkCourseQuery = 'SELECT * FROM courses WHERE course_name = ? AND school_id = ?';
   const insertCourseQuery = `
     INSERT INTO courses 
-      (course_name, course_description) 
-    VALUES (?, ?)
+      (course_name, course_description,school_id) 
+    VALUES (?, ?, ?)
   `;
 
-  db.query(checkCourseQuery, [course_name], (err, result) => {
+  db.query(checkCourseQuery, [course_name,schoolId], (err, result) => {
     if (err) {
       console.error('Database error:', err);
       return res.status(500).json({ message: 'Database error' });
@@ -282,7 +344,7 @@ app.post('/createcourse', (req, res) => {
 
     db.query(
       insertCourseQuery,
-      [course_name, course_description],
+      [course_name, course_description, schoolId],
       (err, result) => {
         if (err) {
           console.error('Error creating course:', err);
@@ -308,20 +370,29 @@ app.post('/createcourseasteacher/:teacher_id', (req, res) => {
       return res.clearCookie('token').status(401).json({ error: 'Invalid token' });
     }
     req.user = decoded;
-    console.log("decoded token in adduser" + req.user.role + " " + req.user.name);
+    console.log("decoded token in adduser" + req.user.role + " " + req.user.school_id);
   });
+  
+  let schoolId = req.get('schoolid');
+
+  // 2) If no header, try the logged‑in user
+  if (!schoolId && req.user) {
+    schoolId = String(req.user.school_id);
+  }
+
+  // 3) If still missing, error out
+  if (!schoolId) {
+    return res.status(400).json({ error: 'Missing schoolid header and no authenticated user' });
+  }
   //if school owner or admin or teacher
   if (req.user.role == 3 || req.user.role == 2 || req.user.role == 4) {
   const { course_name, course_description } = req.body;
   const teacher_id = req.params.teacher_id;
 
   // 1. Check for existing course in the teacher's school
-  const checkQuery = `
-      SELECT * FROM courses 
-      WHERE course_name = ? 
-  `;
+  const checkCourseQuery = 'SELECT * FROM courses WHERE course_name = ? AND school_id = ?';
 
-  db.query(checkQuery, [course_name, teacher_id], (err, results) => {
+  db.query(checkCourseQuery, [course_name, teacher_id,schoolId], (err, results) => {
       if (err) {
           console.error('Check error:', err);
           return res.status(500).json({ error: 'Database error' });
@@ -334,11 +405,11 @@ app.post('/createcourseasteacher/:teacher_id', (req, res) => {
       // 2. Create the course
       const insertCourseQuery = `
           INSERT INTO courses 
-          (course_name, course_description) 
-          VALUES (?, ?)
+          (course_name, course_description, school_id) 
+          VALUES (?, ?, ?)
       `;
 
-      db.query(insertCourseQuery, [course_name, course_description, teacher_id], 
+      db.query(insertCourseQuery, [course_name, course_description, schoolId], 
       (err, courseResult) => {
           if (err) {
               console.error('Course creation error:', err);
@@ -404,9 +475,25 @@ app.get('/teaches', (req, res) => {
   
 
 app.get('/getCourses', (req, res) => {
-  const schoolId = req.header('schoolid');
+  const token = req.cookies.token;
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.clearCookie('token').status(401).json({ error: 'Invalid token' });
+    }
+    req.user = decoded;
+    console.log("decoded token in courses" + req.user.role + " " + req.user.school_id);
+  });
+  
+  let schoolId = req.get('schoolid');
+
+  // 2) If no header, try the logged‑in user
+  if (!schoolId && req.user) {
+    schoolId = String(req.user.school_id);
+  }
+
+  // 3) If still missing, error out
   if (!schoolId) {
-    return res.status(400).json({ error: 'Missing schoolid header' });
+    return res.status(400).json({ error: 'Missing schoolid header and no authenticated user' });
   }
   const query = 'SELECT * FROM courses WHERE school_id = ?';
 
@@ -424,21 +511,44 @@ app.get('/getCourses', (req, res) => {
 
 // Backend API Endpoint (server.js)
 app.get('/modules', (req, res) => {
-  const query = `
-    SELECT 
-      m.module_id,
-      m.module_name,
-      m.module_date,
-      m.module_start_time,
-      m.module_end_time,
-      m.course_id,
-      m.teacher_id,
-      c.course_name
-    FROM modules m
-    LEFT JOIN courses c ON m.course_id = c.course_id
-  `;
+  const token = req.cookies.token;
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.clearCookie('token').status(401).json({ error: 'Invalid token' });
+    }
+    req.user = decoded;
+    console.log("decoded token in modules" + req.user.role + " " + req.user.school_id);
+  });
+  
+  let schoolId = req.get('schoolid');
 
-  db.query(query, (err, results) => {
+  // 2) If no header, try the logged‑in user
+  if (!schoolId && req.user) {
+    schoolId = String(req.user.school_id);
+  }
+
+  // 3) If still missing, error out
+  if (!schoolId) {
+    return res.status(400).json({ error: 'Missing schoolid header and no authenticated user' });
+  }
+  const query = `
+  SELECT 
+    m.module_id,
+    m.module_name,
+    m.module_date,
+    m.module_start_time,
+    m.module_end_time,
+    m.course_id,
+    m.teacher_id,
+    c.course_name,
+    c.school_id
+  FROM modules m
+  LEFT JOIN courses c ON m.course_id = c.course_id
+  WHERE c.school_id = ?
+`;
+
+
+  db.query(query,[schoolId], (err, results) => {
     if (err) {
       console.error('Database error:', err);
       return res.status(500).json({

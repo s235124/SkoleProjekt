@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 
 export default function AddStudent() {
   const [formData, setFormData] = useState({
-    school_id: '',
     password: '',
     email: '',
     phone_number: '',
@@ -36,7 +35,6 @@ export default function AddStudent() {
       alert('User created successfully!');
       // Reset form or redirect as needed
       setFormData({
-        school_id: '',
         password: '',
         email: '',
         phone_number: '',
@@ -58,19 +56,6 @@ export default function AddStudent() {
             Add New User
           </h2>
           <form onSubmit={handleSubmit}>
-            <label className="block mb-2 text-gray-700 dark:text-gray-200">
-              School id:
-            </label>
-            <input
-              type="number"
-              name="school_id"
-              value={formData.school_id}
-              onChange={(e) =>
-                setFormData({ ...formData, school_id: e.target.value })
-              }
-              className="border dark:border-gray-600 p-2 w-full mb-4 dark:bg-gray-700 dark:text-gray-100"
-              required
-            />
 
             <label className="block mb-2 text-gray-700 dark:text-gray-200">
               Password:

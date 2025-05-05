@@ -13,28 +13,40 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import StudentEnrollmentModal from '@/components/studentAssign';
+interface User {
+    id: number;
+    role: number;
+    school_id: number;
+}
 export default function CoursePage() {
     const router = useRouter()
     const params = useParams()
-    const [me, setMe] = useState()
+    const [me, setMe] = useState<User | null>(null);
     const [course, setCourse] = useState()
     const [students, setStudents] = useState([])
     const [teachers, setTeachers] = useState([])
     const [assignmentOpen, setAssignmentOpen] = useState(false);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-    useEffect(() => {
-        // Fetch the current user
-        axios.get(`http://localhost:3001/getUser`)
-        .then((response) => {
-            if (response.data.length > 0) {
-                console.log(response.data)
-                setMe(response.data)
-            }
-            else { console.log('we cant find you') }
 
-        }).catch((error) => {
-            console.log("vvvv" + error)
-        })
+    useEffect(() => {
+        getUser();
+      }, [])
+      
+      const getUser = () => {
+      
+          axios({
+              method: 'get',
+              withCredentials: true,
+              url: 'http://localhost:3001/getUser',
+              timeout: 8000,
+              }).then((response) => {
+                setMe(response.data);
+                  console.log(response.data);
+              }).catch((error) => {
+                  console.log(error);
+              });
+      }
+    useEffect(() => {
         if (params?.id) {
             axios.get(`http://localhost:3001/course/${params.id}`)
                 .then(response => setCourse(response.data))
@@ -115,7 +127,9 @@ export default function CoursePage() {
 
 
     if (!course) return <div>Loading...</div>
-
+    if (me === null) {
+        return <div>Loading user…</div>;
+      }
     return (
 
         <>
@@ -149,7 +163,7 @@ export default function CoursePage() {
                                 type="button"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 mr-2">
-                                    <path fillRule="evenodd" d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z" clipRule="evenodd" />
+                                    <path d="M6.25 6.375a4.125 4.125 0 118.25 0 4.125 4.125 0 01-8.25 0zM3.25 19.125a7.125 7.125 0 0114.25 0v.003l-.001.119a.75.75 0 01-.363.63 13.067 13.067 0 01-6.761 1.873c-2.472 0-4.786-.684-6.76-1.873a.75.75 0 01-.364-.63l-.001-.122zM19.75 7.5a.75.75 0 00-1.5 0v2.25H16a.75.75 0 000 1.5h2.25v2.25a.75.75 0 001.5 0v-2.25H22a.75.75 0 000-1.5h-2.25V7.5z" />
                                 </svg>
                                 Assign Student
                             </button>
@@ -170,17 +184,15 @@ export default function CoursePage() {
                         </div>
                         <div className='basis-1/6 bg-violet-200"'>
 
-                            <Link href="/ownerstuff/courses/createcourse">
-                                <button
-                                    className="top-1 flex items-center rounded bg-slate-800 py-1 px-2.5 border border-transparent text-center text-sm text-white transition-all shadow-sm hover:shadow focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-                                    type="button"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 mr-2">
-                                        <path fillRule="evenodd" d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z" clipRule="evenodd" />
-                                    </svg>
-                                    Delete Course
-                                </button>
-                            </Link>
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRemoveTeacher(me.id);
+                                }}
+                                className="ml-4 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                            >
+                                Leave Course
+                            </button>
 
                         </div>
                     </div>
@@ -205,6 +217,15 @@ export default function CoursePage() {
                                             <p className='text-sm text-gray-600'>{teacher.email}</p>
                                         </div>
                                     </div>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleRemoveTeacher(teacher.user_id);
+                                        }}
+                                        className="ml-4 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                                    >
+                                        Remove
+                                    </button>
                                 </div>
                             ))}
                             <div className="w-full flex items-center my-4">

@@ -83,14 +83,6 @@ export default function Coursesview() {
       <ScrollArea className="m-auto w-4/5 h-3/5 flex flex-row border-black border-b-[2px]">
 
       {listItems}
-      {listItems}
-      {listItems}
-      {listItems}
-      {listItems}
-      {listItems}
-      {listItems}
-      {listItems}
-      {listItems}
       </ScrollArea>
       </div>  
     </div>
