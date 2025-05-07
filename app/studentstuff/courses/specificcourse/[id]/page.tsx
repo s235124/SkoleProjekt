@@ -1,35 +1,47 @@
 // app/teacher/[id]/page.tsx
 "use client"
-import TeacherAssignmentModal from '@/components/teacherAssign';
 import DeleteConfirmation from '@/components/deleteConfirmation';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import axios from 'axios';
-import { Users } from 'lucide-react';
-import Link from 'next/link';
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import StudentEnrollmentModal from '@/components/studentAssign';
+interface course {
+    course_id: number;
+    course_name: string;
+    course_description: string;
+}
+interface user {
+    id: number;
+    email: string;
+    role: number;
+    school_id: number;
+}
+interface student {
+    user_id: number;
+    first_name: string;
+    last_name: string;
+    email: string;
+}
+interface teacher {
+    user_id: number;
+    first_name: string;
+    last_name: string;
+    email: string;
+}
 export default function CoursePage() {
     const router = useRouter()
     const params = useParams()
-    const [me, setMe] = useState()
-    const [course, setCourse] = useState()
-    const [students, setStudents] = useState([])
-    const [teachers, setTeachers] = useState([])
-    const [assignmentOpen, setAssignmentOpen] = useState(false);
+    const [me, setMe] = useState<user>()
+    const [course, setCourse] = useState<course>()
+    const [students, setStudents] = useState<student[]>([])
+    const [teachers, setTeachers] = useState<teacher[]>([])
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     useEffect(() => {
         axios.get(`http://localhost:3001/getUser`)
         .then((response) => {
-            if (response.data.length > 0) {
                 console.log(response.data)
                 setMe(response.data)
-            }
-            else { console.log('we cant find you') }
 
         }).catch((error) => {
             console.log("vvvv" + error)
@@ -54,9 +66,7 @@ export default function CoursePage() {
             })
     }, [params?.id])
 
-
     //student stuff
-    const [enrollmentOpen, setEnrollmentOpen] = useState(false);
 
     // Add useEffect for fetching students
     useEffect(() => {
@@ -70,9 +80,15 @@ export default function CoursePage() {
 
     // Add enrollment handlers
 
-    const handleUnenrollStudent = async (studentId) => {
+    const handleUnenrollStudent = async (studentId: number) => {
         try {
-            await axios.delete(`http://localhost:3001/courses/${params.id}/students/delete/${me.user_id}`);
+            if (!me) {
+                console.error('User not found');
+                return;
+            }
+            console.log("Unenrolling student with ID:", Number(me.id));
+            const myid = Number(me.id)
+            await axios.delete(`http://localhost:3001/courses/${params.id}/students/delete/${myid}`,{ withCredentials: true });
             setStudents(students.filter(s => s.user_id !== studentId));
         } catch (error) {
             console.error('Unenrollment failed:', error);

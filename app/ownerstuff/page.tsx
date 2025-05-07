@@ -1,127 +1,135 @@
-"use client"
+// components/OwnerDashboard.tsx
+'use client';
 
-import React, { useState, useEffect } from 'react'
-import { CalendarDays, Users, GraduationCap, ClipboardCheck, Car, Star } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import axios from 'axios'
-// Mock data (replace with actual data fetching in a real application)
-const mockData = {
-  totalInstructors: 10,
-  totalStudents: 75,
-  totalTeams: 8,
-  pendingLessons: 15,
-  completedLessons: 30,
-  averageRating: 4.5
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Users, GraduationCap, ClipboardList, BarChart, LineChart as LineIcon, Star } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import { env } from '../../env.mjs';
+
+interface Stats {
+  totalInstructors: number;
+  totalStudents: number;
+  totalCourses: number;
+  totalModules: number;
+  pendingLessons: number;
+  completedLessons: number;
+  lessonsTrend: { date: string; count: number }[];
 }
-
-
 
 export default function OwnerDashboard() {
+  const [email, setEmail] = useState('');
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-const [email, setEmail] = useState('');
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [userRes, statsRes] = await Promise.all([
+          axios.get(env.NEXT_PUBLIC_API_BASE_URL+'/getUser', { withCredentials: true }),
+          axios.get<Stats>(env.NEXT_PUBLIC_API_BASE_URL+'/ownerStats', { withCredentials: true })
+        ]);
+        setEmail(userRes.data.email);
+        setStats(statsRes.data);
+      } catch (err) {
+        console.error(err);
+        setError('Failed to load dashboard data');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
-useEffect(() => {
-  getUser();
-}, [])
-
-const getUser = () => {
-
-    axios({
-        method: 'get',
-        withCredentials: true,
-        url: 'http://localhost:3001/getUser',
-        timeout: 8000,
-        }).then((response) => {
-          setEmail(response.data.email);
-            console.log(response.data);
-        }).catch((error) => {
-            console.log(error);
-        });
-}
-
+  if (loading) return <div className="p-8">Loading dashboard…</div>;
+  if (error || !stats) return <div className="p-8 text-red-600">{error || 'No data'}</div>;
+console.log(stats);
   return (
-    <div className="p-8 bg-background text-foreground">
-      <h1 className="text-3xl font-bold mb-6">
-        Welcome back, {email}!
-        <span className='text-blue-500'>.</span>
-      </h1>
-      
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <div className="p-8 space-y-8">
+      <h1 className="text-3xl font-semibold">Welcome back, <span className="text-blue-600">{email}</span></h1>
+
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Instructors</CardTitle>
-            <Users className="h-4 w-4 text-blue-500" />
+          <CardHeader className="flex items-center justify-between">
+            <CardTitle>Total Instructors</CardTitle>
+            <Users className="w-5 h-5 text-indigo-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{mockData.totalInstructors}</div>
+            <div className="text-3xl font-bold">{stats.totalInstructors}</div>
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Students</CardTitle>
-            <GraduationCap className="h-4 w-4 text-blue-500" />
+          <CardHeader className="flex items-center justify-between">
+            <CardTitle>Total Students</CardTitle>
+            <GraduationCap className="w-5 h-5 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{mockData.totalStudents}</div>
+            <div className="text-3xl font-bold">{stats.totalStudents}</div>
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total teams</CardTitle>
-            <Car className="h-4 w-4 text-blue-500" />
+          <CardHeader className="flex items-center justify-between">
+            <CardTitle>Total Courses</CardTitle>
+            <ClipboardList className="w-5 h-5 text-yellow-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{mockData.totalTeams}</div>
+            <div className="text-3xl font-bold">{stats.totalCourses}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex items-center justify-between">
+            <CardTitle>Total Modules</CardTitle>
+            <BarChart className="w-5 h-5 text-pink-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{stats.totalModules}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex items-center justify-between">
+            <CardTitle>Upcoming Modules
+            </CardTitle>
+            <LineIcon className="w-5 h-5 text-orange-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{stats.pendingLessons}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex items-center justify-between">
+            <CardTitle>Past Modules</CardTitle>
+            <ClipboardList className="w-5 h-5 text-teal-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{stats.completedLessons}</div>
           </CardContent>
         </Card>
       </div>
 
-      <Tabs defaultValue="lessons" className="mt-6">
+      <Tabs defaultValue="overview">
         <TabsList>
-          <TabsTrigger value="lessons">Lessons Overview</TabsTrigger>
-          <TabsTrigger value="ratings">School Rating</TabsTrigger>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
         </TabsList>
-        <TabsContent value="lessons">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Pending Lessons</CardTitle>
-                <CalendarDays className="h-4 w-4 text-blue-500" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{mockData.pendingLessons}</div>
-                <p className="text-xs text-muted-foreground">Awaiting instructor approval</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Completed Lessons</CardTitle>
-                <ClipboardCheck className="h-4 w-4 text-blue-500" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{mockData.completedLessons}</div>
-                <p className="text-xs text-muted-foreground">In the last 30 days</p>
-              </CardContent>
-            </Card>
+
+        <TabsContent value="overview">
+          <h2 className="text-xl font-medium mb-4">Lessons Trend (Last 7 Days)</h2>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={stats.lessonsTrend} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="date" />
+                <YAxis />
+                <Tooltip />
+                <Line type="monotone" dataKey="count" stroke="#4F46E5" strokeWidth={2} dot={{ r: 3 }} />
+              </LineChart>
+            </ResponsiveContainer>
           </div>
         </TabsContent>
-        <TabsContent value="ratings">
-          <Card>
-            <CardHeader>
-              <CardTitle>Average School Rating</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center">
-                <Star className="h-6 w-6 text-yellow-400 mr-2" />
-                <div className="text-2xl font-bold">{mockData.averageRating.toFixed(1)}</div>
-              </div>
-              <p className="text-sm text-muted-foreground mt-2">Based on student feedback</p>
-              <p className="text-sm text-muted-foreground">out of 5</p>
-            </CardContent>
-          </Card>
-        </TabsContent>
+
       </Tabs>
     </div>
-  )
+  );
 }

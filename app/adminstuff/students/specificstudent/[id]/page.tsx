@@ -9,20 +9,19 @@ import { Book } from 'lucide-react';
 import router from 'next/router';
 
 
-interface CourseEnrollment {
-  courseId: number;
-  courseName: string;
-  courseDescription: string;
-  enrollmentDate: string;
+interface course {
+  course_id: number;
+  course_name: string;
+  course_description: string;
 }
 
 export default function StudentDetail() {
   const params = useParams();
   const studentId = params?.id;
   const [student, setStudent] = useState();
-  const [courses, setCourses] = useState([]);
+  const [courses, setCourses] = useState<course[]>([]);
   const [loading, setLoading] = useState(true);
-  const getCourses = (id) => {
+  const getCourses = (id: string | string[]) => {
     if (!id) {
       console.error('User not found');
       return;

@@ -2,24 +2,42 @@
 "use client"
 import TeacherAssignmentModal from '@/components/teacherAssign';
 import DeleteConfirmation from '@/components/deleteConfirmation';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import axios from 'axios';
-import { Users } from 'lucide-react';
-import Link from 'next/link';
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import StudentEnrollmentModal from '@/components/studentAssign';
+interface course {
+    course_id: number;
+    course_name: string;
+    course_description: string;
+}
+interface user {
+    id: number;
+    email: string;
+    role: number;
+    school_id: number;
+}
+interface student {
+    user_id: number;
+    first_name: string;
+    last_name: string;
+    email: string;
+}
+interface teacher {
+    user_id: number;
+    first_name: string;
+    last_name: string;
+    email: string;
+}
 export default function CoursePage() {
     const router = useRouter()
     const params = useParams()
-    const [me, setMe] = useState()
-    const [course, setCourse] = useState()
-    const [students, setStudents] = useState([])
-    const [teachers, setTeachers] = useState([])
+ const [me, setMe] = useState<user>()
+    const [course, setCourse] = useState<course>()
+    const [students, setStudents] = useState<student[]>([])
+    const [teachers, setTeachers] = useState<teacher[]>([])
     const [assignmentOpen, setAssignmentOpen] = useState(false);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     useEffect(() => {
@@ -60,12 +78,16 @@ export default function CoursePage() {
             router.push('/ownerstuff/courses'); // Redirect after deletion
         } catch (error) {
             console.error('Delete failed:', error);
-            alert(error.response?.data?.error || 'Failed to delete course');
+            if (axios.isAxiosError(error)) {
+                alert(error.response?.data?.error || 'Failed to delete course');
+            } else {
+                alert('Failed to delete course');
+            }
         } finally {
             setDeleteDialogOpen(false);
         }
     };
-    const handleRemoveTeacher = async (teacherId) => {
+    const handleRemoveTeacher = async (teacherId: number) => {
         try {
             await axios.delete(`http://localhost:3001/courses/${params.id}/teachers/delete/${teacherId}`);
             setTeachers(teachers.filter(t => t.user_id !== teacherId));
@@ -90,18 +112,22 @@ export default function CoursePage() {
     }, [params?.id]);
 
     // Add enrollment handlers
-    const handleEnrollStudent = async (studentId) => {
+    const handleEnrollStudent = async (studentId: number) => {
         try {
             await axios.post(`http://localhost:3001/courses/${params.id}/enroll`, { studentId });
             const res = await axios.get(`http://localhost:3001/courses/${params.id}/students`);
             setStudents(res.data);
         } catch (error) {
             console.error('Enrollment failed:', error);
-            alert(error.response?.data?.error || 'Enrollment failed');
+            if (axios.isAxiosError(error)) {
+                alert(error.response?.data?.error || 'Enrollment failed');
+            } else {
+                alert('Enrollment failed');
+            }
         }
     };
 
-    const handleUnenrollStudent = async (studentId) => {
+    const handleUnenrollStudent = async (studentId: number) => {
         try {
             await axios.delete(`http://localhost:3001/courses/${params.id}/students/delete/${studentId}`);
             setStudents(students.filter(s => s.user_id !== studentId));
@@ -159,17 +185,7 @@ export default function CoursePage() {
                         </div>
                         <div className='basis-1/6 bg-violet-200"'>
 
-                            <Link href="/ownerstuff/courses/createcourse">
-                                <button
-                                    className="top-1 flex items-center rounded bg-slate-800 py-1 px-2.5 border border-transparent text-center text-sm text-white transition-all shadow-sm hover:shadow focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-                                    type="button"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 mr-2">
-                                        <path fillRule="evenodd" d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z" clipRule="evenodd" />
-                                    </svg>
-                                    Delete Course
-                                </button>
-                            </Link>
+
 
                         </div>
                     </div>

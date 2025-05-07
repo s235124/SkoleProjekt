@@ -9,31 +9,25 @@ import { Book } from 'lucide-react';
 import router from 'next/router';
 
 
-interface course {
-  course_id: number;
-  course_name: string;
-  course_description: string;
+interface CourseEnrollment {
+  courseId: number;
+  courseName: string;
+  courseDescription: string;
+  enrollmentDate: string;
 }
 
-export default function TeacherDetail() {
+export default function StudentDetail() {
   const params = useParams();
-  const teacherId = params?.id;
-  interface Teacher {
-    first_name: string;
-    last_name: string;
-    email: string;
-    phone_number: string;
-  }
-
-  const [teacher, setTeacher] = useState<Teacher | null>(null);
-  const [courses, setCourses] = useState<course[]>([]);
+  const studentId = params?.id;
+  const [student, setStudent] = useState();
+  const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
-  const getCourses = (id: string | string[]) => {
+  const getCourses = (id) => {
     if (!id) {
       console.error('User not found');
       return;
     }
-    axios.get(`http://localhost:3001/teacher/courses/${id}`)
+    axios.get(`http://localhost:3001/students/${id}/courses`)
     .then((response) => { if (response.data.length > 0) {
         setCourses(response.data) }
         else { console.log('No courses found') }
@@ -46,30 +40,30 @@ export default function TeacherDetail() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch teacher details
-        const teacherResponse = await axios.get(`http://localhost:3001/teacher/${params.id}`);
-        setTeacher(teacherResponse.data);
+        // Fetch student details
+        const studentResponse = await axios.get(`http://localhost:3001/teacher/${params.id}`);
+        setStudent(studentResponse.data);
 
       } catch (error) {
-        console.error('Error fetching teacher data:', error);
+        console.error('Error fetching student data:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    if (teacherId) {
+    if (studentId) {
       fetchData();
-      getCourses(teacherId);
+      getCourses(studentId);
     }
 
-  }, [params.id, teacherId]);
+  }, [params.id, studentId]);
 
   if (loading) {
-    return <div className="p-8 text-center">Loading teacher information...</div>;
+    return <div className="p-8 text-center">Loading student information...</div>;
   }
 
-  if (!teacher) {
-    return <div className="p-8 text-center text-red-500">Teacher not found</div>;
+  if (!student) {
+    return <div className="p-8 text-center text-red-500">Student not found</div>;
   }
  
   const listItems = <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -99,27 +93,27 @@ export default function TeacherDetail() {
         {/* Header */}
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-center justify-between">
-            <Link href="/ownerstuff/teachers" className="text-indigo-600 hover:text-indigo-800">
-              ← Back to Teachers
+            <Link href="/ownerstuff/students" className="text-indigo-600 hover:text-indigo-800">
+              ← Back to Students
             </Link>
-            <h1 className="text-2xl font-bold text-gray-900">Teacher Profile</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Student Profile</h1>
           </div>
         </div>
 
-        {/* Teacher Information */}
+        {/* Student Information */}
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-center gap-6">
             <div className="h-16 w-16 rounded-full bg-indigo-100 flex items-center justify-center">
               <span className="text-indigo-600 text-xl font-medium">
-              {teacher.first_name?.[0]}{teacher.last_name?.[0]}
+              {student.first_name?.[0]}{student.last_name?.[0]}
               </span>
             </div>
             <div>
               <h2 className="text-xl font-semibold">
-              {teacher.first_name || 'Unknown'} {teacher.last_name || 'Teacher'}
+              {student.first_name || 'Unknown'} {student.last_name || 'Student'}
               </h2>
-              <p className="text-gray-600">{teacher.email}</p>
-              <p className="text-sm text-gray-500">Phone: {teacher.phone_number}</p>
+              <p className="text-gray-600">{student.email}</p>
+              <p className="text-sm text-gray-500">Phone: {student.phone_number}</p>
               <p className="text-sm text-gray-500">
                
               </p>

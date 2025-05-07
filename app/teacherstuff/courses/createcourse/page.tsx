@@ -1,15 +1,20 @@
 "use client";
 import axios from 'axios';
 import Link from 'next/link';
-import React, { use, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { useState } from 'react';
-
+interface user {
+  id: number;
+  email: string;
+  role: number;
+  school_id: number;
+}
 export default function CreateCourseForm() {
   const [formData, setFormData] = useState({
     course_name: '',
     course_description: '',
   });
-  const [me, setMe] = useState();
+  const [me, setMe] = useState<user>();
   const [isLoading, setIsLoading] = useState(true); // Track loading state
   const [error, setError] = useState(''); // Track errors
 
@@ -41,6 +46,7 @@ export default function CreateCourseForm() {
     try {
       const response = await fetch(`http://localhost:3001/createcourseasteacher/${me.id}`, {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
@@ -61,7 +67,11 @@ export default function CreateCourseForm() {
         course_description: '',
       });}catch (error) {
       console.error('Error:', error);
-      alert(error.message || 'Error creating course');
+      if (error instanceof Error) {
+        alert(error.message || 'Error creating course');
+      } else {
+        alert('Error creating course');
+      }
     }
   };
 

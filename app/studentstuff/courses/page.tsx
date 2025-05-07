@@ -4,46 +4,45 @@ import React from 'react'
 import { useState } from 'react';
 import { useEffect } from 'react';
 import { ScrollArea } from "@/components/ui/scroll-area"
-import FloatingLabelInput from '@/components/FloatingLabelInput';
-import router from 'next/router';
-import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Book } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-
+interface course {
+  course_id: number;
+  course_name: string;
+  course_description: string;
+}
+interface user {
+  id: number;
+  email: string;
+  role: number;
+  school_id: number;
+}
 export default function Coursesview() {
-  const [formData, setFormData] = useState({
-    course_name: '',
-    course_description: '',
-  });
   const router = useRouter();
 
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [user, setUser] = useState();
-  useEffect(() => {
-    getUser();
-  }, []);
+  const [courses, setCourses] = useState<course[]>([]);
+  const [user, setUser] = useState<user>();
+
   
-  const getUser = async () => {
-    const response = await axios.get('http://localhost:3001/getUser', {
-      withCredentials: true,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      }
-    });
+  const getUser = () => {
+    axios.get(`http://localhost:3001/getUser`)
+      .then((response) => {
+        console.log(response.data)
+        setUser(response.data);
+      }).catch((error) => {
+        console.log("vvvv" + error)
+      })
 
-    setUser(response.data);
     console.log('User data:', user);
-    getCourses(response.data);
   }
-
-  const getCourses = (data) => {
+  // Fetch courses for the user
+  const getCourses = (data: number) => {
     if (!data) {
       console.error('User not found');
       return;
     }
-    axios.get(`http://localhost:3001/students/${data.id}/courses`)
+    axios.get(`http://localhost:3001/students/${data}/courses`)
     .then((response) => { if (response.data.length > 0) {
         setCourses(response.data) }
         else { console.log('No courses found') }
@@ -53,7 +52,14 @@ export default function Coursesview() {
     })
 
   }
- 
+   useEffect(() => {
+    getUser();
+  },);
+  useEffect(() => {
+    if (!user?.id) return;
+    getCourses(user.id);
+  }, [user]);
+
  const listItems = <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
  {courses.map((course) => (
    <Card 
@@ -87,18 +93,6 @@ export default function Coursesview() {
           <div className='basis-1/6'></div>
           <div className='basis-4/6 font-bold text-5xl'> Courses</div>
           <div className='basis-1/6 bg-violet-200"'>
-
-            <Link href="/teacherstuff/courses/createcourse">
-              <button
-                className="top-1 flex items-center rounded bg-slate-800 py-1 px-2.5 border border-transparent text-center text-sm text-white transition-all shadow-sm hover:shadow focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-                type="button"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 mr-2">
-                  <path fillRule="evenodd" d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z" clipRule="evenodd" />
-                </svg>
-                Add Course
-              </button>
-            </Link>
 
           </div>
         </div>

@@ -1,10 +1,20 @@
 "use client"
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { responseCookiesToRequestCookies } from 'next/dist/server/web/spec-extension/adapters/request-cookies';
-import { threadId } from 'worker_threads';
 import Calendar from '@/components/calendar';
-import { get } from 'http';
+
+interface user {
+  id: number;
+  email: string;
+  role: number;
+  school_id: number;
+}
+
+interface course {
+  course_id: number;
+  course_name: string;
+  course_description: string;
+}
 export default function CreateModulePage() {
   const [formData, setFormData] = useState({
     date: '',
@@ -14,7 +24,7 @@ export default function CreateModulePage() {
     course_id: "",
   });
 
-  let hours = [
+  const hours = [
     "00:00:00", "01:00:00", "02:00:00", "03:00:00", "04:00:00", "05:00:00",
     "06:00:00", "07:00:00", "08:00:00", "09:00:00", "10:00:00", "11:00:00",
     "12:00:00", "13:00:00", "14:00:00", "15:00:00", "16:00:00", "17:00:00",
@@ -22,12 +32,12 @@ export default function CreateModulePage() {
   ];
   ;
 
-  function timeslotInMinutes(timeslotStr) {
+  function timeslotInMinutes(timeslotStr: string) {
     const [hours, minutes, seconds] = timeslotStr.split(':').map(Number);
     return hours * 60 + minutes + seconds / 60;
   }
 
-  function minuteToTimeslot(minutes) {
+  function minuteToTimeslot(minutes: number) {
     const h = Math.floor(minutes / 60);
     const m = minutes % 60;
     //creates a time slot in the format of 00:00:00
@@ -35,7 +45,7 @@ export default function CreateModulePage() {
   }
 
 
-  function createIntervals(intervals) {
+  function createIntervals(intervals: { start: number; end: number }[]) {
     if (intervals.length === 0) return [];
     intervals.sort((a, b) => a.start - b.start);
     const mergedIntervals = [intervals[0]];
@@ -87,36 +97,35 @@ export default function CreateModulePage() {
   const [endTime, setEndTime] = useState('');
   const [minDate, setMinDate] = useState('');
   const [maxDate, setMaxDate] = useState('');
-  const [timeslots, setTimeslots] = useState([]);
-  const [courses, setCourses] = useState([]);
-  const [selectedClass, setSelectedClass] = useState('');
-  const [user, setUser] = useState();
+  const [courses, setCourses] = useState<course[]>([]);
+  const [user, setUser] = useState<user>();
   useEffect(() => {
     getUser();
   }, []);
   
-  const getUser = async () => {
-    const response = await axios.get('http://localhost:3001/getUser', {
-      withCredentials: true,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      }
-    });
+  const getUser = () => {
+    axios.get(`http://localhost:3001/getUser`)
+    .then((response) => {
+      console.log(response.data)
+      setUser(response.data);
+    }).catch((error) => {
+      console.log("vvvv" + error)
+    })
 
-    setUser(response.data);
-    console.log('User data:', user);
-    getCourses(response.data);
+  console.log('User data:', user);
+
+    console.log('User data:', user);;
   }
 
-  const getCourses = (data) => {
-    if (!data) {
+  const getCourses = (userid: number) => {
+    if (!userid) {
       console.error('User not found');
       return;
     }
-    axios.get(`http://localhost:3001/teacher/courses/${data.id}`)
+    axios.get(`http://localhost:3001/teacher/courses/${userid}`)
     .then((response) => { if (response.data.length > 0) {
-        setCourses(response.data) }
+        setCourses(response.data)
+        console.log("no error"+response.data)}
         else { console.log('No courses found') }
         
     }).catch((error) => {
@@ -124,7 +133,13 @@ export default function CreateModulePage() {
     })
 
   }
-  const updateHours = (date) => {
+
+    useEffect(() => {
+      if (!user?.id) return;
+      getCourses(user.id);
+    }, [user]);
+  
+  const updateHours = (date: string) => {
     if (!date) {
       console.error("Date is required");
       return;
@@ -138,7 +153,7 @@ export default function CreateModulePage() {
       timeout: 8000,
     }).then((response) => {
       console.log(response.data);
-      const intervals = response.data.map(({ start, end }) => ({
+      const intervals = response.data.map(({ start, end }: { start: string; end: string }) => ({
         start: timeslotInMinutes(start),
         end: timeslotInMinutes(end)
       }));
@@ -189,7 +204,7 @@ export default function CreateModulePage() {
 
       if (response.data.success) {
         alert('Module created successfully!');
-        setFormData({ date: '', timeslot: '', class: '', content: '' });
+        setFormData({ date: '', timeslot: '', course: '', content: '', course_id: '' });
       }
     } catch (error) {
       console.error('Error creating module:', error);

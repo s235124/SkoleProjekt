@@ -1,14 +1,11 @@
 'use client'
 import FloatingLabelInput from "@/components/FloatingLabelInput";
 import { Button } from "@/components/ui/button";
-import { Router } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import axios from 'axios';
 import jsonwebtoken from "jsonwebtoken";
-import { accessSync } from "node:fs";
 import { env } from '../env.mjs';
 
 

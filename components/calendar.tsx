@@ -6,7 +6,6 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import { number } from 'zod';
 
 interface ModuleEvent {
   id: number;
@@ -92,10 +91,10 @@ const getUser = () => {
           end: end.split('T')[0]
         },
         headers: {
-          'schoolid': schoolId.toString(),
+          'schoolid': schoolId?.toString() || '',
         }
       });
-      const formattedEvents = response.data.map((module: any) => {
+      const formattedEvents = response.data.map((module: { module_id: number; module_name: string; module_date: string; module_start_time: string; module_end_time: string; course_id: number; }) => {
         console.log("v"+currentTeacherId); // Debugging line
 
         const courseId = Number(module.course_id);
@@ -138,7 +137,7 @@ const getUser = () => {
       fetchModules(startStr, endStr);
     }
   };
-  const deleteModule = async (moduleId) => {
+  const deleteModule = async (moduleId: string) => {
     try {
       const response = await axios.delete(
         `http://localhost:3001/deletemodule/${moduleId}`

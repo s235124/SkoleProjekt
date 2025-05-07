@@ -15,7 +15,7 @@ export default function TeacherAssignmentModal({ courseId, open, onOpenChange })
                 .then(response => setTeachers(response.data))
                 .catch(console.error);
         }
-    }, [open, courseId, schoolId]);
+    }, [open, courseId]);
 
     const handleAssign = async () => {
         if (!selectedTeacher) return;
