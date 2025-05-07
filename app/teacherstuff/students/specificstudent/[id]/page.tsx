@@ -7,27 +7,35 @@ import { useParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Book } from 'lucide-react';
 import router from 'next/router';
+import { env } from '../../../../../env.mjs';
 
-
-interface CourseEnrollment {
-  courseId: number;
-  courseName: string;
-  courseDescription: string;
-  enrollmentDate: string;
+interface course{
+  course_id: number;
+  course_name: string;
+  course_description: string;
+}
+interface student {
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone_number: string;
+  role: number;
+  school_id: number;
+  user_id: number;
 }
 
 export default function StudentDetail() {
   const params = useParams();
   const studentId = params?.id;
-  const [student, setStudent] = useState();
-  const [courses, setCourses] = useState([]);
+  const [student, setStudent] = useState<student>();
+  const [courses, setCourses] = useState<course[]>([]);
   const [loading, setLoading] = useState(true);
   const getCourses = (id) => {
     if (!id) {
       console.error('User not found');
       return;
     }
-    axios.get(`http://localhost:3001/students/${id}/courses`)
+    axios.get(env.NEXT_PUBLIC_API_BASE_URL+`/students/${id}/courses`)
     .then((response) => { if (response.data.length > 0) {
         setCourses(response.data) }
         else { console.log('No courses found') }
@@ -41,7 +49,7 @@ export default function StudentDetail() {
     const fetchData = async () => {
       try {
         // Fetch student details
-        const studentResponse = await axios.get(`http://localhost:3001/teacher/${params.id}`);
+        const studentResponse = await axios.get(env.NEXT_PUBLIC_API_BASE_URL+`/teacher/${params.id}`);
         setStudent(studentResponse.data);
 
       } catch (error) {

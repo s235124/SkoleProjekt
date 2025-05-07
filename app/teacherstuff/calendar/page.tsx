@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Calendar from '@/components/calendar';
-
+import { env } from '../../../env.mjs';
 interface user {
   id: number;
   email: string;
@@ -104,7 +104,7 @@ export default function CreateModulePage() {
   }, []);
   
   const getUser = () => {
-    axios.get(`http://localhost:3001/getUser`)
+    axios.get(env.NEXT_PUBLIC_API_BASE_URL+`/getUser`)
     .then((response) => {
       console.log(response.data)
       setUser(response.data);
@@ -122,7 +122,7 @@ export default function CreateModulePage() {
       console.error('User not found');
       return;
     }
-    axios.get(`http://localhost:3001/teacher/courses/${userid}`)
+    axios.get(env.NEXT_PUBLIC_API_BASE_URL+`/teacher/courses/${userid}`)
     .then((response) => { if (response.data.length > 0) {
         setCourses(response.data)
         console.log("no error"+response.data)}
@@ -144,12 +144,12 @@ export default function CreateModulePage() {
       console.error("Date is required");
       return;
     }
-    const url = `http://localhost:3001/timeslots?date=${encodeURIComponent(date)}`;
+    const url = env.NEXT_PUBLIC_API_BASE_URL+`/timeslots?date=${encodeURIComponent(date)}`;
     console.log("Request URL:", url);
     axios({
       method: 'get',
       withCredentials: true,
-      url: `http://localhost:3001/timeslots?date=${encodeURIComponent(date)}`,
+      url: env.NEXT_PUBLIC_API_BASE_URL+`/timeslots?date=${encodeURIComponent(date)}`,
       timeout: 8000,
     }).then((response) => {
       console.log(response.data);
@@ -195,7 +195,7 @@ export default function CreateModulePage() {
     e.preventDefault();
 
     try {
-      const response = await axios.post('http://localhost:3001/createModule', {
+      const response = await axios.post(env.NEXT_PUBLIC_API_BASE_URL+'/createModule', {
         module_date: `${formData.date}`,
         module_start_time: startTime,
         module_end_time: endTime,

@@ -16,6 +16,7 @@ import StudentEnrollmentModal from '@/components/studentAssign';
 import { useSelectedSchool } from '../../../selectedSchoolContext';
 import TeacherAssignmentModalAdmin from '@/components/teacherAssignAdmin';
 import StudentEnrollmentModalAdmin from '@/components/studentAssignAdmin';
+import { env } from '../../../../../env.mjs';
 export default function CoursePage() {
     const router = useRouter()
     const params = useParams()
@@ -28,7 +29,7 @@ export default function CoursePage() {
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     useEffect(() => {
         // Fetch the current user
-        axios.get(`http://localhost:3001/getUser`)
+        axios.get(env.NEXT_PUBLIC_API_BASE_URL+`/getUser`)
         .then((response) => {
             if (response.data.length > 0) {
                 console.log(response.data)
@@ -40,13 +41,13 @@ export default function CoursePage() {
             console.log("vvvv" + error)
         })
         if (params?.id) {
-            axios.get(`http://localhost:3001/course/${params.id}`)
+            axios.get(env.NEXT_PUBLIC_API_BASE_URL+`/course/${params.id}`)
                 .then(response => setCourse(response.data))
                 .catch(error => console.error(error))
             console.log(params.id)
         }
 
-        axios.get(`http://localhost:3001/courses/${params.id}/teachers`)
+        axios.get(env.NEXT_PUBLIC_API_BASE_URL+`/courses/${params.id}/teachers`)
             .then((response) => {
                 if (response.data.length > 0) {
                     console.log(response.data)
@@ -61,7 +62,7 @@ export default function CoursePage() {
     const handleDeleteCourse = async () => {
         try {
             console.log('Deleting course with ID:', params.id);
-            await axios.delete(`http://localhost:3001/courses/delete/${params.id}`);
+            await axios.delete(env.NEXT_PUBLIC_API_BASE_URL+`/courses/delete/${params.id}`);
             router.push('/ownerstuff/courses'); // Redirect after deletion
         } catch (error) {
             console.error('Delete failed:', error);
@@ -72,7 +73,7 @@ export default function CoursePage() {
     };
     const handleRemoveTeacher = async (teacherId) => {
         try {
-            await axios.delete(`http://localhost:3001/courses/${params.id}/teachers/delete/${teacherId}`);
+            await axios.delete(env.NEXT_PUBLIC_API_BASE_URL+`/courses/${params.id}/teachers/delete/${teacherId}`);
             setTeachers(teachers.filter(t => t.user_id !== teacherId));
         } catch (error) {
             console.error('Failed to remove teacher:', error);
@@ -87,7 +88,7 @@ export default function CoursePage() {
     // Add useEffect for fetching students
     useEffect(() => {
         if (params?.id) {
-            axios.get(`http://localhost:3001/courses/${params.id}/students`)
+            axios.get(env.NEXT_PUBLIC_API_BASE_URL+`/courses/${params.id}/students`)
                 .then(response => setStudents(response.data))
                 .catch(console.error);
 
@@ -97,8 +98,8 @@ export default function CoursePage() {
     // Add enrollment handlers
     const handleEnrollStudent = async (studentId) => {
         try {
-            await axios.post(`http://localhost:3001/courses/${params.id}/enroll`, { studentId });
-            const res = await axios.get(`http://localhost:3001/courses/${params.id}/students`);
+            await axios.post(env.NEXT_PUBLIC_API_BASE_URL+`/courses/${params.id}/enroll`, { studentId });
+            const res = await axios.get(env.NEXT_PUBLIC_API_BASE_URL+`/courses/${params.id}/students`);
             setStudents(res.data);
         } catch (error) {
             console.error('Enrollment failed:', error);
@@ -108,7 +109,7 @@ export default function CoursePage() {
 
     const handleUnenrollStudent = async (studentId) => {
         try {
-            await axios.delete(`http://localhost:3001/courses/${params.id}/students/delete/${studentId}`);
+            await axios.delete(env.NEXT_PUBLIC_API_BASE_URL+`/courses/${params.id}/students/delete/${studentId}`);
             setStudents(students.filter(s => s.user_id !== studentId));
         } catch (error) {
             console.error('Unenrollment failed:', error);

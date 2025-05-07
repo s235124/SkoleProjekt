@@ -1,8 +1,7 @@
 "use client"
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { responseCookiesToRequestCookies } from 'next/dist/server/web/spec-extension/adapters/request-cookies';
-import { threadId } from 'worker_threads';
+import { env } from '../../../env.mjs';
 import Calendar from '@/components/calendar';
 export default function CreateModulePage() {
   const [formData, setFormData] = useState({
@@ -94,7 +93,7 @@ function createIntervals(intervals) {
     axios({
       method: 'get',
       withCredentials: true,
-      url: `http://localhost:3001/getCourses`,
+      url: env.NEXT_PUBLIC_API_BASE_URL+`/getCourses`,
       timeout: 8000,
     }).then((response) => {
       console.log(response.data);
@@ -109,12 +108,12 @@ function createIntervals(intervals) {
       console.error("Date is required");
       return;
     }
-    const url = `http://localhost:3001/timeslots?date=${encodeURIComponent(date)}`;
+    const url = env.NEXT_PUBLIC_API_BASE_URL+`/timeslots?date=${encodeURIComponent(date)}`;
     console.log("Request URL:", url);
     axios({
       method: 'get',
       withCredentials: true,
-      url: `http://localhost:3001/timeslots?date=${encodeURIComponent(date)}`,
+      url: env.NEXT_PUBLIC_API_BASE_URL+`/timeslots?date=${encodeURIComponent(date)}`,
       timeout: 8000,
     }).then((response) => {
       console.log(response.data);
@@ -158,7 +157,7 @@ function createIntervals(intervals) {
     e.preventDefault();
     
     try {
-      const response = await axios.post('http://localhost:3001/createModule', {
+      const response = await axios.post(env.NEXT_PUBLIC_API_BASE_URL+'/createModule', {
         module_date: `${formData.date}`,
         module_start_time: startTime,
         module_end_time: endTime,
@@ -167,7 +166,7 @@ function createIntervals(intervals) {
 
       if (response.data.success) {
         alert('Module created successfully!');
-        setFormData({ date: '', timeslot: '', class: '', content: '' });
+        setFormData({ date: '', timeslot: '', course: '', content: '', course_id: '' });
       }
     } catch (error) {
       console.error('Error creating module:', error);

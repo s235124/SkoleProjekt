@@ -7,7 +7,7 @@ import { useParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Book } from 'lucide-react';
 import router from 'next/router';
-
+import { env } from '../../../../../env.mjs';
 
 interface course {
   course_id: number;
@@ -33,7 +33,7 @@ export default function TeacherDetail() {
       console.error('User not found');
       return;
     }
-    axios.get(`http://localhost:3001/teacher/courses/${id}`)
+    axios.get(env.NEXT_PUBLIC_API_BASE_URL+`/teacher/courses/${id}`)
     .then((response) => { if (response.data.length > 0) {
         setCourses(response.data) }
         else { console.log('No courses found') }
@@ -47,7 +47,7 @@ export default function TeacherDetail() {
     const fetchData = async () => {
       try {
         // Fetch teacher details
-        const teacherResponse = await axios.get(`http://localhost:3001/teacher/${params.id}`);
+        const teacherResponse = await axios.get(env.NEXT_PUBLIC_API_BASE_URL+`/teacher/${params.id}`);
         setTeacher(teacherResponse.data);
 
       } catch (error) {

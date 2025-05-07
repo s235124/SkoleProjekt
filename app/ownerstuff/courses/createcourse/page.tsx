@@ -3,7 +3,7 @@ import axios from 'axios';
 import Link from 'next/link';
 import React from 'react'
 import { useState } from 'react';
-
+import { env } from '../../../../env.mjs';
 
 export default function CreateCourseForm() {
   const [formData, setFormData] = useState({
@@ -15,8 +15,9 @@ export default function CreateCourseForm() {
     console.log('Form data:', formData);
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:3001/createcourse', {
+      const response = await fetch(env.NEXT_PUBLIC_API_BASE_URL+'/createcourse', {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },

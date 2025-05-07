@@ -2,13 +2,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Calendar from '@/components/calendar';
 import axios from 'axios';
-
+import { env } from '../../../env.mjs';
 export default function CreateModulePage() {
   const [user, setUser] = useState(null); // Initialize as null for explicit checks
 
   const getUser = useCallback(async () => {
     try {
-      const response = await axios.get('http://localhost:3001/getUser', {
+      const response = await axios.get(env.NEXT_PUBLIC_API_BASE_URL+'/getUser', {
         withCredentials: true,
         headers: {
           'Content-Type': 'application/json',

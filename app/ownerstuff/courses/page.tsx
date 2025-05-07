@@ -4,13 +4,11 @@ import React from 'react'
 import { useState } from 'react';
 import { useEffect } from 'react';
 import { ScrollArea } from "@/components/ui/scroll-area"
-import FloatingLabelInput from '@/components/FloatingLabelInput';
-import router from 'next/router';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Book } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-
+import { env } from '../../../env.mjs';
 export default function Coursesview() {
   const [formData, setFormData] = useState({
     course_name: '',
@@ -21,7 +19,7 @@ export default function Coursesview() {
   const [courses, setCourses] = useState<Course[]>([]);
 
   useEffect(() => {
-     axios.get('http://localhost:3001/getCourses')
+     axios.get(env.NEXT_PUBLIC_API_BASE_URL+'/getCourses')
      .then((response) => { if (response.data.length > 0) {
          setCourses(response.data) }
          else { console.log('No users found') }

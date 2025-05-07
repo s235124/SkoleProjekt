@@ -2,29 +2,39 @@
 "use client"
 import TeacherAssignmentModal from '@/components/teacherAssign';
 import DeleteConfirmation from '@/components/deleteConfirmation';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import axios from 'axios';
-import { Users } from 'lucide-react';
-import Link from 'next/link';
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import StudentEnrollmentModal from '@/components/studentAssign';
+import { env } from '../../../../../env.mjs';
 interface User {
     id: number;
     role: number;
     school_id: number;
+}
+interface teacher {
+    user_id: number;
+    first_name: string;
+    last_name: string;
+    email: string;
+    phone_number: string;
+}
+interface student {
+    user_id: number;
+    first_name: string;
+    last_name: string;
+    email: string;
+    phone_number: string;
 }
 export default function CoursePage() {
     const router = useRouter()
     const params = useParams()
     const [me, setMe] = useState<User | null>(null);
     const [course, setCourse] = useState()
-    const [students, setStudents] = useState([])
-    const [teachers, setTeachers] = useState([])
+    const [students, setStudents] = useState<student[]>([])
+    const [teachers, setTeachers] = useState<teacher[]>([])
     const [assignmentOpen, setAssignmentOpen] = useState(false);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
@@ -37,7 +47,7 @@ export default function CoursePage() {
           axios({
               method: 'get',
               withCredentials: true,
-              url: 'http://localhost:3001/getUser',
+              url: env.NEXT_PUBLIC_API_BASE_URL+'/getUser',
               timeout: 8000,
               }).then((response) => {
                 setMe(response.data);
@@ -48,13 +58,13 @@ export default function CoursePage() {
       }
     useEffect(() => {
         if (params?.id) {
-            axios.get(`http://localhost:3001/course/${params.id}`)
+            axios.get(env.NEXT_PUBLIC_API_BASE_URL+`/course/${params.id}`)
                 .then(response => setCourse(response.data))
                 .catch(error => console.error(error))
             console.log(params.id)
         }
 
-        axios.get(`http://localhost:3001/courses/${params.id}/teachers`)
+        axios.get(env.NEXT_PUBLIC_API_BASE_URL+`/courses/${params.id}/teachers`)
             .then((response) => {
                 if (response.data.length > 0) {
                     console.log(response.data)
@@ -69,7 +79,7 @@ export default function CoursePage() {
     const handleDeleteCourse = async () => {
         try {
             console.log('Deleting course with ID:', params.id);
-            await axios.delete(`http://localhost:3001/courses/delete/${params.id}`);
+            await axios.delete(env.NEXT_PUBLIC_API_BASE_URL+`/courses/delete/${params.id}`);
             router.push('/ownerstuff/courses'); // Redirect after deletion
         } catch (error) {
             console.error('Delete failed:', error);
@@ -78,9 +88,9 @@ export default function CoursePage() {
             setDeleteDialogOpen(false);
         }
     };
-    const handleRemoveTeacher = async (teacherId) => {
+    const handleRemoveTeacher = async (teacherId: number) => {
         try {
-            await axios.delete(`http://localhost:3001/courses/${params.id}/teachers/delete/${teacherId}`);
+            await axios.delete(env.NEXT_PUBLIC_API_BASE_URL+`/courses/${params.id}/teachers/delete/${teacherId}`);
             setTeachers(teachers.filter(t => t.user_id !== teacherId));
         } catch (error) {
             console.error('Failed to remove teacher:', error);
@@ -95,7 +105,7 @@ export default function CoursePage() {
     // Add useEffect for fetching students
     useEffect(() => {
         if (params?.id) {
-            axios.get(`http://localhost:3001/courses/${params.id}/students`)
+            axios.get(env.NEXT_PUBLIC_API_BASE_URL+`/courses/${params.id}/students`)
                 .then(response => setStudents(response.data))
                 .catch(console.error);
 
@@ -103,10 +113,10 @@ export default function CoursePage() {
     }, [params?.id]);
 
     // Add enrollment handlers
-    const handleEnrollStudent = async (studentId) => {
+    const handleEnrollStudent = async (studentId: any) => {
         try {
-            await axios.post(`http://localhost:3001/courses/${params.id}/enroll`, { studentId });
-            const res = await axios.get(`http://localhost:3001/courses/${params.id}/students`);
+            await axios.post(env.NEXT_PUBLIC_API_BASE_URL+`/courses/${params.id}/enroll`, { studentId });
+            const res = await axios.get(env.NEXT_PUBLIC_API_BASE_URL+`/courses/${params.id}/students`);
             setStudents(res.data);
         } catch (error) {
             console.error('Enrollment failed:', error);
@@ -114,9 +124,9 @@ export default function CoursePage() {
         }
     };
 
-    const handleUnenrollStudent = async (studentId) => {
+    const handleUnenrollStudent = async (studentId: any) => {
         try {
-            await axios.delete(`http://localhost:3001/courses/${params.id}/students/delete/${studentId}`);
+            await axios.delete(env.NEXT_PUBLIC_API_BASE_URL+`/courses/${params.id}/students/delete/${studentId}`);
             setStudents(students.filter(s => s.user_id !== studentId));
         } catch (error) {
             console.error('Unenrollment failed:', error);

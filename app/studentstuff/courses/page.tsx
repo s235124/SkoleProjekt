@@ -7,6 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Book } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { env } from '../../../env.mjs';
 interface course {
   course_id: number;
   course_name: string;
@@ -26,7 +27,7 @@ export default function Coursesview() {
 
   
   const getUser = () => {
-    axios.get(`http://localhost:3001/getUser`)
+    axios.get(env.NEXT_PUBLIC_API_BASE_URL+`/getUser`)
       .then((response) => {
         console.log(response.data)
         setUser(response.data);
@@ -42,7 +43,7 @@ export default function Coursesview() {
       console.error('User not found');
       return;
     }
-    axios.get(`http://localhost:3001/students/${data}/courses`)
+    axios.get(env.NEXT_PUBLIC_API_BASE_URL+`/students/${data}/courses`)
     .then((response) => { if (response.data.length > 0) {
         setCourses(response.data) }
         else { console.log('No courses found') }

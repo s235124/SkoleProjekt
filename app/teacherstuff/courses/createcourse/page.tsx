@@ -3,6 +3,7 @@ import axios from 'axios';
 import Link from 'next/link';
 import React, { useEffect } from 'react'
 import { useState } from 'react';
+import { env } from '../../../../env.mjs';
 interface user {
   id: number;
   email: string;
@@ -24,7 +25,7 @@ export default function CreateCourseForm() {
 
   const getUser = async () => {
     try {
-      const response = await axios.get('http://localhost:3001/getUser', {
+      const response = await axios.get('/getUser', {
         withCredentials: true,
         headers: {
           'Content-Type': 'application/json',
@@ -44,7 +45,7 @@ export default function CreateCourseForm() {
     if (!me) return; // Final safeguard
 
     try {
-      const response = await fetch(`http://localhost:3001/createcourseasteacher/${me.id}`, {
+      const response = await fetch(env.NEXT_PUBLIC_API_BASE_URL+`/createcourseasteacher/${me.id}`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },

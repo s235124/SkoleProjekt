@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-
+import { env } from '../../../env.mjs';
 export default function AddStudent() {
   const [formData, setFormData] = useState({
     password: '',
@@ -16,7 +16,7 @@ export default function AddStudent() {
     console.log('Form data:', formData);
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:3001/adduser', {
+      const response = await fetch(env.NEXT_PUBLIC_API_BASE_URL+'/adduser', {
         credentials: 'include',
         method: 'POST',
         headers: {
@@ -44,7 +44,7 @@ export default function AddStudent() {
       });
     } catch (error) {
       console.error('Error:', error);
-      alert(error.message || 'Error creating user');
+      alert((error instanceof Error ? error.message : 'Unknown error') || 'Error creating user');
     }
   };
 

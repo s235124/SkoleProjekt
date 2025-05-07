@@ -3,13 +3,11 @@
 import axios from 'axios';
 import React, { useState, useEffect } from 'react';
 import { ScrollArea } from "@/components/ui/scroll-area";
-import router from 'next/router';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useContext } from 'react';
-
 import { useSelectedSchool } from '../selectedSchoolContext'; // Fix import path
-import error from 'next/error';
+
+import { env } from '../../../env.mjs'; 
 interface User {
   user_id: number;
   firstName: string;
@@ -30,7 +28,7 @@ export default function Students() {
   useEffect(() => {
     if (selectedSchoolId == null) return; // Ensure selectedSchoolId is not null
     setLoading(true);
-    axios.get<User[]>('http://localhost:3001/getAllUsers', {
+    axios.get<User[]>(env.NEXT_PUBLIC_API_BASE_URL+'/getAllUsers', {
       headers: {
         'schoolid': selectedSchoolId.toString(),
       }

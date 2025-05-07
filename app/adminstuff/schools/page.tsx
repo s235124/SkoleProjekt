@@ -7,7 +7,7 @@ import router from 'next/router';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useContext } from 'react';
-
+import { env } from '../../../env.mjs';
 import { useSelectedSchool } from '../selectedSchoolContext'; // Fix import path
 interface School {
   school_id: number;
@@ -21,7 +21,7 @@ export default function Schools() {
   const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
   useEffect(() => {
-    axios.get<School[]>('http://localhost:3001/getSchools')
+    axios.get<School[]>(env.NEXT_PUBLIC_API_BASE_URL+'/getSchools')
       .then((response) => {
         if (response.data.length > 0) {
           setSchools(response.data);
@@ -92,7 +92,7 @@ export default function Schools() {
                     <div className="flex-shrink-0">
                       <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
                         <span className="text-indigo-600 font-medium">
-                          {School.school_id?.[0]}{School.school_name?.[0]}
+                          {School.school_id?.toString()[0]}{School.school_name?.[0]}
                         </span>
                       </div>
                     </div>

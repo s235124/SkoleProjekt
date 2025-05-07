@@ -4,7 +4,7 @@ import Link from 'next/link';
 import React from 'react'
 import { useState } from 'react';
 import { useSelectedSchool } from '../../selectedSchoolContext'  // ← two dots, one for createcourses → courses, second for courses → adminstuff
-
+import { env } from '../../../../env.mjs';
 export default function CreateCourseForm() {
 
     const { selectedSchoolId } = useSelectedSchool();
@@ -18,7 +18,7 @@ export default function CreateCourseForm() {
     console.log('Form data:', formData);
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:3001/createcourse', {
+      const response = await fetch(env.NEXT_PUBLIC_API_BASE_URL+'/createcourse', {
         credentials: 'include',
         method: 'POST',
         headers: {

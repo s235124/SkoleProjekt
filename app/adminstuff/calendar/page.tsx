@@ -5,6 +5,7 @@ import { responseCookiesToRequestCookies } from 'next/dist/server/web/spec-exten
 import { threadId } from 'worker_threads';
 import Calendar from '@/components/calendar';
 import { useSelectedSchool } from '../selectedSchoolContext';
+import { env } from '../../../env.mjs';
 export default function CreateModulePage() {
   const { selectedSchoolId } = useSelectedSchool();
   const [formData, setFormData] = useState({
@@ -15,7 +16,7 @@ export default function CreateModulePage() {
     course_id: "",
   });
  
-  let hours = [
+  const hours = [
     "00:00:00", "01:00:00", "02:00:00", "03:00:00", "04:00:00", "05:00:00",
     "06:00:00", "07:00:00", "08:00:00", "09:00:00", "10:00:00", "11:00:00",
     "12:00:00", "13:00:00", "14:00:00", "15:00:00", "16:00:00", "17:00:00",
@@ -23,12 +24,12 @@ export default function CreateModulePage() {
   ];
 ;
 
-function timeslotInMinutes(timeslotStr) {
+function timeslotInMinutes(timeslotStr: string) {
   const [hours, minutes,seconds] = timeslotStr.split(':').map(Number);
   return hours * 60 + minutes+seconds/60;
 }
 
-function minuteToTimeslot(minutes) {
+function minuteToTimeslot(minutes: number) {
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
   //creates a time slot in the format of 00:00:00
@@ -96,10 +97,10 @@ function createIntervals(intervals) {
     axios({
       method: 'get',
       withCredentials: true,
-      url: `http://localhost:3001/getCourses`,
+      url: env.NEXT_PUBLIC_API_BASE_URL+`/getCourses`,
       
       headers: {
-        'schoolid': selectedSchoolId.toString(),
+        'schoolid': selectedSchoolId ? selectedSchoolId.toString() : '',
       },
       timeout: 8000,
     }).then((response) => {
@@ -118,12 +119,12 @@ function createIntervals(intervals) {
       console.error("Date is required");
       return;
     }
-    const url = `http://localhost:3001/timeslots?date=${encodeURIComponent(date)}`;
+    const url = env.NEXT_PUBLIC_API_BASE_URL+`/timeslots?date=${encodeURIComponent(date)}`;
     console.log("Request URL:", url);
     axios({
       method: 'get',
       withCredentials: true,
-      url: `http://localhost:3001/timeslots?date=${encodeURIComponent(date)}`,
+      url: env.NEXT_PUBLIC_API_BASE_URL+`/timeslots?date=${encodeURIComponent(date)}`,
       headers: {
         'schoolid': selectedSchoolId.toString(),
       },
@@ -173,7 +174,7 @@ function createIntervals(intervals) {
     e.preventDefault();
     
     try {
-      const response = await axios.post('http://localhost:3001/createModule', {
+      const response = await axios.post(env.NEXT_PUBLIC_API_BASE_URL+'/createModule', {
         module_date: `${formData.date}`,
         module_start_time: startTime,
         module_end_time: endTime,
@@ -182,7 +183,7 @@ function createIntervals(intervals) {
 
       if (response.data.success) {
         alert('Module created successfully!');
-        setFormData({ date: '', timeslot: '', class: '', content: '' });
+        setFormData({ date: '', timeslot: '', course: '', content: '', course_id: '' });
       }
     } catch (error) {
       console.error('Error creating module:', error);

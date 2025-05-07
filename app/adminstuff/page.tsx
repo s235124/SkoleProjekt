@@ -1,15 +1,13 @@
 "use client"
 import SchoolSelector from '@/components/SchoolSelector';
-import React, { useState, useEffect, use } from 'react'
+import React, { useState, useEffect } from 'react'
 import { CalendarDays, Users, GraduationCap, ClipboardCheck, Car, Star } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
-import { createContext } from 'react';
 import { useSelectedSchool } from './selectedSchoolContext';
-import { SelectedSchoolContext } from './selectedSchoolContext';
-import { get } from 'http';
+import { env } from '../../env.mjs';
 // Mock data (replace with actual data fetching in a real application)
 const mockData = {
   totalInstructors: 10,
@@ -31,7 +29,7 @@ export default function AdminDashboard() {
   //const [activeView, setActiveView] = useState<'calendar' | 'students' | 'courses'>('calendar');
   const router = useRouter();
   const getSchools = () => {
-    axios.get('http://localhost:3001/getSchools')
+    axios.get(env.NEXT_PUBLIC_API_BASE_URL+'/getSchools')
      .then((response) => { if (response.data.length > 0) {
          setSchools(response.data) }
          else { console.log('No users found') }
@@ -58,7 +56,7 @@ const getUser = () => {
     axios({
         method: 'get',
         withCredentials: true,
-        url: 'http://localhost:3001/getUser',
+        url: env.NEXT_PUBLIC_API_BASE_URL+'/getUser',
         timeout: 8000,
         }).then((response) => {
           setEmail(response.data.email);

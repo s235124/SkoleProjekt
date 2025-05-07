@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Book } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useSelectedSchool } from '../selectedSchoolContext';
+import { env } from '../../../env.mjs';
 export default function Coursesview() {
   const [formData, setFormData] = useState({
     course_name: '',
@@ -23,7 +24,7 @@ export default function Coursesview() {
 
   useEffect(() => {
     if (selectedSchoolId == null) return;
-     axios.get('http://localhost:3001/getCourses', {
+     axios.get(env.NEXT_PUBLIC_API_BASE_URL+'/getCourses', {
       headers: {
         'schoolid': selectedSchoolId.toString(),
       }
