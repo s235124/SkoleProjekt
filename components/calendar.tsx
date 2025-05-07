@@ -6,7 +6,7 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-
+import { env } from '../env.mjs';
 interface ModuleEvent {
   id: number;
   title: string;
@@ -53,7 +53,7 @@ const getUser = () => {
     axios({
         method: 'get',
         withCredentials: true,
-        url: 'http://localhost:3001/getUser',
+        url: env.NEXT_PUBLIC_API_BASE_URL+'/getUser',
         timeout: 8000,
         }).then((response) => {
           setUser(response.data.role);
@@ -66,7 +66,7 @@ const getUser = () => {
 // 1. Fetch teacher-course relationships with loading state
    const fetchCourseTeachers = async () => {
     try {
-      const response = await axios.get<CourseTeachers[]>('http://localhost:3001/teaches');
+      const response = await axios.get<CourseTeachers[]>(env.NEXT_PUBLIC_API_BASE_URL+'/teaches');
       const map = response.data.reduce((acc, { course_id, teachers }) => {
         acc[course_id] = teachers;
         return acc;
@@ -85,7 +85,7 @@ const getUser = () => {
       setLoading(true);
       setError('');
 
-      const response = await axios.get('http://localhost:3001/modules', { 
+      const response = await axios.get(env.NEXT_PUBLIC_API_BASE_URL+'/modules', { 
         params: {
           start: start.split('T')[0],
           end: end.split('T')[0]
@@ -140,7 +140,7 @@ const getUser = () => {
   const deleteModule = async (moduleId: string) => {
     try {
       const response = await axios.delete(
-        `http://localhost:3001/deletemodule/${moduleId}`
+        env.NEXT_PUBLIC_API_BASE_URL+`/deletemodule/${moduleId}`
       );
       
       if (response.data.success) {

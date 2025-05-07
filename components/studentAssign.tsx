@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
+import { env } from '../env.mjs';
 
 export default function StudentEnrollmentModal({ courseId, open, onOpenChange, onEnroll }) {
     const [students, setStudents] = useState([]);
@@ -11,7 +12,7 @@ export default function StudentEnrollmentModal({ courseId, open, onOpenChange, o
 
     useEffect(() => {
         if (open && courseId) {
-            axios.get(`http://localhost:3001/courses/${courseId}/available-students`)
+            axios.get(env.NEXT_PUBLIC_API_BASE_URL+`/courses/${courseId}/available-students`)
                 .then(response => setStudents(response.data))
                 .catch(console.error);
                 console.log(students);

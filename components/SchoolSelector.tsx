@@ -5,13 +5,13 @@ import { useState } from 'react';
 import { useSelectedSchool } from '@/app/adminstuff/selectedSchoolContext';
 
 
-
-export default function SchoolSelector({ schools, onSelect, selectedSchoolId }) {
-  const { setSelectedSchoolId } = useSelectedSchool();
-  interface School {
+ interface School {
     school_id: number;
     school_name: string;
   }
+export default function SchoolSelector({ schools, onSelect, selectedSchoolId }: { schools: School[]; onSelect: (schoolId: number) => void; selectedSchoolId: number }) {
+  const { setSelectedSchoolId } = useSelectedSchool();
+ 
   const handleSelect = (schoolId: number) => {
     setSelectedSchoolId(schoolId);
     onSelect(schoolId);

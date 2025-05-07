@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
+import { env } from '../env.mjs';
 
 export default function TeacherAssignmentModal({ courseId, open, onOpenChange }) {
     const [teachers, setTeachers] = useState([]);
@@ -11,7 +12,7 @@ export default function TeacherAssignmentModal({ courseId, open, onOpenChange })
 
     useEffect(() => {
         if (open && courseId) {
-            axios.get(`http://localhost:3001/courses/${courseId}/available-teachers`)
+            axios.get(env.NEXT_PUBLIC_API_BASE_URL+`/courses/${courseId}/available-teachers`)
                 .then(response => setTeachers(response.data))
                 .catch(console.error);
         }
@@ -22,7 +23,7 @@ export default function TeacherAssignmentModal({ courseId, open, onOpenChange })
         
         setLoading(true);
         try {
-            await axios.post(`http://localhost:3001/courses/${courseId}/assign-teacher`, {
+            await axios.post(env.NEXT_PUBLIC_API_BASE_URL+`/courses/${courseId}/assign-teacher`, {
                 teacherId: selectedTeacher
             });
             onOpenChange(false);
