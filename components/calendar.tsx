@@ -25,6 +25,12 @@ interface CalendarProps {
 }
 
 interface user {
+user_id: number;
+first_name: string;
+last_name: string;
+email: string;
+phone_number: string;
+school_id: number; // Assuming this is the correct type
 role: number;
 }
 interface CourseTeachers {
@@ -54,8 +60,8 @@ const getUser = () => {
         url: env.NEXT_PUBLIC_API_BASE_URL+'/getUser',
         timeout: 8000,
         }).then((response) => {
-          setUser(response.data.role);
-            console.log(response.data.role);
+          setUser(response.data);
+            console.log(response.data);
         }).catch((error) => {
             console.log(error);
         });

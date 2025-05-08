@@ -6,7 +6,12 @@ import Calendar from '@/components/calendar';
 import { useSelectedSchool } from '../selectedSchoolContext';
 import { env } from '../../../env.mjs';
 export default function CreateModulePage() {
+
+  
   const { selectedSchoolId } = useSelectedSchool();
+
+
+  
   const [formData, setFormData] = useState({
     date: '',
     timeslot: '',
