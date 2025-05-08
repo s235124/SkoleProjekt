@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
@@ -12,7 +13,7 @@ export default function CreateModulePage() {
     course_id: "",
   });
  
-  let hours = [
+  const hours = [
     "00:00:00", "01:00:00", "02:00:00", "03:00:00", "04:00:00", "05:00:00",
     "06:00:00", "07:00:00", "08:00:00", "09:00:00", "10:00:00", "11:00:00",
     "12:00:00", "13:00:00", "14:00:00", "15:00:00", "16:00:00", "17:00:00",
@@ -20,12 +21,12 @@ export default function CreateModulePage() {
   ];
 ;
 
-function timeslotInMinutes(timeslotStr) {
+function timeslotInMinutes(timeslotStr: string) {
   const [hours, minutes,seconds] = timeslotStr.split(':').map(Number);
   return hours * 60 + minutes+seconds/60;
 }
 
-function minuteToTimeslot(minutes) {
+function minuteToTimeslot(minutes: number) {
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
   //creates a time slot in the format of 00:00:00
@@ -33,11 +34,16 @@ function minuteToTimeslot(minutes) {
 }
 
 
-function createIntervals(intervals) {
-  if(intervals.length === 0) return [];
-  intervals.sort((a,b) => a.start - b.start);
-  const mergedIntervals = [intervals[0]];
-  for(let i = 1; i < intervals.length; i++) {
+interface Interval {
+  start: number;
+  end: number;
+}
+
+function createIntervals(intervals: Interval[]): Interval[] {
+  if (intervals.length === 0) return [];
+  intervals.sort((a, b) => a.start - b.start);
+  const mergedIntervals: Interval[] = [intervals[0]];
+  for (let i = 1; i < intervals.length; i++) {
     const current = intervals[i];
     const lastMerged = mergedIntervals[mergedIntervals.length - 1];
     if (current.start <= lastMerged.end) {
@@ -49,9 +55,14 @@ function createIntervals(intervals) {
   return mergedIntervals;
 }
 
-  function findFreeIntervals(mergedIntervals) {
+  interface FreeInterval {
+    start: number;
+    end: number;
+  }
+
+  function findFreeIntervals(mergedIntervals: Interval[]): FreeInterval[] {
     //initialize the arr of free intervals
-    const freeIntervals = [];
+    const freeIntervals: FreeInterval[] = [];
     let previousEnd = 0;
     // loop through the merged intervals and find the free intervals
     for (let i = 0; i < mergedIntervals.length; i++) {
@@ -64,11 +75,10 @@ function createIntervals(intervals) {
           start: previousEnd,
           end: interval.start
         });
-
       }
       //update the previous end to be the max of the current end and the previous end
       // this is to make sure that if there are overlapping intervals, we only take the max end time of them
-      previousEnd = Math.max(previousEnd, interval.end)
+      previousEnd = Math.max(previousEnd, interval.end);
     }
     //1440 is the number of minutes in 24 hours so we, if previous end is lower than 1440, we know that there is an interval between previous end and 1440(24:00:00)
     // so we push the interval between previous end and 1440 to the free intervals arr for example 14:00:00 - 24:00:00
@@ -85,9 +95,12 @@ function createIntervals(intervals) {
   const [endTime, setEndTime] = useState('');
   const [minDate, setMinDate] = useState('');
   const [maxDate, setMaxDate] = useState('');
-  const [timeslots, setTimeslots] = useState([]);
-  const [courses, setCourses] = useState([]);
-  const [selectedClass, setSelectedClass] = useState('');
+  interface Course {
+    course_id: string;
+    course_name: string;
+  }
+
+  const [courses, setCourses] = useState<Course[]>([]);
 
   function getCourses() {
     axios({
@@ -103,7 +116,7 @@ function createIntervals(intervals) {
     });
   }
 
-  const updateHours = (date) => {
+  const updateHours = (date: string) => {
     if (!date) {
       console.error("Date is required");
       return;
@@ -117,7 +130,7 @@ function createIntervals(intervals) {
       timeout: 8000,
     }).then((response) => {
       console.log(response.data);
-      const intervals = response.data.map(({ start, end }) => ({
+      const intervals = response.data.map(({ start, end }: { start: string; end: string }) => ({
         start: timeslotInMinutes(start),
         end: timeslotInMinutes(end)
       }));

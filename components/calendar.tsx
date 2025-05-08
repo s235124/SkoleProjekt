@@ -8,7 +8,7 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { env } from '../env.mjs';
 interface ModuleEvent {
-  id: number;
+  id: string;
   title: string;
   start: string;
   end: string;
@@ -35,9 +35,7 @@ export default function Calendar({ refetchTrigger, currentTeacherId,schoolId }: 
   const [events, setEvents] = useState<ModuleEvent[]>([]);
   const [currentStart, setCurrentStart] = useState('');
   const [currentEnd, setCurrentEnd] = useState('');
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [courses, setCourses] = useState([]);
   const [courseTeacherMap, setCourseTeacherMap] = useState<Record<number, number[]>>({});
   const [fetched, setFetched] = useState(false); // User state
 // Add loading state
@@ -82,7 +80,7 @@ const getUser = () => {
   
   const fetchModules = useCallback(async (start: string, end: string) => {
     try {
-      setLoading(true);
+      //setLoading(true);
       setError('');
 
       const response = await axios.get(env.NEXT_PUBLIC_API_BASE_URL+'/modules', { 
@@ -103,7 +101,7 @@ const getUser = () => {
       console.log("what"+isCurrentTeacher); // Debugging line
       console.log("what"+ teachers); // Debugging line
         return {
-          id: module.module_id,
+          id: module.module_id.toString(), // Ensure id is a string
           title: module.module_name,
           start: `${module.module_date}T${module.module_start_time}`,
           end: `${module.module_date}T${module.module_end_time}`,
@@ -123,7 +121,7 @@ const getUser = () => {
       setError('Failed to load calendar data');
       console.error('Error fetching modules:', err);
     } finally {
-      setLoading(false);
+      //setLoading(false);
     }
   }, [currentTeacherId, courseTeacherMap]);
 
@@ -186,7 +184,7 @@ const getUser = () => {
         eventContent={(arg) => (
           <div className="flex justify-between items-center h-full p-1">
             <div className="flex-1 overflow-hidden">{arg.event.title}</div>
-            {(arg.event.extendedProps.teacherId === currentTeacherId || user == 3|| user == 4) && (
+            {(arg.event.extendedProps.teacherId === currentTeacherId || user?.role === 3 || user?.role === 4) && (
             <button 
               className="ml-2 p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
               onClick={(e) => {

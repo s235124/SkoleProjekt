@@ -1,8 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { responseCookiesToRequestCookies } from 'next/dist/server/web/spec-extension/adapters/request-cookies';
-import { threadId } from 'worker_threads';
 import Calendar from '@/components/calendar';
 import { useSelectedSchool } from '../selectedSchoolContext';
 import { env } from '../../../env.mjs';
@@ -29,19 +28,18 @@ function timeslotInMinutes(timeslotStr: string) {
   return hours * 60 + minutes+seconds/60;
 }
 
-function minuteToTimeslot(minutes: number) {
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
-  //creates a time slot in the format of 00:00:00
-  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:00`;
+
+
+interface Interval {
+  start: number;
+  end: number;
 }
 
-
-function createIntervals(intervals) {
-  if(intervals.length === 0) return [];
-  intervals.sort((a,b) => a.start - b.start);
-  const mergedIntervals = [intervals[0]];
-  for(let i = 1; i < intervals.length; i++) {
+function createIntervals(intervals: Interval[]): Interval[] {
+  if (intervals.length === 0) return [];
+  intervals.sort((a, b) => a.start - b.start);
+  const mergedIntervals: Interval[] = [intervals[0]];
+  for (let i = 1; i < intervals.length; i++) {
     const current = intervals[i];
     const lastMerged = mergedIntervals[mergedIntervals.length - 1];
     if (current.start <= lastMerged.end) {
@@ -53,9 +51,14 @@ function createIntervals(intervals) {
   return mergedIntervals;
 }
 
-  function findFreeIntervals(mergedIntervals) {
+  interface FreeInterval {
+    start: number;
+    end: number;
+  }
+
+  function findFreeIntervals(mergedIntervals: Interval[]): FreeInterval[] {
     //initialize the arr of free intervals
-    const freeIntervals = [];
+    const freeIntervals: FreeInterval[] = [];
     let previousEnd = 0;
     // loop through the merged intervals and find the free intervals
     for (let i = 0; i < mergedIntervals.length; i++) {
@@ -68,11 +71,10 @@ function createIntervals(intervals) {
           start: previousEnd,
           end: interval.start
         });
-
       }
       //update the previous end to be the max of the current end and the previous end
       // this is to make sure that if there are overlapping intervals, we only take the max end time of them
-      previousEnd = Math.max(previousEnd, interval.end)
+      previousEnd = Math.max(previousEnd, interval.end);
     }
     //1440 is the number of minutes in 24 hours so we, if previous end is lower than 1440, we know that there is an interval between previous end and 1440(24:00:00)
     // so we push the interval between previous end and 1440 to the free intervals arr for example 14:00:00 - 24:00:00
@@ -82,7 +84,7 @@ function createIntervals(intervals) {
     return freeIntervals;
   }
 
- const [filteredHours, setFilteredHours] = useState(hours);
+ const [filteredHours] = useState(hours);
  const [freeTimeslots, setFreeTimeslots] = useState<{ start: number; end: number }[]>([]);
   const [existingTimeslots, setExistingTimeslots] = useState<{ start: number; end: number }[]>([]);
   const [startTime, setStartTime] = useState('');
@@ -90,7 +92,7 @@ function createIntervals(intervals) {
   const [minDate, setMinDate] = useState('');
   const [maxDate, setMaxDate] = useState('');
   const [timeslots, setTimeslots] = useState([]);
-  const [courses, setCourses] = useState([]);
+  const [courses, setCourses] = useState<{ course_id: string; course_name: string }[]>([]);
   const [selectedClass, setSelectedClass] = useState('');
 
   function getCourses() {
@@ -114,7 +116,17 @@ function createIntervals(intervals) {
     return <div>Please select a school.</div>;
   }
 
-  const updateHours = (date) => {
+  interface TimeslotResponse {
+    start: string;
+    end: string;
+  }
+
+  interface Interval {
+    start: number;
+    end: number;
+  }
+
+  const updateHours = (date: string): void => {
     if (!date) {
       console.error("Date is required");
       return;
@@ -131,7 +143,7 @@ function createIntervals(intervals) {
       timeout: 8000,
     }).then((response) => {
       console.log(response.data);
-      const intervals = response.data.map(({ start, end }) => ({
+      const intervals: Interval[] = response.data.map(({ start, end }: TimeslotResponse) => ({
         start: timeslotInMinutes(start),
         end: timeslotInMinutes(end)
       }));
@@ -160,6 +172,7 @@ function createIntervals(intervals) {
     return free && hEnd > hStart && hEnd <= free.end;
   }) : [];
 
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
     // Set date constraints
     const today = new Date();

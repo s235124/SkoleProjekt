@@ -1,7 +1,13 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 
-export default function DeleteConfirmation({ open, onOpenChange, onConfirm }) {
+interface DeleteConfirmationProps {
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    onConfirm: () => void;
+}
+
+export default function DeleteConfirmation({ open, onOpenChange, onConfirm }: DeleteConfirmationProps) {
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent>

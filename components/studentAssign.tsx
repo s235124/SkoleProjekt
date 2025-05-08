@@ -5,9 +5,16 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { env } from '../env.mjs';
 
-export default function StudentEnrollmentModal({ courseId, open, onOpenChange, onEnroll }) {
-    const [students, setStudents] = useState([]);
-    const [selectedStudent, setSelectedStudent] = useState('');
+interface StudentEnrollmentModalProps {
+    courseId: string| string[] | undefined| null ;
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    onEnroll: (studentId: string) => Promise<void>;
+}
+
+export default function StudentEnrollmentModal({ courseId, open, onOpenChange, onEnroll }: StudentEnrollmentModalProps) {
+    const [students, setStudents] = useState<{ user_id: string; email: string; last_name: string }[]>([]);
+    const [selectedStudent, setSelectedStudent] = useState<string | undefined>();
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {

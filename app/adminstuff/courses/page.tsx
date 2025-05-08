@@ -4,8 +4,6 @@ import React from 'react'
 import { useState } from 'react';
 import { useEffect } from 'react';
 import { ScrollArea } from "@/components/ui/scroll-area"
-import FloatingLabelInput from '@/components/FloatingLabelInput';
-import router from 'next/router';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Book } from 'lucide-react';
@@ -13,14 +11,14 @@ import { useRouter } from 'next/navigation';
 import { useSelectedSchool } from '../selectedSchoolContext';
 import { env } from '../../../env.mjs';
 export default function Coursesview() {
-  const [formData, setFormData] = useState({
-    course_name: '',
-    course_description: '',
-  });
   const { selectedSchoolId } = useSelectedSchool();
   const router = useRouter();
-
-  const [courses, setCourses] = useState<Course[]>([]);
+interface course {
+    course_id: number;
+    course_name: string;
+    course_description: string;
+  }
+  const [courses, setCourses] = useState<course[]>([]);
 
   useEffect(() => {
     if (selectedSchoolId == null) return;

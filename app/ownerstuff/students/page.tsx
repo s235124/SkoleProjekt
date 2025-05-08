@@ -87,7 +87,7 @@ export default function Students() {
             {filteredTeachers.length > 0 ? (
               filteredTeachers.map((user) => (
                 <div 
-                  key={user.id} 
+                  key={user.user_id} 
                   className="group p-4 hover:bg-gray-50 transition-colors cursor-pointer"
                   onClick={() => router.push(`/ownerstuff/students/specificstudent/${user.user_id}`)}
                 >

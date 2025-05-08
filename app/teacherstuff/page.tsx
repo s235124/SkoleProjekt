@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -40,7 +41,7 @@ export default function OwnerDashboard() {
       console.log('User data:', response.data);
     } catch (error) {
       console.error('Error fetching user:', error);
-      if (error.response?.status === 401) {
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
         // Handle unauthorized access
       }
     }

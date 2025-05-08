@@ -5,8 +5,14 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { env } from '../env.mjs';
 
-export default function TeacherAssignmentModal({ courseId, open, onOpenChange }) {
-    const [teachers, setTeachers] = useState([]);
+interface TeacherAssignmentModalProps {
+    courseId: string | string[] | undefined;
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+}
+
+export default function TeacherAssignmentModal({ courseId, open, onOpenChange }: TeacherAssignmentModalProps) {
+    const [teachers, setTeachers] = useState<{ user_id: string; email: string; last_name: string }[]>([]);
     const [selectedTeacher, setSelectedTeacher] = useState('');
     const [loading, setLoading] = useState(false);
 
@@ -30,7 +36,9 @@ export default function TeacherAssignmentModal({ courseId, open, onOpenChange })
             // Optionally refresh course data
         } catch (error) {
             console.error('Assignment failed:', error);
-            alert(error.response?.data?.error || 'Assignment failed');
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const err = error as any;
+            alert(err.response?.data?.error || 'Assignment failed');
         } finally {
             setLoading(false);
         }

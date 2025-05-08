@@ -4,8 +4,21 @@ import { Button } from '@/components/ui/button';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { env } from '../env.mjs';
-export default function TeacherAssignmentModalAdmin({ courseId, open, onOpenChange,schoolId }) {
-    const [teachers, setTeachers] = useState([]);
+interface TeacherAssignmentModalAdminProps {
+    courseId: string | string[] | undefined;
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    schoolId: number | string[] | undefined| null ;
+}
+
+export default function TeacherAssignmentModalAdmin({ courseId, open, onOpenChange, schoolId }: TeacherAssignmentModalAdminProps) {
+    interface Teacher {
+        user_id: string;
+        email: string;
+        last_name: string;
+    }
+    
+    const [teachers, setTeachers] = useState<Teacher[]>([]);
     const [selectedTeacher, setSelectedTeacher] = useState('');
     const [loading, setLoading] = useState(false);
 
@@ -13,7 +26,7 @@ export default function TeacherAssignmentModalAdmin({ courseId, open, onOpenChan
         if (open && courseId) {
             axios.get(env.NEXT_PUBLIC_API_BASE_URL+`/courses/${courseId}/available-teachers`, {
                 headers: {
-                  'schoolid': schoolId.toString(),
+                  'schoolid': schoolId ? schoolId.toString() : '',
                 }
               })
                 .then(response => setTeachers(response.data))
@@ -33,7 +46,9 @@ export default function TeacherAssignmentModalAdmin({ courseId, open, onOpenChan
             // Optionally refresh course data
         } catch (error) {
             console.error('Assignment failed:', error);
-            alert(error.response?.data?.error || 'Assignment failed');
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const err = error as any;
+            alert(err.response?.data?.error || 'Assignment failed');
         } finally {
             setLoading(false);
         }

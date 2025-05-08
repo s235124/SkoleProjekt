@@ -1,7 +1,6 @@
 // components/SchoolSelector.tsx
 //deepseek made this code more readable
 "use client";
-import { useState } from 'react';
 import { useSelectedSchool } from '@/app/adminstuff/selectedSchoolContext';
 
 

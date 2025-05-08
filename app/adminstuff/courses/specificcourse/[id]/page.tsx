@@ -1,18 +1,12 @@
 // app/teacher/[id]/page.tsx
 "use client"
-import TeacherAssignmentModal from '@/components/teacherAssign';
 import DeleteConfirmation from '@/components/deleteConfirmation';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import axios from 'axios';
-import { Users } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import StudentEnrollmentModal from '@/components/studentAssign';
 import { useSelectedSchool } from '../../../selectedSchoolContext';
 import TeacherAssignmentModalAdmin from '@/components/teacherAssignAdmin';
 import StudentEnrollmentModalAdmin from '@/components/studentAssignAdmin';
@@ -21,9 +15,19 @@ export default function CoursePage() {
     const router = useRouter()
     const params = useParams()
     const [me, setMe] = useState()
-    const [course, setCourse] = useState()
-    const [students, setStudents] = useState([])
-    const [teachers, setTeachers] = useState([])
+    interface Course {
+        course_name: string;
+        // Add other properties of the course object here if needed
+    }
+    const [course, setCourse] = useState<Course | null>(null);
+    interface Student {
+        user_id: number;
+        first_name: string;
+        last_name: string;
+        email: string;
+    }
+    const [students, setStudents] = useState<Student[]>([])
+    const [teachers, setTeachers] = useState<Teacher[]>([])
       const { selectedSchoolId } = useSelectedSchool();
     const [assignmentOpen, setAssignmentOpen] = useState(false);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -34,6 +38,7 @@ export default function CoursePage() {
             if (response.data.length > 0) {
                 console.log(response.data)
                 setMe(response.data)
+                console.log('me', me)
             }
             else { console.log('we cant find you') }
 
@@ -66,15 +71,26 @@ export default function CoursePage() {
             router.push('/ownerstuff/courses'); // Redirect after deletion
         } catch (error) {
             console.error('Delete failed:', error);
-            alert(error.response?.data?.error || 'Failed to delete course');
+            if (axios.isAxiosError(error)) {
+                alert(error.response?.data?.error || 'Failed to delete course');
+            } else {
+                alert('Failed to delete course');
+            }
         } finally {
             setDeleteDialogOpen(false);
         }
     };
-    const handleRemoveTeacher = async (teacherId) => {
+    interface Teacher {
+        user_id: string;
+        first_name: string;
+        last_name: string;
+        email: string;
+    }
+
+    const handleRemoveTeacher = async (teacherId: string): Promise<void> => {
         try {
             await axios.delete(env.NEXT_PUBLIC_API_BASE_URL+`/courses/${params.id}/teachers/delete/${teacherId}`);
-            setTeachers(teachers.filter(t => t.user_id !== teacherId));
+            setTeachers(teachers.filter((t: Teacher) => t.user_id !== teacherId));
         } catch (error) {
             console.error('Failed to remove teacher:', error);
             alert('Failed to remove teacher');
@@ -96,30 +112,25 @@ export default function CoursePage() {
     }, [params?.id]);
 
     // Add enrollment handlers
-    const handleEnrollStudent = async (studentId) => {
+    const handleEnrollStudent = async (studentId: number): Promise<void> => {
         try {
-            await axios.post(env.NEXT_PUBLIC_API_BASE_URL+`/courses/${params.id}/enroll`, { studentId });
-            const res = await axios.get(env.NEXT_PUBLIC_API_BASE_URL+`/courses/${params.id}/students`);
-            setStudents(res.data);
+            console.log("Enrolling student with ID:", studentId);
+            await axios.post(`/api/enroll/${studentId}`);
         } catch (error) {
             console.error('Enrollment failed:', error);
-            alert(error.response?.data?.error || 'Enrollment failed');
         }
     };
 
-    const handleUnenrollStudent = async (studentId) => {
+    const handleUnenrollStudent = async (studentId: string) => {
         try {
             await axios.delete(env.NEXT_PUBLIC_API_BASE_URL+`/courses/${params.id}/students/delete/${studentId}`);
-            setStudents(students.filter(s => s.user_id !== studentId));
+            setStudents(students.filter(s => String(s.user_id) !== studentId));
         } catch (error) {
             console.error('Unenrollment failed:', error);
             alert('Failed to unenroll student');
-        }
-    };
+        }}
+    if (!course) return <div>Loading...</div>;
 
-
-
-    if (!course) return <div>Loading...</div>
 
     return (
 
@@ -202,13 +213,22 @@ export default function CoursePage() {
                                 >
                                     <div
                                         className='flex-1 flex items-center gap-4'
-                                        onClick={() => router.push(`/ownerstuff/teachers/specificteacher/${teacher.user_id}`)}
+                                        onClick={() => router.push(`/adminstuff/teachers/specificteacher/${teacher.user_id}`)}
                                     >
                                         <div className='w-8 h-8 rounded-full bg-violet-400'></div>
                                         <div>
                                             <p className='font-medium'>{teacher.first_name} {teacher.last_name}</p>
                                             <p className='text-sm text-gray-600'>{teacher.email}</p>
                                         </div>
+                                        <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleRemoveTeacher(teacher.user_id);
+                                        }}
+                                        className="ml-4 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                                    >
+                                        Remove
+                                    </button>
                                     </div>
                                 </div>
                             ))}
@@ -232,7 +252,7 @@ export default function CoursePage() {
                                     <button
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            handleUnenrollStudent(student.user_id);
+                                            handleUnenrollStudent(String(student.user_id));
                                         }}
                                         className="ml-4 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
                                     >
@@ -259,7 +279,7 @@ export default function CoursePage() {
                 courseId={params.id}
                 open={enrollmentOpen}
                 onOpenChange={setEnrollmentOpen}
-                onEnroll={handleEnrollStudent}
+                onEnroll={(studentId: string) => handleEnrollStudent(Number(studentId))}
                 schoolId={selectedSchoolId}
             />
         </>

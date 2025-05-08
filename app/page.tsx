@@ -19,6 +19,7 @@ console.log("v"+env.NEXT_PUBLIC_API_BASE_URL)
     setIsMounted(true)
     setEmail("")
     setPassword("")
+    console.log("is mounted"+ isMounted)
   }, [])
 
 
@@ -33,8 +34,10 @@ console.log("v"+env.NEXT_PUBLIC_API_BASE_URL)
 
     const {token} = res.data
     const decodedToken = jsonwebtoken.decode(token);
-    
-    const role = decodedToken.role;
+    let role = 0;
+    if (decodedToken && typeof decodedToken !== 'string' && 'role' in decodedToken) {
+      role = decodedToken.role;
+    }
     document.cookie = `token=${token}; path=/; max-age=3600`;
 
     
@@ -49,7 +52,7 @@ console.log("v"+env.NEXT_PUBLIC_API_BASE_URL)
         router.push('/ownerstuff');
         break;
       case 4:
-        router.push('/dashboards/admin');
+        router.push('/adminstuff');
         break;
       default:
         console.log('No role found');
@@ -73,8 +76,8 @@ console.log("v"+env.NEXT_PUBLIC_API_BASE_URL)
           <h2 className="text-3xl font-bold mb-6 text-left text-white">Log ind i din konto<span className='text-blue-500'>.</span></h2>
           <h3 className='text-white text-sm my-4'>Mangler du en konto? <Link href="/signup" className='text-blue-500'>Lav en her</Link></h3>
           <form className="space-y-6" onSubmit={login3}>
-            <FloatingLabelInput value={email} onChange={(e: any) => setEmail(e.target.value)} label="Email" id="email"/>
-            <FloatingLabelInput value={password} onChange={(e: any) => setPassword(e.target.value)} label="Password" id="password"/>
+            <FloatingLabelInput value={email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} label="Email" id="email"/>
+            <FloatingLabelInput value={password} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)} label="Password" id="password"/>
             <Button type="submit" className="w-full h-12 rounded-full bg-blue-500 hover:bg-blue-600 text-white">
               Log ind
             </Button>

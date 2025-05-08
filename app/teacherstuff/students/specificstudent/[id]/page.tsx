@@ -30,7 +30,7 @@ export default function StudentDetail() {
   const [student, setStudent] = useState<student>();
   const [courses, setCourses] = useState<course[]>([]);
   const [loading, setLoading] = useState(true);
-  const getCourses = (id) => {
+  const getCourses = (id: number | string | string[]) => {
     if (!id) {
       console.error('User not found');
       return;

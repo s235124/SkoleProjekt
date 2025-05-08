@@ -14,11 +14,21 @@ interface course {
   course_name: string;
   course_description: string;
 }
+interface Student {
+  user_id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone_number: string;
+}
+
+
+
 
 export default function StudentDetail() {
   const params = useParams();
   const studentId = params?.id;
-  const [student, setStudent] = useState();
+  const [student, setStudent] = useState<Student>();
   const [courses, setCourses] = useState<course[]>([]);
   const [loading, setLoading] = useState(true);
   const getCourses = (id: string | string[]) => {

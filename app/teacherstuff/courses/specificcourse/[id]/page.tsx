@@ -35,6 +35,7 @@ interface teacher {
 export default function CoursePage() {
     const router = useRouter()
     const params = useParams()
+ // eslint-disable-next-line @typescript-eslint/no-unused-vars
  const [me, setMe] = useState<user>()
     const [course, setCourse] = useState<course>()
     const [students, setStudents] = useState<student[]>([])
@@ -113,18 +114,12 @@ export default function CoursePage() {
     }, [params?.id]);
 
     // Add enrollment handlers
-    const handleEnrollStudent = async (studentId: number) => {
+    const handleEnrollStudent = async (studentId: number): Promise<void> => {
         try {
-            await axios.post(env.NEXT_PUBLIC_API_BASE_URL+`/courses/${params.id}/enroll`, { studentId });
-            const res = await axios.get(env.NEXT_PUBLIC_API_BASE_URL+`/courses/${params.id}/students`);
-            setStudents(res.data);
+            console.log("Enrolling student with ID:", studentId);
+            await axios.post(`/api/enroll/${studentId}`);
         } catch (error) {
             console.error('Enrollment failed:', error);
-            if (axios.isAxiosError(error)) {
-                alert(error.response?.data?.error || 'Enrollment failed');
-            } else {
-                alert('Enrollment failed');
-            }
         }
     };
 
@@ -137,7 +132,6 @@ export default function CoursePage() {
             alert('Failed to unenroll student');
         }
     };
-
 
 
     if (!course) return <div>Loading...</div>
@@ -268,7 +262,7 @@ export default function CoursePage() {
                 courseId={params.id}
                 open={enrollmentOpen}
                 onOpenChange={setEnrollmentOpen}
-                onEnroll={handleEnrollStudent}
+                onEnroll={(studentId: string) => handleEnrollStudent(Number(studentId))} // Convert string to number
             />
         </>
     )

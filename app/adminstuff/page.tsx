@@ -5,7 +5,6 @@ import { CalendarDays, Users, GraduationCap, ClipboardCheck, Car, Star } from 'l
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import axios from 'axios'
-import { useRouter } from 'next/navigation'
 import { useSelectedSchool } from './selectedSchoolContext';
 import { env } from '../../env.mjs';
 // Mock data (replace with actual data fetching in a real application)
@@ -27,7 +26,6 @@ export default function AdminDashboard() {
   const [schools, setSchools] = useState<School[]>([]);
   const [email, setEmail] = useState('');
   //const [activeView, setActiveView] = useState<'calendar' | 'students' | 'courses'>('calendar');
-  const router = useRouter();
   const getSchools = () => {
     axios.get(env.NEXT_PUBLIC_API_BASE_URL+'/getSchools')
      .then((response) => { if (response.data.length > 0) {
@@ -80,7 +78,7 @@ const getUser = () => {
           <SchoolSelector 
             schools={schools}
             onSelect={handleSchoolSelect}
-            selectedSchoolId={selectedSchoolId}
+            selectedSchoolId={selectedSchoolId ?? 0}
           />
         </div>
       </div>

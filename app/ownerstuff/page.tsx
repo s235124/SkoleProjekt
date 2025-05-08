@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Users, GraduationCap, ClipboardList, BarChart, LineChart as LineIcon, Star } from 'lucide-react';
+import { Users, GraduationCap, ClipboardList, BarChart, LineChart as LineIcon } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { env } from '../../env.mjs';
 

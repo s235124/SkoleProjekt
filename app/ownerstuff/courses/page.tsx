@@ -10,13 +10,13 @@ import { Book } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { env } from '../../../env.mjs';
 export default function Coursesview() {
-  const [formData, setFormData] = useState({
-    course_name: '',
-    course_description: '',
-  });
   const router = useRouter();
-
-  const [courses, setCourses] = useState<Course[]>([]);
+ interface course {
+  course_id: number;
+  course_name: string;
+  course_description: string;
+}
+  const [courses, setCourses] = useState<course[]>([]);
 
   useEffect(() => {
      axios.get(env.NEXT_PUBLIC_API_BASE_URL+'/getCourses')

@@ -3,10 +3,7 @@
 import axios from 'axios';
 import React, { useState, useEffect } from 'react';
 import { ScrollArea } from "@/components/ui/scroll-area";
-import router from 'next/router';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useContext } from 'react';
 import { env } from '../../../env.mjs';
 import { useSelectedSchool } from '../selectedSchoolContext'; // Fix import path
 interface School {
@@ -19,7 +16,6 @@ export default function Schools() {
   console.log('Selected School ID:', selectedSchoolId);
   const [schools, setSchools] = useState<School[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const router = useRouter();
   useEffect(() => {
     axios.get<School[]>(env.NEXT_PUBLIC_API_BASE_URL+'/getSchools')
       .then((response) => {
@@ -86,7 +82,7 @@ export default function Schools() {
                 <div 
                   key={School.school_id} 
                   className="group p-4 hover:bg-gray-50 transition-colors cursor-pointer"
-                  onClick={() => router.push(`/ownerstuff/students/specificstudent/${user.user_id}`)}
+                  //onClick={() => router.push(`/adminstuff/schools/specificschool/${School.school_id}`)}
                 >
                   <div className="flex items-center gap-4">
                     <div className="flex-shrink-0">

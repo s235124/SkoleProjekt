@@ -4,7 +4,17 @@ import Calendar from '@/components/calendar';
 import axios from 'axios';
 import { env } from '../../../env.mjs';
 export default function CreateModulePage() {
-  const [user, setUser] = useState(null); // Initialize as null for explicit checks
+  interface User {
+    school_id: number; // Define the expected properties of the user object
+    // Add other properties if needed
+    user_id: number;
+    first_name: string;
+    last_name: string;
+    email: string;
+    phone_number: string;
+  }
+
+  const [user, setUser] = useState<User | null>(null); // Use the User type for state
 
   const getUser = useCallback(async () => {
     try {

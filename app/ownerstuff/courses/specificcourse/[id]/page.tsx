@@ -32,7 +32,12 @@ export default function CoursePage() {
     const router = useRouter()
     const params = useParams()
     const [me, setMe] = useState<User | null>(null);
-    const [course, setCourse] = useState()
+    interface Course {
+        course_name: string;
+        // Add other properties of the course object here if needed
+    }
+    
+    const [course, setCourse] = useState<Course | null>(null);
     const [students, setStudents] = useState<student[]>([])
     const [teachers, setTeachers] = useState<teacher[]>([])
     const [assignmentOpen, setAssignmentOpen] = useState(false);
@@ -83,7 +88,11 @@ export default function CoursePage() {
             router.push('/ownerstuff/courses'); // Redirect after deletion
         } catch (error) {
             console.error('Delete failed:', error);
-            alert(error.response?.data?.error || 'Failed to delete course');
+            if (axios.isAxiosError(error) && error.response?.data?.error) {
+                alert(error.response.data.error);
+            } else {
+                alert('Failed to delete course');
+            }
         } finally {
             setDeleteDialogOpen(false);
         }
@@ -113,18 +122,22 @@ export default function CoursePage() {
     }, [params?.id]);
 
     // Add enrollment handlers
-    const handleEnrollStudent = async (studentId: any) => {
+    const handleEnrollStudent = async (studentId: number | string) => {
         try {
             await axios.post(env.NEXT_PUBLIC_API_BASE_URL+`/courses/${params.id}/enroll`, { studentId });
             const res = await axios.get(env.NEXT_PUBLIC_API_BASE_URL+`/courses/${params.id}/students`);
             setStudents(res.data);
         } catch (error) {
             console.error('Enrollment failed:', error);
-            alert(error.response?.data?.error || 'Enrollment failed');
+            if (axios.isAxiosError(error)) {
+                alert(error.response?.data?.error || 'Enrollment failed');
+            } else {
+                alert('Enrollment failed');
+            }
         }
     };
 
-    const handleUnenrollStudent = async (studentId: any) => {
+    const handleUnenrollStudent = async (studentId: number | string) => {
         try {
             await axios.delete(env.NEXT_PUBLIC_API_BASE_URL+`/courses/${params.id}/students/delete/${studentId}`);
             setStudents(students.filter(s => s.user_id !== studentId));

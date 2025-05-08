@@ -37,6 +37,7 @@ export default function CoursePage() {
     const [students, setStudents] = useState<student[]>([])
     const [teachers, setTeachers] = useState<teacher[]>([])
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [studentToUnenroll, setStudentToUnenroll] = useState<number | null>(null);
     useEffect(() => {
         axios.get(`http://localhost:3001/getUser`)
         .then((response) => {
@@ -177,6 +178,16 @@ export default function CoursePage() {
                                             <p className='text-sm text-gray-600'>{student.email}</p>
                                         </div>
                                     </div>
+                                    <button
+                                        onClick={() => {
+                                            setStudentToUnenroll(student.user_id); // Set the student ID
+                                            setDeleteDialogOpen(true); // Open the dialog
+                                        }}
+                                        className="top-1 flex items-center rounded bg-red-600 py-1 px-2.5 border border-transparent text-center text-sm text-white transition-all shadow-sm hover:shadow focus:bg-red-700 focus:shadow-none active:bg-red-700 hover:bg-red-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                                        type="button"
+                                    >
+                                        Leave Course
+                                    </button>
                                 </div>
                             ))}
                         </div>
@@ -186,7 +197,11 @@ export default function CoursePage() {
             <DeleteConfirmation
                 open={deleteDialogOpen}
                 onOpenChange={setDeleteDialogOpen}
-                onConfirm={handleUnenrollStudent}
+                onConfirm={() => {
+                    if (studentToUnenroll !== null) {
+                        handleUnenrollStudent(studentToUnenroll);
+                    }
+                }}
             />
         </>
     )

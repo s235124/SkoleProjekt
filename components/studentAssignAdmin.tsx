@@ -4,8 +4,22 @@ import { Button } from '@/components/ui/button';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { env } from '../env.mjs';
-export default function StudentEnrollmentModalAdmin({ courseId, open, onOpenChange, onEnroll, schoolId }) {
-    const [students, setStudents] = useState([]);
+interface StudentEnrollmentModalAdminProps {
+    courseId: number | string[] | undefined | string;
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    onEnroll: (studentId: string) => Promise<void>;
+    schoolId: number| null;
+}
+
+export default function StudentEnrollmentModalAdmin({ courseId, open, onOpenChange, onEnroll, schoolId }: StudentEnrollmentModalAdminProps) {
+    interface Student {
+        user_id: string;
+        email: string;
+        last_name: string;
+    }
+
+    const [students, setStudents] = useState<Student[]>([]);
     const [selectedStudent, setSelectedStudent] = useState('');
     const [loading, setLoading] = useState(false);
 
@@ -13,7 +27,7 @@ export default function StudentEnrollmentModalAdmin({ courseId, open, onOpenChan
         if (open && courseId) {
             axios.get(env.NEXT_PUBLIC_API_BASE_URL+`/courses/${courseId}/available-students`, {
                 headers: {
-                  'schoolid': schoolId.toString(),
+                  'schoolid': schoolId ? schoolId.toString() : '',
                 }
               })
                 .then(response => setStudents(response.data))

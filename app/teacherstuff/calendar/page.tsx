@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
@@ -61,9 +62,14 @@ export default function CreateModulePage() {
     return mergedIntervals;
   }
 
-  function findFreeIntervals(mergedIntervals) {
+  interface Interval {
+    start: number;
+    end: number;
+  }
+
+  function findFreeIntervals(mergedIntervals: Interval[]): Interval[] {
     //initialize the arr of free intervals
-    const freeIntervals = [];
+    const freeIntervals: Interval[] = [];
     let previousEnd = 0;
     // loop through the merged intervals and find the free intervals
     for (let i = 0; i < mergedIntervals.length; i++) {

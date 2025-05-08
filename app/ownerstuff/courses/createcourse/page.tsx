@@ -1,5 +1,4 @@
 "use client";
-import axios from 'axios';
 import Link from 'next/link';
 import React from 'react'
 import { useState } from 'react';
@@ -35,7 +34,11 @@ export default function CreateCourseForm() {
       });
     } catch (error) {
       console.error('Error:', error);
-      alert(error.message || 'Error creating course');
+      if (error instanceof Error) {
+        alert(error.message || 'Error creating course');
+      } else {
+        alert('An unknown error occurred');
+      }
     }
   };
 
