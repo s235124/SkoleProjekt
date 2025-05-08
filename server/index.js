@@ -10,6 +10,64 @@
 // mysql for handling our sql connection and queries
 // passport and passport-local for handling our authentication
 
+// nodemon: a developer utility (not in package.json) that watches your files
+// and automatically restarts the Node server whenever you save changes.
+// Great for rapid iteration during development.
+
+// axios: a Promise‑based HTTP client you can use on both Node.js and the browser.
+// On the server it’s handy for calling external APIs; in React it’s how you fetch your own backend.
+
+// bcrypt: a library for hashing (and comparing) passwords in a secure way.
+// It uses a salt under the hood so that even identical passwords hash to different values,
+// which protects you if your database ever leaks.
+
+// cors: short for “Cross‑Origin Resource Sharing.”  
+// Browsers enforce a same‑origin policy by default, so scripts at http://localhost:3000
+// can’t call APIs at http://localhost:3001 unless the server explicitly allows it.
+// The `cors` middleware sets the right HTTP headers (Access‑Control‑Allow‑Origin, etc.)
+// so that your frontend and backend can live on different ports or domains.
+
+// express: the core web‑framework.  
+// It gives you an easy way to declare routes (`app.get`, `app.post`, etc.),  
+// plug in middleware, handle errors, and send JSON or HTML responses.
+
+// express‑session: middleware for managing server‑side sessions.  
+// When a new visitor comes, it creates a session object stored in memory (or a store).
+// It then sets a session cookie on the client (`connect.sid` by default), so subsequent
+// requests automatically load that visitor’s session data.
+
+// cookie‑parser: reads the Cookie header on incoming requests and populates `req.cookies`
+// (and, if you configure signed cookies, `req.signedCookies`). This makes it trivial to
+// read your JWT or session ID from a cookie.
+
+// body‑parser: middleware that reads JSON or URL‑encoded payloads from POST/PUT requests
+// and populates `req.body` so you can do `const { email, password } = req.body;` instead of
+// parsing the raw HTTP stream yourself. In modern Express you can also use `express.json()`
+// and `express.urlencoded()` instead of pulling in `body-parser` separately.
+
+// passport + passport‑local: a pluggable authentication middleware for Express.
+// `passport` wires into your session so it can serialize/deserialize a user object.
+// The “local” strategy lets you define a username/password check. After a successful
+// `passport.authenticate('local')`, it calls `req.logIn(user)` behind the scenes,
+// storing the user’s ID in the session and making `req.user` available on future requests.
+
+// mysql: the official Node.js driver for MySQL.  
+// You use it to create a connection or pool, run parameterized queries (`?` placeholders),
+// and get back JavaScript arrays/objects instead of juggling the raw MySQL protocol.
+
+// db (your own module): typically you’d export a `mysql.createPool(...)` or `createConnection(...)`
+// instance here, plus helper functions for querying.  
+
+// Putting it all together, your typical request flow is:
+// 1) Browser sends request with cookies (session ID or JWT).  
+// 2) cors middleware checks origin & sets CORS headers.  
+// 3) cookie‑parser parses cookies → req.cookies.  
+// 4) express‑session loads or creates a session for that cookie.  
+// 5) passport (if configured) grabs `req.session.userId`, looks up the user from DB, and sets `req.user`.  
+// 6) body‑parser populates `req.body` with any JSON payload.  
+// 7) Your route handler uses `db.query(...)` to fetch or modify data, maybe uses `bcrypt.compare` to check passwords, etc.  
+// 8) You `res.json(...)` or `res.send(...)`, and Express takes care of the rest.  
+
 const express = require('express');
 const cors = require('cors');
 const passport = require('passport');
