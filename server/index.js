@@ -56,8 +56,9 @@ app.post('/signup', (req, res) => {
 
     db.query(query2, [email], (err, result) => {
         if(err) {
-            throw err;
-        }
+            console.error(err);
+            return res.status(500).send('Database error')
+        }   
         if(result.length > 0) {
             res.send('User already exists');
         }
@@ -65,7 +66,8 @@ app.post('/signup', (req, res) => {
             const hashedPassword = bcrypt.hashSync(password, 10);
            db.query(query, [email, hashedPassword, 1], (err, result) => {
                if(err) {
-                   throw err;
+                console.error(err);
+                return res.status(500).send('Database error')
                }
                res.send('User created');
 

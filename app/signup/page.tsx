@@ -55,7 +55,7 @@ export default function Home() {
       },
 
       withCredentials: true,
-      url: 'http://localhost:3001/signup',
+      url: 'http://130.225.170.52:10151/api/signup',
       timeout: 8000,
     }).then((response) => {
       console.log(response);

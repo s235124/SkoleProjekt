@@ -28,7 +28,7 @@ const router = useRouter()
   const login3 = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-    const res = await axios.post('http://localhost:3001/login', {
+    const res = await axios.post('http://130.225.170.52:10151/api/login', {
       email: email,
       password: password
     });
