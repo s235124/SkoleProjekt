@@ -13,7 +13,7 @@ interface StudentEnrollmentModalProps {
 }
 
 export default function StudentEnrollmentModal({ courseId, open, onOpenChange, onEnroll }: StudentEnrollmentModalProps) {
-    const [students, setStudents] = useState<{ user_id: string; email: string; last_name: string }[]>([]);
+    const [students, setStudents] = useState<{ user_id: string; email: string; first_name: string; last_name: string }[]>([]);
     const [selectedStudent, setSelectedStudent] = useState<string | undefined>();
     const [loading, setLoading] = useState(false);
 
@@ -57,7 +57,7 @@ export default function StudentEnrollmentModal({ courseId, open, onOpenChange, o
                             <option value="">Select a student</option>
                             {students.map(student => (
                                 <option key={student.user_id} value={student.user_id}>
-                                    {student.email} {student.last_name}
+                                    {student.email} | {student.first_name} {student.last_name}
                                 </option>
                             ))}
                         </select>

@@ -9,12 +9,14 @@ interface TeacherAssignmentModalAdminProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     schoolId: number | string[] | undefined| null ;
+    first_name: string;
 }
 
 export default function TeacherAssignmentModalAdmin({ courseId, open, onOpenChange, schoolId }: TeacherAssignmentModalAdminProps) {
     interface Teacher {
         user_id: string;
         email: string;
+        first_name: string;
         last_name: string;
     }
     
@@ -73,7 +75,7 @@ export default function TeacherAssignmentModalAdmin({ courseId, open, onOpenChan
                             <option value="">Select a teacher</option>
                             {teachers.map(teacher => (
                                 <option key={teacher.user_id} value={teacher.user_id}>
-                                    {teacher.email} {teacher.last_name}
+                                    {teacher.email} | {teacher.first_name} {teacher.last_name}
                                 </option>
                             ))}
                         </select>
