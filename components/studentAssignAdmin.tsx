@@ -16,6 +16,7 @@ export default function StudentEnrollmentModalAdmin({ courseId, open, onOpenChan
     interface Student {
         user_id: string;
         email: string;
+        first_name: string;
         last_name: string;
     }
 
@@ -67,7 +68,7 @@ export default function StudentEnrollmentModalAdmin({ courseId, open, onOpenChan
                             <option value="">Select a student</option>
                             {students.map(student => (
                                 <option key={student.user_id} value={student.user_id}>
-                                    {student.email} {student.last_name}
+                                    {student.email} | {student.first_name} {student.last_name}
                                 </option>
                             ))}
                         </select>

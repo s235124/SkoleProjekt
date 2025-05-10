@@ -112,7 +112,7 @@ export default function Students() {
                   </div>
                   <div className="hidden md:flex items-center gap-2 text-sm text-gray-500">
                     <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      Teachervv
+                      Teacher
                     </span>
                   </div>
                 </div>
