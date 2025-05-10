@@ -128,7 +128,8 @@ Why Middleware First?
 By intercepting requests at the edge before routing or data‑fetching, middleware ensures that only valid, authorized traffic ever reaches your React rendering pipeline. 
 
 
-a jwt is at the most simple level three parts a header, payload and a signature 
+a jwt is at the most simple level three parts a header, payload and a signature  <header>.<payload>.<signature>
+the header is a json object that contains two parts, the type of token and the signing algorithm being used. for example if we use HMAC SHA256 as our signing algorithm, then
 the header can look like this:
 {
   "alg": "HS256", // algorithm used to sign the token most common is HMAC SHA256

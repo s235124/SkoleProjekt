@@ -63,10 +63,10 @@ export default function Students() {
               className="flex items-center rounded bg-slate-800 py-1 px-2.5 text-sm text-white hover:bg-slate-700 transition"
             >
               {/* Icon omitted for brevity */}
-              Add student
+              Add teacher
             </button>
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900">Students</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Teachers</h1>
           <div className="w-full md:max-w-xs">
             <div className="relative">
               <input
@@ -110,14 +110,14 @@ export default function Students() {
                   </div>
                   <div className="hidden md:flex items-center gap-2 text-sm text-gray-500">
                     <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      Student
+                      Teacher
                     </span>
                   </div>
                 </div>
               </div>
             ))
           ) : (
-            <div className="p-6 text-center text-gray-500">No students found</div>
+            <div className="p-6 text-center text-gray-500">No teachers found</div>
           )}
         </div>
       </ScrollArea>
