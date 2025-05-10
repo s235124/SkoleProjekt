@@ -835,6 +835,52 @@ app.get('/getUser', authenticateUser, (req, res) => {
 });
 
 
+app.delete('/deleteteacher/:id', (req, res) => {
+  const token = req.cookies.token;
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.clearCookie('token').status(401).json({ error: 'Invalid token' });
+    }
+    req.user = decoded;
+    console.log("decoded token in adduser" + req.user.role + " " + req.user.name);
+  });
+  //if school owner or admin
+  if (req.user.role == 3 || req.user.role == 4) {
+  const teacherId = req.params.id;
+  const deleteQuery = `
+    DELETE FROM user 
+    WHERE user_id = ?
+  `;
+
+  db.query(deleteQuery, [teacherId], (err, result) => {
+    if (err) {
+      console.error('Database error:', err);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to delete teacger'
+      });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Teacher not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Teacher deleted successfully',
+      deletedId: teacherId
+    });
+  });
+  }
+  else {
+    console.log("decoded token in adduser" + req.user.role + " " + req.user.name);
+    return res.status(403).json({ error: 'Forbidden you are not an owner' });
+  }
+});
+
 
 app.listen(3001, () => {
   console.log('Server is running on port 3001');

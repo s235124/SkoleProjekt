@@ -6,6 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { env } from '../../../env.mjs';
+import { Button } from '@/components/ui/button';
 interface User {
   user_id: number;
   firstName: string;
@@ -18,6 +19,8 @@ export default function Students() {
   const [users, setUsers] = useState<User[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
+    const [showConfirm, setShowConfirm] = useState(false);
+    const [teacherToDelete, setTeacherToDelete] = useState<number | null>(null);
   useEffect(() => {
     axios.get<User[]>(env.NEXT_PUBLIC_API_BASE_URL+'/getAllUsers')
       .then((response) => {
@@ -29,6 +32,26 @@ export default function Students() {
         console.error('Error fetching users:', error);
       });
   }, []);
+
+  async function removeTeacher(userId: number) {
+    try {
+      const response = await axios.delete(
+        `${env.NEXT_PUBLIC_API_BASE_URL}/deleteteacher/${userId}`, // Changed endpoint to match server
+        {
+          withCredentials: true, // Include credentials for CORS
+        }
+      );
+
+      console.log('Teacher removed successfully:', response.data);
+      setUsers(prev => prev.filter(user => user.user_id !== userId));
+
+    } catch (error) {
+      console.error('Error removing teacher:');
+      if (axios.isAxiosError(error)) {
+        alert(error.response?.data?.message || 'Failed to delete teacher');
+      }
+    }
+  }
 
   const filteredTeachers = users
     .filter(user => 
@@ -109,6 +132,54 @@ export default function Students() {
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                         Teacher
                       </span>
+                      <Button
+                        className='bg-red-700 w-28'
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setTeacherToDelete(user.user_id);
+                          setShowConfirm(true);
+                        }}
+                      >
+                        Remove Teacher
+                      </Button>
+
+                      {showConfirm && (
+                        <div
+                          className="fixed inset-0 bg-black/50 flex items-center justify-center"
+                          onClick={(e) => {
+                            e.stopPropagation(); // Add this to prevent background click propagation
+                            setShowConfirm(false);
+                          }}
+                        >
+                          <div
+                            className="bg-white p-4 rounded-lg"
+                            onClick={(e) => e.stopPropagation()} // Prevent modal content clicks from closing
+                          >
+                            <p>Are you sure you want to delete this teacher?</p>
+                            <div className="flex justify-end gap-2 mt-4">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation(); // Add this
+                                  setShowConfirm(false);
+                                }}
+                                className="px-4 py-2 text-gray-500 hover:text-gray-700"
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation(); // Add this
+                                  setShowConfirm(false);
+                                  if (teacherToDelete) removeTeacher(teacherToDelete);
+                                }}
+                                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

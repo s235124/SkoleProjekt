@@ -4,9 +4,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Users, GraduationCap, ClipboardList, BarChart, LineChart as LineIcon } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { env } from '../../env.mjs';
 
 interface Stats {
@@ -32,6 +31,7 @@ export default function OwnerDashboard() {
           axios.get(env.NEXT_PUBLIC_API_BASE_URL+'/getUser', { withCredentials: true }),
           axios.get<Stats>(env.NEXT_PUBLIC_API_BASE_URL+'/ownerStats', { withCredentials: true })
         ]);
+        console.log("user"+userRes.data.email);
         setEmail(userRes.data.email);
         setStats(statsRes.data);
       } catch (err) {
@@ -114,20 +114,6 @@ console.log(stats);
           <TabsTrigger value="overview">Overview</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview">
-          <h2 className="text-xl font-medium mb-4">Lessons Trend (Last 7 Days)</h2>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={stats.lessonsTrend} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip />
-                <Line type="monotone" dataKey="count" stroke="#4F46E5" strokeWidth={2} dot={{ r: 3 }} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </TabsContent>
 
       </Tabs>
     </div>

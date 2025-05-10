@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import { useSelectedSchool } from '../selectedSchoolContext'; // Fix import path
 
 import { env } from '../../../env.mjs'; 
+import { Button } from '@/components/ui/button';
 interface User {
   user_id: number;
   firstName: string;
@@ -25,6 +26,8 @@ export default function Students() {
   const [users, setUsers] = useState<User[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
+    const [showConfirm, setShowConfirm] = useState(false);
+    const [studentToDelete, setStudentToDelete] = useState<number | null>(null);
   useEffect(() => {
     if (selectedSchoolId == null) return; // Ensure selectedSchoolId is not null
     setLoading(true);
@@ -46,6 +49,33 @@ export default function Students() {
       });
   }, [selectedSchoolId]);
 
+  async function removeStudent(userId: number) {
+    try {
+      if (selectedSchoolId == null) {
+        console.error('No school selected');
+        return;
+      }
+
+      const response = await axios.delete(
+        `${env.NEXT_PUBLIC_API_BASE_URL}/deleteteacher/${userId}`, // Changed endpoint to match server
+        {
+          headers: {
+            'schoolid': selectedSchoolId.toString(),
+          },
+          withCredentials: true, // Include credentials for CORS
+        }
+      );
+
+      console.log('Student removed successfully:', response.data);
+      setUsers(prev => prev.filter(user => user.user_id !== userId));
+
+    } catch (error) {
+      console.error('Error removing Student:');
+      if (axios.isAxiosError(error)) {
+        alert(error.response?.data?.message || 'Failed to delete student');
+      }
+    }
+  }
   const filteredStudents = users
     .filter(user => 
       user.role === 1 && user.school_id === selectedSchoolId && // Filter by role and school ID
@@ -113,6 +143,54 @@ export default function Students() {
                     <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                       Student
                     </span>
+                    <Button
+                        className='bg-red-700 w-28'
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setStudentToDelete(user.user_id);
+                          setShowConfirm(true);
+                        }}
+                      >
+                        Remove Student
+                      </Button>
+
+                      {showConfirm && (
+                        <div
+                          className="fixed inset-0 bg-black/50 flex items-center justify-center"
+                          onClick={(e) => {
+                            e.stopPropagation(); // Add this to prevent background click propagation
+                            setShowConfirm(false);
+                          }}
+                        >
+                          <div
+                            className="bg-white p-4 rounded-lg"
+                            onClick={(e) => e.stopPropagation()} // Prevent modal content clicks from closing
+                          >
+                            <p>Are you sure you want to delete this student?</p>
+                            <div className="flex justify-end gap-2 mt-4">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation(); // Add this
+                                  setShowConfirm(false);
+                                }}
+                                className="px-4 py-2 text-gray-500 hover:text-gray-700"
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation(); // Add this
+                                  setShowConfirm(false);
+                                  if (studentToDelete) removeStudent(studentToDelete);
+                                }}
+                                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                   </div>
                 </div>
               </div>
