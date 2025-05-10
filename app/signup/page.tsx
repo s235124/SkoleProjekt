@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import axios from 'axios';
-
+import { env } from '../../env.mjs';
 
 
 
@@ -33,7 +33,7 @@ export default function Home() {
       },
 
       withCredentials: true,
-      url: 'http://localhost:3001/signup',
+      url: env.NEXT_PUBLIC_API_BASE_URL+'/signup',
       timeout: 8000,
     }).then((response) => {
       console.log(response);
