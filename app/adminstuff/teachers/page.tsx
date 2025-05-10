@@ -5,6 +5,8 @@ import React, { useState, useEffect } from 'react';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { env } from '../../../env.mjs';
+
 
 import { useSelectedSchool } from '../selectedSchoolContext'; // Fix import path
 interface User {
@@ -27,7 +29,7 @@ export default function Students() {
   useEffect(() => {
     if (selectedSchoolId == null) return; // Ensure selectedSchoolId is not null
     setLoading(true);
-    axios.get<User[]>('http://localhost:3001/getAllUsers', {
+    axios.get<User[]>(env.NEXT_PUBLIC_API_BASE_URL+'/getAllUsers', {
       headers: {
         'schoolid': selectedSchoolId.toString(),
       }
