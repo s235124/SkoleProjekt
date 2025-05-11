@@ -3,15 +3,22 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
+import { env } from '../env.mjs';
 
-export default function TeacherAssignmentModal({ courseId, open, onOpenChange }) {
-    const [teachers, setTeachers] = useState([]);
+interface TeacherAssignmentModalProps {
+    courseId: string | string[] | undefined;
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+}
+
+export default function TeacherAssignmentModal({ courseId, open, onOpenChange }: TeacherAssignmentModalProps) {
+    const [teachers, setTeachers] = useState<{ user_id: string; email: string; first_name: string; last_name: string }[]>([]);
     const [selectedTeacher, setSelectedTeacher] = useState('');
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         if (open && courseId) {
-            axios.get(`http://localhost:3001/courses/${courseId}/available-teachers`)
+            axios.get(env.NEXT_PUBLIC_API_BASE_URL+`/courses/${courseId}/available-teachers`)
                 .then(response => setTeachers(response.data))
                 .catch(console.error);
         }
@@ -22,14 +29,16 @@ export default function TeacherAssignmentModal({ courseId, open, onOpenChange })
         
         setLoading(true);
         try {
-            await axios.post(`http://localhost:3001/courses/${courseId}/assign-teacher`, {
+            await axios.post(env.NEXT_PUBLIC_API_BASE_URL+`/courses/${courseId}/assign-teacher`, {
                 teacherId: selectedTeacher
             });
             onOpenChange(false);
             // Optionally refresh course data
         } catch (error) {
             console.error('Assignment failed:', error);
-            alert(error.response?.data?.error || 'Assignment failed');
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const err = error as any;
+            alert(err.response?.data?.error || 'Assignment failed');
         } finally {
             setLoading(false);
         }
@@ -54,7 +63,7 @@ export default function TeacherAssignmentModal({ courseId, open, onOpenChange })
                             <option value="">Select a teacher</option>
                             {teachers.map(teacher => (
                                 <option key={teacher.user_id} value={teacher.user_id}>
-                                    {teacher.email} {teacher.last_name}
+                                    {teacher.email} | {teacher.first_name} {teacher.last_name}
                                 </option>
                             ))}
                         </select>

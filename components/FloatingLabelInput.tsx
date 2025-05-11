@@ -1,6 +1,13 @@
 import React from 'react';
 
-export default function FloatingLabelInput({value, onChange, label, id}: any ) {
+interface FloatingLabelInputProps {
+  value: string;
+  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  label: string;
+  id: string;
+}
+
+export default function FloatingLabelInput({value, onChange, label, id}: FloatingLabelInputProps) {
   return (
     <div className="relative">
       <input

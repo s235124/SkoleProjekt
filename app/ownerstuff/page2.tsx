@@ -20,11 +20,9 @@ const mockData = {
 export default function OwnerDashboard() {
 
 const [email, setEmail] = useState('');
-const [users, setUsers] = useState('');
 
 useEffect(() => {
   getUser();
-  getAllUsers();
 }, [])
 
 const getUser = () => {
@@ -36,24 +34,10 @@ const getUser = () => {
         timeout: 8000,
         }).then((response) => {
           setEmail(response.data.email);
-            console.log(response);
+            console.log(response.data);
         }).catch((error) => {
             console.log(error);
         });
-}
-
-const getAllUsers = () => {
-  axios({
-    method: 'get',
-    withCredentials: true,
-    url: 'http://localhost:3001/getAllUsers',
-    timeout: 8000,
-    }).then((response) => {
-      setUsers(response.data);
-        console.log(response.data);
-    }).catch((error) => {
-        console.log(error);
-    });
 }
 
   return (

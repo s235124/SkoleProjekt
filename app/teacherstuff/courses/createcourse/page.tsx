@@ -1,16 +1,24 @@
 "use client";
 import axios from 'axios';
 import Link from 'next/link';
-import React, { use, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { useState } from 'react';
-
+import { env } from '../../../../env.mjs';
+interface user {
+  id: number;
+  email: string;
+  role: number;
+  school_id: number;
+}
 export default function CreateCourseForm() {
   const [formData, setFormData] = useState({
     course_name: '',
     course_description: '',
   });
-  const [me, setMe] = useState();
+  const [me, setMe] = useState<user>();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isLoading, setIsLoading] = useState(true); // Track loading state
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [error, setError] = useState(''); // Track errors
 
   useEffect(() => {
@@ -19,7 +27,7 @@ export default function CreateCourseForm() {
 
   const getUser = async () => {
     try {
-      const response = await axios.get('http://localhost:3001/getUser', {
+      const response = await axios.get('/getUser', {
         withCredentials: true,
         headers: {
           'Content-Type': 'application/json',
@@ -39,8 +47,9 @@ export default function CreateCourseForm() {
     if (!me) return; // Final safeguard
 
     try {
-      const response = await fetch(`http://localhost:3001/createcourseasteacher/${me.id}`, {
+      const response = await fetch(env.NEXT_PUBLIC_API_BASE_URL+`/createcourseasteacher/${me.id}`, {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
@@ -61,7 +70,11 @@ export default function CreateCourseForm() {
         course_description: '',
       });}catch (error) {
       console.error('Error:', error);
-      alert(error.message || 'Error creating course');
+      if (error instanceof Error) {
+        alert(error.message || 'Error creating course');
+      } else {
+        alert('Error creating course');
+      }
     }
   };
 

@@ -1,6 +1,5 @@
 "use client"
 
-import React, { useState, useEffect } from 'react'
 import { CalendarDays, Users, GraduationCap, ClipboardCheck, Car, Star } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"

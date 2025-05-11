@@ -1,9 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
 
 import React, { useState, useEffect } from 'react'
 import { CalendarDays, Users, GraduationCap, ClipboardCheck, Car, Star } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { env } from '../../env.mjs';
 import axios from 'axios'
 
 // Mock data (replace with actual data fetching in a real application)
@@ -27,7 +29,7 @@ export default function OwnerDashboard() {
   
   const getUser = async () => {
     try {
-      const response = await axios.get('http://localhost:3001/getUser', {
+      const response = await axios.get(env.NEXT_PUBLIC_API_BASE_URL+'/getUser', {
         withCredentials: true,
         headers: {
           'Content-Type': 'application/json',
@@ -39,7 +41,7 @@ export default function OwnerDashboard() {
       console.log('User data:', response.data);
     } catch (error) {
       console.error('Error fetching user:', error);
-      if (error.response?.status === 401) {
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
         // Handle unauthorized access
       }
     }
@@ -49,7 +51,7 @@ export default function OwnerDashboard() {
     axios({
       method: 'get',
       withCredentials: true,
-      url: 'http://localhost:3001/getAllUsers',
+      url: env.NEXT_PUBLIC_API_BASE_URL+'/getAllUsers',
       timeout: 8000,
       }).then((response) => {
         setUsers(response.data);

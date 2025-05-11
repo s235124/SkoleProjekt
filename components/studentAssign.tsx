@@ -3,15 +3,23 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
+import { env } from '../env.mjs';
 
-export default function StudentEnrollmentModal({ courseId, open, onOpenChange, onEnroll }) {
-    const [students, setStudents] = useState([]);
-    const [selectedStudent, setSelectedStudent] = useState('');
+interface StudentEnrollmentModalProps {
+    courseId: string| string[] | undefined| null ;
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    onEnroll: (studentId: string) => Promise<void>;
+}
+
+export default function StudentEnrollmentModal({ courseId, open, onOpenChange, onEnroll }: StudentEnrollmentModalProps) {
+    const [students, setStudents] = useState<{ user_id: string; email: string; first_name: string; last_name: string }[]>([]);
+    const [selectedStudent, setSelectedStudent] = useState<string | undefined>();
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         if (open && courseId) {
-            axios.get(`http://localhost:3001/courses/${courseId}/available-students`)
+            axios.get(env.NEXT_PUBLIC_API_BASE_URL+`/courses/${courseId}/available-students`)
                 .then(response => setStudents(response.data))
                 .catch(console.error);
                 console.log(students);
@@ -49,7 +57,7 @@ export default function StudentEnrollmentModal({ courseId, open, onOpenChange, o
                             <option value="">Select a student</option>
                             {students.map(student => (
                                 <option key={student.user_id} value={student.user_id}>
-                                    {student.email} {student.last_name}
+                                    {student.email} | {student.first_name} {student.last_name}
                                 </option>
                             ))}
                         </select>

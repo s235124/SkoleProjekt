@@ -4,46 +4,48 @@ import React from 'react'
 import { useState } from 'react';
 import { useEffect } from 'react';
 import { ScrollArea } from "@/components/ui/scroll-area"
-import FloatingLabelInput from '@/components/FloatingLabelInput';
-import router from 'next/router';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Book } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { env } from '../../../env.mjs';
+interface course {
+  course_id: number;
+  course_name: string;
+  course_description: string;
+}
 
+interface user {
+  id: number;
+  email: string;
+  role: number;
+  school_id: number;
+}
 export default function Coursesview() {
-  const [formData, setFormData] = useState({
-    course_name: '',
-    course_description: '',
-  });
   const router = useRouter();
 
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [user, setUser] = useState();
-  useEffect(() => {
-    getUser();
-  }, []);
+  const [courses, setCourses] = useState<course[]>([]);
+  const [user, setUser] = useState<user>();
+
   
-  const getUser = async () => {
-    const response = await axios.get('http://localhost:3001/getUser', {
-      withCredentials: true,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      }
-    });
+  const getUser = () => {
+    axios.get(env.NEXT_PUBLIC_API_BASE_URL+`/getUser`)
+      .then((response) => {
+        console.log(response.data)
+        setUser(response.data);
+      }).catch((error) => {
+        console.log("vvvv" + error)
+      })
 
-    setUser(response.data);
     console.log('User data:', user);
-    getCourses(response.data);
   }
-
-  const getCourses = (data) => {
+  // Fetch courses for the user
+  const getCourses = (data: number) => {
     if (!data) {
       console.error('User not found');
       return;
     }
-    axios.get(`http://localhost:3001/teacher/courses/${data.id}`)
+    axios.get(env.NEXT_PUBLIC_API_BASE_URL+`/teacher/courses/${data}`)
     .then((response) => { if (response.data.length > 0) {
         setCourses(response.data) }
         else { console.log('No courses found') }
@@ -53,6 +55,13 @@ export default function Coursesview() {
     })
 
   }
+  useEffect(() => {
+    getUser();
+  }, []);
+  useEffect(() => {
+    if (!user?.id) return;
+    getCourses(user.id);
+  }, [user]);
  
  const listItems = <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
  {courses.map((course) => (

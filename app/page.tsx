@@ -1,15 +1,12 @@
 'use client'
 import FloatingLabelInput from "@/components/FloatingLabelInput";
 import { Button } from "@/components/ui/button";
-import { Router } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import axios from 'axios';
 import jsonwebtoken from "jsonwebtoken";
-import { accessSync } from "node:fs";
-
+import { env } from '../env.mjs';
 
 
 export default function Home() {
@@ -17,26 +14,30 @@ export default function Home() {
   const [password, setPassword] = useState('');
 const [isMounted, setIsMounted] = useState(false)
 const router = useRouter()
-
+console.log("v"+env.NEXT_PUBLIC_API_BASE_URL)
   useEffect(() => {
     setIsMounted(true)
     setEmail("")
     setPassword("")
+    console.log("is mounted"+ isMounted)
   }, [])
 
 
   const login3 = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-    const res = await axios.post('http://130.225.170.52:10151/api/login', {
+    
+    const res = await axios.post(env.NEXT_PUBLIC_API_BASE_URL+'/login', {
       email: email,
       password: password
     });
 
     const {token} = res.data
     const decodedToken = jsonwebtoken.decode(token);
-    
-    const role = decodedToken.role;
+    let role = 0;
+    if (decodedToken && typeof decodedToken !== 'string' && 'role' in decodedToken) {
+      role = decodedToken.role;
+    }
     document.cookie = `token=${token}; path=/; max-age=3600`;
 
     
@@ -51,7 +52,7 @@ const router = useRouter()
         router.push('/ownerstuff');
         break;
       case 4:
-        router.push('/dashboards/admin');
+        router.push('/adminstuff');
         break;
       default:
         console.log('No role found');
@@ -75,8 +76,8 @@ const router = useRouter()
           <h2 className="text-3xl font-bold mb-6 text-left text-white">Log ind i din konto<span className='text-blue-500'>.</span></h2>
           <h3 className='text-white text-sm my-4'>Mangler du en konto? <Link href="/signup" className='text-blue-500'>Lav en her</Link></h3>
           <form className="space-y-6" onSubmit={login3}>
-            <FloatingLabelInput value={email} onChange={(e: any) => setEmail(e.target.value)} label="Email" id="email"/>
-            <FloatingLabelInput value={password} onChange={(e: any) => setPassword(e.target.value)} label="Password" id="password"/>
+            <FloatingLabelInput value={email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} label="Email" id="email"/>
+            <FloatingLabelInput value={password} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)} label="Password" id="password"/>
             <Button type="submit" className="w-full h-12 rounded-full bg-blue-500 hover:bg-blue-600 text-white">
               Log ind
             </Button>

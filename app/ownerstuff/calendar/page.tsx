@@ -1,8 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { responseCookiesToRequestCookies } from 'next/dist/server/web/spec-extension/adapters/request-cookies';
-import { threadId } from 'worker_threads';
+import { env } from '../../../env.mjs';
 import Calendar from '@/components/calendar';
 export default function CreateModulePage() {
   const [formData, setFormData] = useState({
@@ -13,7 +13,7 @@ export default function CreateModulePage() {
     course_id: "",
   });
  
-  let hours = [
+  const hours = [
     "00:00:00", "01:00:00", "02:00:00", "03:00:00", "04:00:00", "05:00:00",
     "06:00:00", "07:00:00", "08:00:00", "09:00:00", "10:00:00", "11:00:00",
     "12:00:00", "13:00:00", "14:00:00", "15:00:00", "16:00:00", "17:00:00",
@@ -21,12 +21,12 @@ export default function CreateModulePage() {
   ];
 ;
 
-function timeslotInMinutes(timeslotStr) {
+function timeslotInMinutes(timeslotStr: string) {
   const [hours, minutes,seconds] = timeslotStr.split(':').map(Number);
   return hours * 60 + minutes+seconds/60;
 }
 
-function minuteToTimeslot(minutes) {
+function minuteToTimeslot(minutes: number) {
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
   //creates a time slot in the format of 00:00:00
@@ -34,11 +34,16 @@ function minuteToTimeslot(minutes) {
 }
 
 
-function createIntervals(intervals) {
-  if(intervals.length === 0) return [];
-  intervals.sort((a,b) => a.start - b.start);
-  const mergedIntervals = [intervals[0]];
-  for(let i = 1; i < intervals.length; i++) {
+interface Interval {
+  start: number;
+  end: number;
+}
+
+function createIntervals(intervals: Interval[]): Interval[] {
+  if (intervals.length === 0) return [];
+  intervals.sort((a, b) => a.start - b.start);
+  const mergedIntervals: Interval[] = [intervals[0]];
+  for (let i = 1; i < intervals.length; i++) {
     const current = intervals[i];
     const lastMerged = mergedIntervals[mergedIntervals.length - 1];
     if (current.start <= lastMerged.end) {
@@ -50,9 +55,14 @@ function createIntervals(intervals) {
   return mergedIntervals;
 }
 
-  function findFreeIntervals(mergedIntervals) {
+  interface FreeInterval {
+    start: number;
+    end: number;
+  }
+
+  function findFreeIntervals(mergedIntervals: Interval[]): FreeInterval[] {
     //initialize the arr of free intervals
-    const freeIntervals = [];
+    const freeIntervals: FreeInterval[] = [];
     let previousEnd = 0;
     // loop through the merged intervals and find the free intervals
     for (let i = 0; i < mergedIntervals.length; i++) {
@@ -65,11 +75,10 @@ function createIntervals(intervals) {
           start: previousEnd,
           end: interval.start
         });
-
       }
       //update the previous end to be the max of the current end and the previous end
       // this is to make sure that if there are overlapping intervals, we only take the max end time of them
-      previousEnd = Math.max(previousEnd, interval.end)
+      previousEnd = Math.max(previousEnd, interval.end);
     }
     //1440 is the number of minutes in 24 hours so we, if previous end is lower than 1440, we know that there is an interval between previous end and 1440(24:00:00)
     // so we push the interval between previous end and 1440 to the free intervals arr for example 14:00:00 - 24:00:00
@@ -86,15 +95,18 @@ function createIntervals(intervals) {
   const [endTime, setEndTime] = useState('');
   const [minDate, setMinDate] = useState('');
   const [maxDate, setMaxDate] = useState('');
-  const [timeslots, setTimeslots] = useState([]);
-  const [courses, setCourses] = useState([]);
-  const [selectedClass, setSelectedClass] = useState('');
+  interface Course {
+    course_id: string;
+    course_name: string;
+  }
+
+  const [courses, setCourses] = useState<Course[]>([]);
 
   function getCourses() {
     axios({
       method: 'get',
       withCredentials: true,
-      url: `http://localhost:3001/getCourses`,
+      url: env.NEXT_PUBLIC_API_BASE_URL+`/getCourses`,
       timeout: 8000,
     }).then((response) => {
       console.log(response.data);
@@ -104,21 +116,21 @@ function createIntervals(intervals) {
     });
   }
 
-  const updateHours = (date) => {
+  const updateHours = (date: string) => {
     if (!date) {
       console.error("Date is required");
       return;
     }
-    const url = `http://localhost:3001/timeslots?date=${encodeURIComponent(date)}`;
+    const url = env.NEXT_PUBLIC_API_BASE_URL+`/timeslots?date=${encodeURIComponent(date)}`;
     console.log("Request URL:", url);
     axios({
       method: 'get',
       withCredentials: true,
-      url: `http://localhost:3001/timeslots?date=${encodeURIComponent(date)}`,
+      url: env.NEXT_PUBLIC_API_BASE_URL+`/timeslots?date=${encodeURIComponent(date)}`,
       timeout: 8000,
     }).then((response) => {
       console.log(response.data);
-      const intervals = response.data.map(({ start, end }) => ({
+      const intervals = response.data.map(({ start, end }: { start: string; end: string }) => ({
         start: timeslotInMinutes(start),
         end: timeslotInMinutes(end)
       }));
@@ -146,14 +158,11 @@ function createIntervals(intervals) {
     const free = freeTimeslots.find(f => hStart >= f.start && hStart < f.end);
     return free && hEnd > hStart && hEnd <= free.end;
   }) : [];
-
   useEffect(() => {
-    // Set date constraints
     const today = new Date();
     setMinDate(today.toISOString().split('T')[0]);
     setMaxDate(new Date(today.setFullYear(today.getFullYear() + 1)).toISOString().split('T')[0]);
-
-    // Fetch available timeslots and classes
+  
     getCourses();
   }, []);
 
@@ -161,7 +170,7 @@ function createIntervals(intervals) {
     e.preventDefault();
     
     try {
-      const response = await axios.post('http://localhost:3001/createModule', {
+      const response = await axios.post(env.NEXT_PUBLIC_API_BASE_URL+'/createModule', {
         module_date: `${formData.date}`,
         module_start_time: startTime,
         module_end_time: endTime,
@@ -170,7 +179,7 @@ function createIntervals(intervals) {
 
       if (response.data.success) {
         alert('Module created successfully!');
-        setFormData({ date: '', timeslot: '', class: '', content: '' });
+        setFormData({ date: '', timeslot: '', course: '', content: '', course_id: '' });
       }
     } catch (error) {
       console.error('Error creating module:', error);
@@ -183,11 +192,11 @@ function createIntervals(intervals) {
     <div className="flex flex-grow items-center justify-center">
       <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-96 text-center">
         <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">
-          Lav en lektion
+          Create a module
         </h2>
         <form onSubmit={handleSubmit}>
           <label className="block mb-2 text-gray-700 dark:text-gray-200">
-            Vælg en dato:
+            Choose date:
           </label>
           <input
             type="date"
@@ -221,7 +230,7 @@ function createIntervals(intervals) {
             required
           >
           
-            <option value="">Vælg tidspunkt</option>
+            <option value="">Choose timeslot</option>
             {availableStartTimes.map((hour) => (
               <option key={hour} value={hour}>
                 {hour}
@@ -239,7 +248,7 @@ function createIntervals(intervals) {
             required
           >
           
-            <option value="">Vælg tidspunkt</option>
+            <option value="">Choose timeslot</option>
             {availableEndTimes.map((hour) => (
               <option key={hour} value={hour}>
                 {hour}
@@ -248,7 +257,7 @@ function createIntervals(intervals) {
           </select>
           </div>
           <label className="block mb-2 text-gray-700 dark:text-gray-200">
-            Hold:
+            Course:
           </label>
           <select
             value={formData.course_id}
@@ -256,7 +265,7 @@ function createIntervals(intervals) {
             className="border dark:border-gray-600 p-2 w-full mb-4 dark:bg-gray-700 dark:text-gray-100"
             required
           >
-            <option value="">Vælg hold</option>
+            <option value="">Choose course</option>
             {courses.map((course) => (
               <option key={course.course_id} value={course.course_id}>
                 {course.course_name}

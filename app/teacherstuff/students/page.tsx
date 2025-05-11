@@ -3,10 +3,10 @@
 import axios from 'axios';
 import React, { useState, useEffect } from 'react';
 import { ScrollArea } from "@/components/ui/scroll-area";
-import router from 'next/router';
-
+import { useRouter } from 'next/navigation';
+import { env } from '../../../env.mjs';
 interface User {
-  id: number;
+  user_id: number;
   firstName: string;
   lastName: string;
   email: string;
@@ -14,11 +14,12 @@ interface User {
 }
 
 export default function Students() {
+  const router = useRouter();
   const [users, setUsers] = useState<User[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    axios.get<User[]>('http://localhost:3001/getAllUsers')
+    axios.get<User[]>(env.NEXT_PUBLIC_API_BASE_URL+'/getAllUsers')
       .then((response) => {
         if (response.data.length > 0) {
           setUsers(response.data);
@@ -75,9 +76,9 @@ export default function Students() {
             {filteredTeachers.length > 0 ? (
               filteredTeachers.map((user) => (
                 <div 
-                  key={user.id} 
+                  key={user.user_id} 
                   className="group p-4 hover:bg-gray-50 transition-colors cursor-pointer"
-                  onClick={() => router.push(`/teacher/${user.id}`)}
+                  onClick={() => router.push(`students/specificstudent/${user.user_id}`)}
                 >
                   <div className="flex items-center gap-4">
                     <div className="flex-shrink-0">

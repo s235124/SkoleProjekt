@@ -1,9 +1,8 @@
 "use client";
-import axios from 'axios';
 import Link from 'next/link';
 import React from 'react'
 import { useState } from 'react';
-
+import { env } from '../../../../env.mjs';
 
 export default function CreateCourseForm() {
   const [formData, setFormData] = useState({
@@ -15,8 +14,9 @@ export default function CreateCourseForm() {
     console.log('Form data:', formData);
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:3001/createcourse', {
+      const response = await fetch(env.NEXT_PUBLIC_API_BASE_URL+'/createcourse', {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -34,7 +34,11 @@ export default function CreateCourseForm() {
       });
     } catch (error) {
       console.error('Error:', error);
-      alert(error.message || 'Error creating course');
+      if (error instanceof Error) {
+        alert(error.message || 'Error creating course');
+      } else {
+        alert('An unknown error occurred');
+      }
     }
   };
 

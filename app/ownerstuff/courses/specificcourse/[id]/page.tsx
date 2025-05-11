@@ -2,47 +2,74 @@
 "use client"
 import TeacherAssignmentModal from '@/components/teacherAssign';
 import DeleteConfirmation from '@/components/deleteConfirmation';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import axios from 'axios';
-import { Users } from 'lucide-react';
-import Link from 'next/link';
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import StudentEnrollmentModal from '@/components/studentAssign';
+import { env } from '../../../../../env.mjs';
+interface User {
+    id: number;
+    role: number;
+    school_id: number;
+}
+interface teacher {
+    user_id: number;
+    first_name: string;
+    last_name: string;
+    email: string;
+    phone_number: string;
+}
+interface student {
+    user_id: number;
+    first_name: string;
+    last_name: string;
+    email: string;
+    phone_number: string;
+}
 export default function CoursePage() {
     const router = useRouter()
     const params = useParams()
-    const [me, setMe] = useState()
-    const [course, setCourse] = useState()
-    const [students, setStudents] = useState([])
-    const [teachers, setTeachers] = useState([])
+    const [me, setMe] = useState<User | null>(null);
+    interface Course {
+        course_name: string;
+        // Add other properties of the course object here if needed
+    }
+    
+    const [course, setCourse] = useState<Course | null>(null);
+    const [students, setStudents] = useState<student[]>([])
+    const [teachers, setTeachers] = useState<teacher[]>([])
     const [assignmentOpen, setAssignmentOpen] = useState(false);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-    useEffect(() => {
-        // Fetch the current user
-        axios.get(`http://localhost:3001/getUser`)
-        .then((response) => {
-            if (response.data.length > 0) {
-                console.log(response.data)
-                setMe(response.data)
-            }
-            else { console.log('we cant find you') }
 
-        }).catch((error) => {
-            console.log("vvvv" + error)
-        })
+    useEffect(() => {
+        getUser();
+      }, [])
+      
+      const getUser = () => {
+      
+          axios({
+              method: 'get',
+              withCredentials: true,
+              url: env.NEXT_PUBLIC_API_BASE_URL+'/getUser',
+              timeout: 8000,
+              }).then((response) => {
+                setMe(response.data);
+                  console.log(response.data);
+              }).catch((error) => {
+                  console.log(error);
+              });
+      }
+    useEffect(() => {
         if (params?.id) {
-            axios.get(`http://localhost:3001/course/${params.id}`)
+            axios.get(env.NEXT_PUBLIC_API_BASE_URL+`/course/${params.id}`)
                 .then(response => setCourse(response.data))
                 .catch(error => console.error(error))
             console.log(params.id)
         }
 
-        axios.get(`http://localhost:3001/courses/${params.id}/teachers`)
+        axios.get(env.NEXT_PUBLIC_API_BASE_URL+`/courses/${params.id}/teachers`)
             .then((response) => {
                 if (response.data.length > 0) {
                     console.log(response.data)
@@ -57,18 +84,22 @@ export default function CoursePage() {
     const handleDeleteCourse = async () => {
         try {
             console.log('Deleting course with ID:', params.id);
-            await axios.delete(`http://localhost:3001/courses/delete/${params.id}`);
+            await axios.delete(env.NEXT_PUBLIC_API_BASE_URL+`/courses/delete/${params.id}`);
             router.push('/ownerstuff/courses'); // Redirect after deletion
         } catch (error) {
             console.error('Delete failed:', error);
-            alert(error.response?.data?.error || 'Failed to delete course');
+            if (axios.isAxiosError(error) && error.response?.data?.error) {
+                alert(error.response.data.error);
+            } else {
+                alert('Failed to delete course');
+            }
         } finally {
             setDeleteDialogOpen(false);
         }
     };
-    const handleRemoveTeacher = async (teacherId) => {
+    const handleRemoveTeacher = async (teacherId: number) => {
         try {
-            await axios.delete(`http://localhost:3001/courses/${params.id}/teachers/delete/${teacherId}`);
+            await axios.delete(env.NEXT_PUBLIC_API_BASE_URL+`/courses/${params.id}/teachers/delete/${teacherId}`);
             setTeachers(teachers.filter(t => t.user_id !== teacherId));
         } catch (error) {
             console.error('Failed to remove teacher:', error);
@@ -83,7 +114,7 @@ export default function CoursePage() {
     // Add useEffect for fetching students
     useEffect(() => {
         if (params?.id) {
-            axios.get(`http://localhost:3001/courses/${params.id}/students`)
+            axios.get(env.NEXT_PUBLIC_API_BASE_URL+`/courses/${params.id}/students`)
                 .then(response => setStudents(response.data))
                 .catch(console.error);
 
@@ -91,20 +122,24 @@ export default function CoursePage() {
     }, [params?.id]);
 
     // Add enrollment handlers
-    const handleEnrollStudent = async (studentId) => {
+    const handleEnrollStudent = async (studentId: number | string) => {
         try {
-            await axios.post(`http://localhost:3001/courses/${params.id}/enroll`, { studentId });
-            const res = await axios.get(`http://localhost:3001/courses/${params.id}/students`);
+            await axios.post(env.NEXT_PUBLIC_API_BASE_URL+`/courses/${params.id}/enroll`, { studentId });
+            const res = await axios.get(env.NEXT_PUBLIC_API_BASE_URL+`/courses/${params.id}/students`);
             setStudents(res.data);
         } catch (error) {
             console.error('Enrollment failed:', error);
-            alert(error.response?.data?.error || 'Enrollment failed');
+            if (axios.isAxiosError(error)) {
+                alert(error.response?.data?.error || 'Enrollment failed');
+            } else {
+                alert('Enrollment failed');
+            }
         }
     };
 
-    const handleUnenrollStudent = async (studentId) => {
+    const handleUnenrollStudent = async (studentId: number | string) => {
         try {
-            await axios.delete(`http://localhost:3001/courses/${params.id}/students/delete/${studentId}`);
+            await axios.delete(env.NEXT_PUBLIC_API_BASE_URL+`/courses/${params.id}/students/delete/${studentId}`);
             setStudents(students.filter(s => s.user_id !== studentId));
         } catch (error) {
             console.error('Unenrollment failed:', error);
@@ -115,7 +150,9 @@ export default function CoursePage() {
 
 
     if (!course) return <div>Loading...</div>
-
+    if (me === null) {
+        return <div>Loading user…</div>;
+      }
     return (
 
         <>
@@ -149,7 +186,7 @@ export default function CoursePage() {
                                 type="button"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 mr-2">
-                                    <path fillRule="evenodd" d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z" clipRule="evenodd" />
+                                    <path d="M6.25 6.375a4.125 4.125 0 118.25 0 4.125 4.125 0 01-8.25 0zM3.25 19.125a7.125 7.125 0 0114.25 0v.003l-.001.119a.75.75 0 01-.363.63 13.067 13.067 0 01-6.761 1.873c-2.472 0-4.786-.684-6.76-1.873a.75.75 0 01-.364-.63l-.001-.122zM19.75 7.5a.75.75 0 00-1.5 0v2.25H16a.75.75 0 000 1.5h2.25v2.25a.75.75 0 001.5 0v-2.25H22a.75.75 0 000-1.5h-2.25V7.5z" />
                                 </svg>
                                 Assign Student
                             </button>
@@ -170,17 +207,15 @@ export default function CoursePage() {
                         </div>
                         <div className='basis-1/6 bg-violet-200"'>
 
-                            <Link href="/ownerstuff/courses/createcourse">
-                                <button
-                                    className="top-1 flex items-center rounded bg-slate-800 py-1 px-2.5 border border-transparent text-center text-sm text-white transition-all shadow-sm hover:shadow focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-                                    type="button"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 mr-2">
-                                        <path fillRule="evenodd" d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z" clipRule="evenodd" />
-                                    </svg>
-                                    Delete Course
-                                </button>
-                            </Link>
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRemoveTeacher(me.id);
+                                }}
+                                className="ml-4 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                            >
+                                Leave Course
+                            </button>
 
                         </div>
                     </div>
@@ -205,6 +240,15 @@ export default function CoursePage() {
                                             <p className='text-sm text-gray-600'>{teacher.email}</p>
                                         </div>
                                     </div>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleRemoveTeacher(teacher.user_id);
+                                        }}
+                                        className="ml-4 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                                    >
+                                        Remove
+                                    </button>
                                 </div>
                             ))}
                             <div className="w-full flex items-center my-4">

@@ -1,47 +1,63 @@
 // app/teacher/[id]/page.tsx
 "use client"
-import TeacherAssignmentModal from '@/components/teacherAssign';
 import DeleteConfirmation from '@/components/deleteConfirmation';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import axios from 'axios';
-import { Users } from 'lucide-react';
-import Link from 'next/link';
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import StudentEnrollmentModal from '@/components/studentAssign';
+import { env } from '../../../../../env.mjs';
+
+
+interface course {
+    course_id: number;
+    course_name: string;
+    course_description: string;
+}
+interface user {
+    id: number;
+    email: string;
+    role: number;
+    school_id: number;
+}
+interface student {
+    user_id: number;
+    first_name: string;
+    last_name: string;
+    email: string;
+}
+interface teacher {
+    user_id: number;
+    first_name: string;
+    last_name: string;
+    email: string;
+}
 export default function CoursePage() {
     const router = useRouter()
     const params = useParams()
-    const [me, setMe] = useState()
-    const [course, setCourse] = useState()
-    const [students, setStudents] = useState([])
-    const [teachers, setTeachers] = useState([])
-    const [assignmentOpen, setAssignmentOpen] = useState(false);
+    const [me, setMe] = useState<user>()
+    const [course, setCourse] = useState<course>()
+    const [students, setStudents] = useState<student[]>([])
+    const [teachers, setTeachers] = useState<teacher[]>([])
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [studentToUnenroll, setStudentToUnenroll] = useState<number | null>(null);
     useEffect(() => {
-        axios.get(`http://localhost:3001/getUser`)
+        axios.get(env.NEXT_PUBLIC_API_BASE_URL+`/getUser`)
         .then((response) => {
-            if (response.data.length > 0) {
                 console.log(response.data)
                 setMe(response.data)
-            }
-            else { console.log('we cant find you') }
 
         }).catch((error) => {
             console.log("vvvv" + error)
         })
         if (params?.id) {
-            axios.get(`http://localhost:3001/course/${params.id}`)
+            axios.get(env.NEXT_PUBLIC_API_BASE_URL+`/course/${params.id}`)
                 .then(response => setCourse(response.data))
                 .catch(error => console.error(error))
             console.log(params.id)
         }
 
-        axios.get(`http://localhost:3001/courses/${params.id}/teachers`)
+        axios.get(env.NEXT_PUBLIC_API_BASE_URL+`/courses/${params.id}/teachers`)
             .then((response) => {
                 if (response.data.length > 0) {
                     console.log(response.data)
@@ -54,14 +70,12 @@ export default function CoursePage() {
             })
     }, [params?.id])
 
-
     //student stuff
-    const [enrollmentOpen, setEnrollmentOpen] = useState(false);
 
     // Add useEffect for fetching students
     useEffect(() => {
         if (params?.id) {
-            axios.get(`http://localhost:3001/courses/${params.id}/students`)
+            axios.get(env.NEXT_PUBLIC_API_BASE_URL+`/courses/${params.id}/students`)
                 .then(response => setStudents(response.data))
                 .catch(console.error);
 
@@ -70,9 +84,15 @@ export default function CoursePage() {
 
     // Add enrollment handlers
 
-    const handleUnenrollStudent = async (studentId) => {
+    const handleUnenrollStudent = async (studentId: number) => {
         try {
-            await axios.delete(`http://localhost:3001/courses/${params.id}/students/delete/${me.user_id}`);
+            if (!me) {
+                console.error('User not found');
+                return;
+            }
+            console.log("Unenrolling student with ID:", Number(me.id));
+            const myid = Number(me.id)
+            await axios.delete(env.NEXT_PUBLIC_API_BASE_URL+`/courses/${params.id}/students/delete/${myid}`,{ withCredentials: true });
             setStudents(students.filter(s => s.user_id !== studentId));
         } catch (error) {
             console.error('Unenrollment failed:', error);
@@ -161,6 +181,16 @@ export default function CoursePage() {
                                             <p className='text-sm text-gray-600'>{student.email}</p>
                                         </div>
                                     </div>
+                                    <button
+                                        onClick={() => {
+                                            setStudentToUnenroll(student.user_id); // Set the student ID
+                                            setDeleteDialogOpen(true); // Open the dialog
+                                        }}
+                                        className="top-1 flex items-center rounded bg-red-600 py-1 px-2.5 border border-transparent text-center text-sm text-white transition-all shadow-sm hover:shadow focus:bg-red-700 focus:shadow-none active:bg-red-700 hover:bg-red-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                                        type="button"
+                                    >
+                                        Leave Course
+                                    </button>
                                 </div>
                             ))}
                         </div>
@@ -170,12 +200,11 @@ export default function CoursePage() {
             <DeleteConfirmation
                 open={deleteDialogOpen}
                 onOpenChange={setDeleteDialogOpen}
-                onConfirm={handleUnenrollStudent}
-            />
-            <TeacherAssignmentModal
-                courseId={params.id}
-                open={assignmentOpen}
-                onOpenChange={setAssignmentOpen}
+                onConfirm={() => {
+                    if (studentToUnenroll !== null) {
+                        handleUnenrollStudent(studentToUnenroll);
+                    }
+                }}
             />
         </>
     )

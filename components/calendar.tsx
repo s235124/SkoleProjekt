@@ -6,9 +6,9 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-
+import { env } from '../env.mjs';
 interface ModuleEvent {
-  id: number;
+  id: string;
   title: string;
   start: string;
   end: string;
@@ -21,30 +21,56 @@ interface ModuleEvent {
 interface CalendarProps {
   refetchTrigger?: string;
   currentTeacherId?: number;  // Add this
+  schoolId?: number; // Add this
+}
+
+interface user {
+user_id: number;
+first_name: string;
+last_name: string;
+email: string;
+phone_number: string;
+school_id: number; // Assuming this is the correct type
+role: number;
 }
 interface CourseTeachers {
   course_id: number;
   teachers: number[];
 }
-export default function Calendar({ refetchTrigger, currentTeacherId }: CalendarProps) {
+export default function Calendar({ refetchTrigger, currentTeacherId,schoolId }: CalendarProps) {
   const [events, setEvents] = useState<ModuleEvent[]>([]);
   const [currentStart, setCurrentStart] = useState('');
   const [currentEnd, setCurrentEnd] = useState('');
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [courses, setCourses] = useState([]);
   const [courseTeacherMap, setCourseTeacherMap] = useState<Record<number, number[]>>({});
   const [fetched, setFetched] = useState(false); // User state
 // Add loading state
 const [isLoading, setIsLoading] = useState(true);
+const [user, setUser] = useState<user | null>(null);
+
+useEffect(() => {
+  getUser();
+}, [])
+
+const getUser = () => {
+
+    axios({
+        method: 'get',
+        withCredentials: true,
+        url: env.NEXT_PUBLIC_API_BASE_URL+'/getUser',
+        timeout: 8000,
+        }).then((response) => {
+          setUser(response.data);
+            console.log(response.data);
+        }).catch((error) => {
+            console.log(error);
+        });
+}
 
 // 1. Fetch teacher-course relationships with loading state
-useEffect(() => {
- 
-}, []);
    const fetchCourseTeachers = async () => {
     try {
-      const response = await axios.get<CourseTeachers[]>('http://localhost:3001/teaches');
+      const response = await axios.get<CourseTeachers[]>(env.NEXT_PUBLIC_API_BASE_URL+'/teaches');
       const map = response.data.reduce((acc, { course_id, teachers }) => {
         acc[course_id] = teachers;
         return acc;
@@ -57,20 +83,22 @@ useEffect(() => {
       setIsLoading(false); // Update loading state when done
     }
   };
-  fetchCourseTeachers();
   
   const fetchModules = useCallback(async (start: string, end: string) => {
     try {
-      setLoading(true);
+      //setLoading(true);
       setError('');
 
-      const response = await axios.get('http://localhost:3001/modules', {
+      const response = await axios.get(env.NEXT_PUBLIC_API_BASE_URL+'/modules', { 
         params: {
           start: start.split('T')[0],
           end: end.split('T')[0]
+        },
+        headers: {
+          'schoolid': schoolId?.toString() || '',
         }
       });
-      const formattedEvents = response.data.map((module: any) => {
+      const formattedEvents = response.data.map((module: { module_id: number; module_name: string; module_date: string; module_start_time: string; module_end_time: string; course_id: number; }) => {
         console.log("v"+currentTeacherId); // Debugging line
 
         const courseId = Number(module.course_id);
@@ -79,7 +107,7 @@ useEffect(() => {
       console.log("what"+isCurrentTeacher); // Debugging line
       console.log("what"+ teachers); // Debugging line
         return {
-          id: module.module_id,
+          id: module.module_id.toString(), // Ensure id is a string
           title: module.module_name,
           start: `${module.module_date}T${module.module_start_time}`,
           end: `${module.module_date}T${module.module_end_time}`,
@@ -99,7 +127,7 @@ useEffect(() => {
       setError('Failed to load calendar data');
       console.error('Error fetching modules:', err);
     } finally {
-      setLoading(false);
+      //setLoading(false);
     }
   }, [currentTeacherId, courseTeacherMap]);
 
@@ -113,10 +141,10 @@ useEffect(() => {
       fetchModules(startStr, endStr);
     }
   };
-  const deleteModule = async (moduleId) => {
+  const deleteModule = async (moduleId: string) => {
     try {
       const response = await axios.delete(
-        `http://localhost:3001/deletemodule/${moduleId}`
+        env.NEXT_PUBLIC_API_BASE_URL+`/deletemodule/${moduleId}`
       );
       
       if (response.data.success) {
@@ -134,7 +162,7 @@ useEffect(() => {
     if (currentStart && currentEnd && fetched) {
       fetchModules(currentStart, currentEnd);
     }
-  }, [refetchTrigger, currentStart, currentEnd, fetchModules, fetched]); // Add all used dependencies
+  }, [refetchTrigger]); // Add all used dependencies
 
   return (
     <div className="p-4 dark:bg-gray-800 min-h-screen">
@@ -162,7 +190,7 @@ useEffect(() => {
         eventContent={(arg) => (
           <div className="flex justify-between items-center h-full p-1">
             <div className="flex-1 overflow-hidden">{arg.event.title}</div>
-            {arg.event.extendedProps.teacherId === currentTeacherId && (
+            {(arg.event.extendedProps.teacherId === currentTeacherId || user?.role === 3 || user?.role === 4) && (
             <button 
               className="ml-2 p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
               onClick={(e) => {
