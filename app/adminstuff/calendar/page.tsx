@@ -16,7 +16,6 @@ export default function CreateModulePage() {
     date: '',
     timeslot: '',
     course: '',
-    content: '',
     course_id: "",
   });
  
@@ -296,18 +295,6 @@ function createIntervals(intervals: Interval[]): Interval[] {
             ))}
           </select>
 
-          <label className="block mb-2 text-gray-700 dark:text-gray-200">
-            Content:
-          </label>
-          <textarea
-            name="content"
-            value={formData.content}
-            onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-            className="border dark:border-gray-600 p-2 w-full mb-4 dark:bg-gray-700 dark:text-gray-100"
-            rows={4}
-            placeholder="What are you going to teach about"
-            required
-          ></textarea>
 
           <button
             type="submit"
