@@ -65,6 +65,7 @@ export default function CoursePage() {
             })
     }, [params?.id])
     const handleDeleteCourse = async () => {
+        if (selectedSchoolId == null) return
         try {
             console.log('Deleting course with ID:', params.id);
             await axios.delete(env.NEXT_PUBLIC_API_BASE_URL+`/courses/delete/${params.id}`);
@@ -113,9 +114,16 @@ export default function CoursePage() {
 
     // Add enrollment handlers
     const handleEnrollStudent = async (studentId: number): Promise<void> => {
+        if (selectedSchoolId == null) return
         try {
             console.log("Enrolling student with ID:", studentId);
-            await axios.post(`/api/enroll/${studentId}`);
+             await axios.post(env.NEXT_PUBLIC_API_BASE_URL+`/admin/courses/${params.id}/enroll/${studentId}`,
+                {headers: {
+            'schoolid': selectedSchoolId.toString(),
+          },}
+             );
+            const res = await axios.get(env.NEXT_PUBLIC_API_BASE_URL+`/courses/${params.id}/students`);
+            setStudents(res.data);
         } catch (error) {
             console.error('Enrollment failed:', error);
         }

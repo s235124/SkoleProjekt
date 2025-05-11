@@ -1328,6 +1328,40 @@ app.delete('/courses/:courseId/students/delete/:studentId', (req, res) => {
   });
 });
 
+
+app.post('/admin/courses/:courseId/enroll/:studentId', (req, res) => {
+  let decoded;
+  try {
+    decoded = jwt.verify(req.cookies.token, process.env.JWT_SECRET);
+  } catch (err) {
+    res.clearCookie('token');
+    return res.status(401).json({ error: 'Invalid token' });
+  }
+
+  // Now req.user is available synchronously
+  req.user = decoded;
+
+  // Only roles 1–4 can enroll
+  if (![1,2,3,4].includes(req.user.role)) {
+    return res.status(403).json({ error: 'Forbidden: insufficient privileges' });
+  }
+
+  const { courseId, studentId } = req.params;
+  const query = 'INSERT INTO courseEnrollments (student_id, course_id) VALUES (?, ?)';
+  db.query(query, [studentId, courseId], (err) => {
+    if (err) {
+      console.error('Enrollment error:', err);
+      return res.status(500).json({ error: 'Failed to enroll student' });
+    }
+    res.status(201).json({ success: true });
+  });
+});
+
+
+
+
+
+
 // Owner dashboard stats API made by chatgpt
 // In your Express server
 
