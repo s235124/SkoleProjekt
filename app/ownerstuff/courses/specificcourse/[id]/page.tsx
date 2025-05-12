@@ -205,19 +205,6 @@ export default function CoursePage() {
                             </button>
 
                         </div>
-                        <div className='basis-1/6 bg-violet-200"'>
-
-                            <button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleRemoveTeacher(me.id);
-                                }}
-                                className="ml-4 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
-                            >
-                                Leave Course
-                            </button>
-
-                        </div>
                     </div>
                     <ScrollArea className="m-auto w-4/5 h-3/5 border-black border-b-[2px]">
                         <div className="flex flex-col">                            <div className="w-full flex items-center my-4">
