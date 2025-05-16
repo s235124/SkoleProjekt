@@ -223,11 +223,11 @@ export default function CreateModulePage() {
       <div className="flex flex-grow items-center justify-center">
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-96 text-center">
           <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">
-            Lav en lektion
+            Create a module
           </h2>
           <form onSubmit={handleSubmit}>
             <label className="block mb-2 text-gray-700 dark:text-gray-200">
-              Vælg en dato:
+              Choose date:
             </label>
             <input
               type="date"
@@ -261,7 +261,7 @@ export default function CreateModulePage() {
                 required
               >
 
-                <option value="">Vælg tidspunkt</option>
+                <option value="">Choose timeslot</option>
                 {availableStartTimes.map((hour) => (
                   <option key={hour} value={hour}>
                     {hour}
@@ -279,7 +279,7 @@ export default function CreateModulePage() {
                 required
               >
 
-                <option value="">Vælg tidspunkt</option>
+                <option value="">Choose timeslot</option>
                 {availableEndTimes.map((hour) => (
                   <option key={hour} value={hour}>
                     {hour}
@@ -288,7 +288,7 @@ export default function CreateModulePage() {
               </select>
             </div>
             <label className="block mb-2 text-gray-700 dark:text-gray-200">
-              Hold:
+              Course:
             </label>
             <select
               value={formData.course_id}
@@ -296,7 +296,7 @@ export default function CreateModulePage() {
               className="border dark:border-gray-600 p-2 w-full mb-4 dark:bg-gray-700 dark:text-gray-100"
               required
             >
-              <option value="">Vælg hold</option>
+              <option value="">Choose course</option>
               {courses.map((course) => (
                 <option key={course.course_id} value={course.course_id}>
                   {course.course_name}
