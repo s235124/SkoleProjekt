@@ -31,7 +31,7 @@ console.log("v"+env.NEXT_PUBLIC_API_BASE_URL)
       email: email,
       password: password
     });
-
+  
     const {token} = res.data
     const decodedToken = jsonwebtoken.decode(token);
     let role = 0;
@@ -39,7 +39,6 @@ console.log("v"+env.NEXT_PUBLIC_API_BASE_URL)
       role = decodedToken.role;
     }
     document.cookie = `token=${token}; path=/; max-age=3600`;
-
     
     switch(role){
       case 1:
@@ -58,7 +57,10 @@ console.log("v"+env.NEXT_PUBLIC_API_BASE_URL)
         console.log('No role found');
     } 
     }catch (err){
-      console.log(err);
+    if (axios.isAxiosError(err) && err.response && err.response.status === 401) {
+      alert("Invalid email or password");
+    } 
+    console.log(err);
     }
 
 
