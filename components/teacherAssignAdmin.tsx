@@ -9,7 +9,7 @@ interface TeacherAssignmentModalAdminProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     schoolId: number | string[] | undefined| null ;
-    first_name: string;
+    // first_name: string;
 }
 
 export default function TeacherAssignmentModalAdmin({ courseId, open, onOpenChange, schoolId }: TeacherAssignmentModalAdminProps) {

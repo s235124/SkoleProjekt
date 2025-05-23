@@ -24,7 +24,7 @@ export async function middleware(request: NextRequest) {
     // if someone tries to access a route that isnt "public" and they dont have a token (they didnt login) we redirect them to signup
     if (!public_routes.includes(path)) {
       if (!token) {
-        return NextResponse.redirect(new URL('/signup', request.url));
+        return NextResponse.redirect(new URL('/', request.url));
       }
 
       // Verify token with jose

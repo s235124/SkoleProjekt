@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { env } from '../../../env.mjs';
+
 export default function AddStudent() {
   const [formData, setFormData] = useState({
     school_name: '',
@@ -43,7 +44,7 @@ export default function AddStudent() {
       <div className="flex flex-grow items-center justify-center">
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-96 text-center">
           <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">
-            Add New User
+            Add New School
           </h2>
           <form onSubmit={handleSubmit}>
 
@@ -66,7 +67,7 @@ export default function AddStudent() {
               type="submit"
               className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded w-full dark:bg-blue-500 dark:hover:bg-blue-600"
             >
-              Add User
+              Add School
             </button>
           </form>
         </div>

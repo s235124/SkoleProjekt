@@ -16,7 +16,7 @@ export default function LogoutButton() {
 
       // 2. Redirect the user to the signup/login page
       //    Use a full-nav so React state is wiped clean
-      window.location.href = '/signup';
+      window.location.href = '/';
     } catch (err) {
       console.error('Error during logout:', err);
     }

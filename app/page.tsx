@@ -74,14 +74,14 @@ console.log("v"+env.NEXT_PUBLIC_API_BASE_URL)
   
       <div className="w-full lg:w-1/2 flex items-center justify-center px-6 py-12 lg:px-8">
         <div className="w-full max-w-sm">
-          <h3 className='text-white text-sm mb-4'>EN DIGITAL LØSNING TIL DIN SKOLE</h3>
-          <h2 className="text-3xl font-bold mb-6 text-left text-white">Log ind i din konto<span className='text-blue-500'>.</span></h2>
-          <h3 className='text-white text-sm my-4'>Mangler du en konto? <Link href="/signup" className='text-blue-500'>Lav en her</Link></h3>
+          <h3 className='text-white text-sm mb-4'>A DIGITAL SOLUTION FOR YOUR SCHOOL</h3>
+          <h2 className="text-3xl font-bold mb-6 text-left text-white">Log in to your account<span className='text-blue-500'>.</span></h2>
+          <h3 className='text-white text-sm my-4'>Interested in this service? <Link href="mailto:s235124@dtu.dk?subject=Applying for Learnflow&body=Hi, my name is (First name) (Last name), I would like to use LearnFlow for my shcool (School name). Optionally, my phone number is (Phone number)" className='text-blue-500'>Contact us.</Link></h3>
           <form className="space-y-6" onSubmit={login3}>
             <FloatingLabelInput value={email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} label="Email" id="email"/>
             <FloatingLabelInput value={password} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)} label="Password" id="password"/>
             <Button type="submit" className="w-full h-12 rounded-full bg-blue-500 hover:bg-blue-600 text-white">
-              Log ind
+              Log in
             </Button>
           </form>
         </div>

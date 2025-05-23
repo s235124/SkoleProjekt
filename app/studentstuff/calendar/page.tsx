@@ -37,7 +37,7 @@ export default function CreateModulePage() {
   }, [getUser]); // Effect runs once on mount due to stable getUser
 
   return (
-    <div className='h-full'>
+    <div className='h-full pt-10'>
       {user ? (
         <Calendar schoolId={user.school_id} />
       ) : (
