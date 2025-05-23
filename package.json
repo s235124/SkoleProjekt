@@ -6,7 +6,7 @@
     "server": "nodemon server/index.js -H 0.0.0.0 -p 3000",
     "dev": "next dev --turbopack -H 0.0.0.0 -p 3002",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -p 3002",
     "lint": "next lint"
   },
   "dependencies": {
