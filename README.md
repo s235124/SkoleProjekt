@@ -1,6 +1,6 @@
 # SkoleProjekt — Learning Management System (LMS)
 
-## 🧩 Project Overview
+## Project Overview
 **SkoleProjekt** is a fully functional Learning Management System (LMS) developed as part of a university project.  
 It demonstrates the design and implementation of a modern full-stack web application using current web technologies.
 
